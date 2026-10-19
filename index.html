@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena · 1 VS 1 | SpriteCollab</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena · Grounded 1 VS 1 | SpriteCollab</title>
 <style>
 :root{--ink:#071823;--glass:#0a2636e0;--line:#9bd9df45;--gold:#ffd667;--sky:#92eeff}*{box-sizing:border-box}html,body{margin:0;min-height:100%;width:100%;height:100%;overflow:hidden;background:#071822;color:#e9fcff;font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;touch-action:none}button{font:inherit;cursor:pointer}#stage{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 32%,#03101868 100%)}#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 16px 0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:8px}.glass{background:var(--glass);border:1px solid var(--line);box-shadow:0 8px 28px #07121c55;backdrop-filter:blur(8px);border-radius:13px}.stats{padding:10px 12px;min-width:180px;max-width:245px}.stats .name{display:flex;justify-content:space-between;font-weight:900;font-size:13px;gap:15px}.stats .name span:last-child{color:#c5ecf8;font-size:11px}.track{position:relative;height:10px;background:#17323b;border-radius:20px;margin-top:6px;overflow:hidden;border:1px solid #6a92924a}.track>i{height:100%;display:block;width:100%;transition:width .1s linear}.track.hp i{background:linear-gradient(90deg,#52be77,#b8f28b)}.track.xp{height:5px;margin-top:5px}.track.xp i{background:#6cdbf8}.rightHud{display:flex;gap:8px}.hudpill{padding:10px 13px;min-width:78px;text-align:center;font-size:11px;color:#bfe9ed}.hudpill b{font-size:19px;display:block;color:white;line-height:1.15}.pause{padding:10px 13px;font-weight:900;background:var(--glass);color:white;pointer-events:auto;min-width:42px}.controls{position:absolute;left:0;bottom:0;right:0;padding:0 max(18px,env(safe-area-inset-left)) calc(20px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-right));display:flex;align-items:end;justify-content:space-between;pointer-events:none;gap:14px;isolation:isolate}.controls:before{content:'';position:absolute;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:calc(7px + env(safe-area-inset-bottom));height:126px;border-radius:34px;background:linear-gradient(180deg,#0f2a39f5,#081c29ef);border:1px solid #c9f0ff22;box-shadow:0 18px 45px #020b1245,inset 0 1px 0 #ffffff10,inset 0 -12px 30px #00000038;backdrop-filter:blur(10px);z-index:-1}#joy{height:136px;width:136px;position:relative;border:2px solid #d2edff45;background:radial-gradient(circle at 35% 30%,#ecffff30,#9bdaf511 55%,#7ebad20e 100%);border-radius:50%;box-shadow:0 10px 24px #01091355,inset 0 0 20px #c6f5ff14,inset 0 2px 0 #ffffff1f;pointer-events:auto;touch-action:none;flex-shrink:0;margin:0 0 8px 8px}.joyShell{position:relative}.joyShell:after{content:'';position:absolute;left:18px;right:18px;bottom:4px;height:16px;border-radius:50%;background:#0008;filter:blur(10px)}#joy:before{content:'MOVE';font-weight:900;letter-spacing:2.5px;position:absolute;top:auto;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:#d3f6ffb8;background:#071c2abf;padding:2px 8px;border-radius:999px;border:1px solid #ffffff18}.nub{width:59px;height:59px;position:absolute;left:calc(50% - 29.5px);top:calc(50% - 29.5px);border-radius:50%;background:linear-gradient(145deg,#d5f8ffcf,#85bdda96);box-shadow:0 5px 19px #020d176b;border:2px solid #ecffffb8;pointer-events:none}.buttons{display:flex;align-items:end;gap:11px;pointer-events:auto;padding:14px 14px 14px 16px;border-radius:28px;border:1px solid #cbf4ff24;background:linear-gradient(180deg,#123043f0,#0a2130ef);box-shadow:0 12px 30px #0007,inset 0 1px 0 #ffffff10,inset 0 -10px 24px #00000024;position:relative;margin:0 8px 10px 0}.buttons:before{content:'SKILLS';position:absolute;left:16px;top:-11px;padding:2px 8px;border-radius:999px;background:#0c2635f7;border:1px solid #cbf4ff24;color:#d2f6ffcc;font-size:9px;font-weight:900;letter-spacing:2.2px}.skill{--c:#ffd45c;position:relative;display:flex;align-items:center;justify-content:center;width:69px;height:69px;border:2px solid color-mix(in srgb,var(--c) 60%,white);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 40%,#193848),#0a2231 72%);box-shadow:0 5px 16px #0008,inset 0 0 18px color-mix(in srgb,var(--c) 18%,transparent),inset 0 2px 0 #ffffff1a;color:white;border-radius:50%;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}.skill.main{width:86px;height:86px}.skill .glyph{font-size:25px;transform:translateY(-7px);filter:drop-shadow(0 2px 1px #0007)}.skill.main .glyph{font-size:35px;transform:translateY(-9px)}.skill small{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:850;text-shadow:none;background:#081f2dcc;padding:2px 7px;border-radius:999px;border:1px solid #ffffff1b;color:#f3fbff}.skill .cooldown{position:absolute;inset:0;border-radius:50%;background:#08131dd7;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:900}.skill.selected{box-shadow:0 0 0 5px #e9fbff1e,0 0 28px var(--c),inset 0 0 16px color-mix(in srgb,var(--c) 20%,white);transform:translateY(-2px) scale(1.03)}.screen{position:absolute;inset:0;z-index:10;background:radial-gradient(ellipse at 50% 35%,#1d4458ef 0%,#071824f7 70%);display:flex;justify-content:center;align-items:center;overflow-y:auto;padding:20px 12px calc(20px + env(safe-area-inset-bottom));pointer-events:auto}.panel{width:min(620px,100%);padding:26px 23px 21px;text-align:center;border:1px solid #98ddf252;background:linear-gradient(155deg,#153449fa,#0a1d2cf9);border-radius:24px;box-shadow:0 20px 100px #020e1baf}.eyebrow{font-weight:900;font-size:10px;letter-spacing:4px;color:#9ce6f3;margin-bottom:6px}.panel h1{margin:0;color:#fff5c5;font-size:clamp(30px,5.5vw,48px);letter-spacing:-2px;line-height:1.1;text-shadow:0 5px #0d3242}.panel h1 em{font-style:normal;color:#ffe26a}.desc{font-size:13px;line-height:1.65;color:#bedae3;margin:12px auto 13px}.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0 19px}.choice{border:1px solid #8acee34d;border-radius:13px;min-width:0;padding:10px 2px 8px;background:#173648;color:#d8eaf3;transition:transform .13s,border-color .13s}.choice.on{border-color:#ffe69b;box-shadow:0 0 0 2px #ffd26833;background:#39516a;transform:translateY(-3px)}.choice canvas{display:block;width:72px;height:72px;margin:0 auto 1px;image-rendering:pixelated;max-width:100%}.choice b{display:block;font-size:12px}.choice small{display:block;color:#99c9d3;font-size:10px;margin-top:3px}.primary{background:linear-gradient(180deg,#ffeb91,#ffbd50);border:0;color:#2d2b2e;font-weight:950;padding:15px 25px;min-width:195px;border-radius:13px;font-size:16px;box-shadow:0 6px 0 #a96924}.primary:active{transform:translateY(4px);box-shadow:0 2px 0 #a96924}.status{min-height:18px;font-size:11px;color:#c4e0e8;margin:10px 0 1px}.credit{font-size:10px;line-height:1.5;color:#9bc0cf;margin-top:14px}.credit a{color:#a9eaf4}.explain{margin:11px 0;font-size:12px;color:#bcd7d8;line-height:1.8}.hidden{display:none!important}#floating{position:absolute;inset:0;pointer-events:none;overflow:hidden}#floating .floater{position:absolute;transform:translate(-50%,-50%);font-weight:900;text-shadow:0 2px #071821,0 0 6px #071821;animation:floatup .7s forwards}@keyframes floatup{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -38px}}#toast{position:absolute;top:22%;width:100%;text-align:center;pointer-events:none;font-weight:1000;font-size:25px;color:#fff3af;text-shadow:0 4px #09242b,0 0 20px #091820;opacity:0;transition:opacity .2s}#toast.show{opacity:1}#tips{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);color:#c9dce68e;white-space:nowrap;font-size:10px;pointer-events:none}#aimHelp{position:absolute;bottom:calc(165px + env(safe-area-inset-bottom));right:20px;color:#eaf7fd9c;font-size:10px;pointer-events:none}@media(max-width:700px){#hud{padding:calc(env(safe-area-inset-top) + 7px) 9px 0}.stats{min-width:137px;padding:8px}.stats .name{font-size:11px}.rightHud{gap:5px}.hudpill{min-width:57px;padding:8px;font-size:10px}.hudpill b{font-size:16px}.pause{padding:8px}.controls{padding-left:12px;padding-right:12px;bottom:4px}.controls:before{height:112px;border-radius:28px}#joy{height:117px;width:117px;margin:0 0 6px 4px}.joyShell:after{left:12px;right:12px}#joy:before{font-size:8px;bottom:7px;padding:2px 7px}.nub{width:52px;height:52px;left:calc(50% - 26px);top:calc(50% - 26px)}.buttons{gap:8px;padding:11px 10px 11px 12px;margin:0 4px 7px 0}.buttons:before{left:12px;font-size:8px}.skill{width:56px;height:56px}.skill.main{width:70px;height:70px}.skill .glyph{font-size:21px;transform:translateY(-5px)}.skill.main .glyph{font-size:29px;transform:translateY(-7px)}.skill small{font-size:8px;bottom:5px;padding:1px 5px}.choices{gap:6px}.panel{padding:22px 13px 15px}.choice canvas{width:60px;height:60px}#aimHelp{bottom:calc(130px + env(safe-area-inset-bottom));font-size:9px}#tips{font-size:8px}}@media(max-width:370px){#joy{height:96px;width:96px}.controls:before{height:102px}.buttons{gap:5px;padding:9px 8px 9px 10px}.skill{width:49px;height:49px}.skill.main{width:61px;height:61px}.skill small{font-size:7px;bottom:4px}.hudpill{min-width:47px}.rightHud{gap:3px}.stats{min-width:120px}}@media(max-height:480px){.panel{padding:14px}.panel h1{font-size:26px}.desc{margin:6px}.choices{margin:7px 0}.choice canvas{width:45px;height:45px}.controls{padding-bottom:15px}#joy{width:92px;height:92px}.skill{width:52px;height:52px}.skill.main{width:65px;height:65px}#aimHelp{display:none}}
 
@@ -40,12 +40,48 @@ const sprites={};const FALLBACK={Walk:[32,40,4],Idle:[40,56,6],Attack:[80,80,10]
 function getAnim(xml,name){let nodes=[...xml.getElementsByTagName('Anim')],node=nodes.find(n=>n.getElementsByTagName('Name')[0]?.textContent===name);if(!node)return null;const val=key=>Number(node.getElementsByTagName(key)[0]?.textContent||0);return {w:val('FrameWidth'),h:val('FrameHeight'),dur:[...node.getElementsByTagName('Duration')].map(n=>+n.textContent)}}
 function loadImage(url){return new Promise((resolve,reject)=>{const im=new Image();let ended=false;const timer=setTimeout(()=>finish(false),5500);function finish(ok){if(ended)return;ended=true;clearTimeout(timer);im.onload=im.onerror=null;if(ok)resolve(im);else reject(Error('스프라이트 요청 실패 또는 시간 초과'))}im.crossOrigin='anonymous';im.onload=()=>finish(true);im.onerror=()=>finish(false);im.src=url})}
 async function loadXml(url){const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),4200);try{const r=await fetch(url,{mode:'cors',signal:ctrl.signal});if(!r.ok)throw Error('HTTP '+r.status);return new DOMParser().parseFromString(await r.text(),'application/xml')}finally{clearTimeout(timer)}}
-async function preload(id){const pack=sprites[id]={anims:{},loaded:false};let metadata={};try{const xml=await loadXml(BASE+id+'/AnimData.xml');for(const a of ACTIONS)metadata[a]=getAnim(xml,a)}catch(err){}await Promise.all(ACTIONS.map(async a=>{try{let image=await loadImage(BASE+id+'/'+a+'-Anim.png');let m=metadata[a];if(!m?.w||!m?.h){const f=FALLBACK[a];m={w:({25:32,1:40,4:32,7:32,19:48,43:24,16:32,92:48}[Number(id)]||image.height/8||f[0]),h:image.height/8||f[1],dur:Array.from({length:Math.max(1,Math.round(image.width/(image.height/8||f[0])))},()=>8)}}if(image.width<m.w||image.height<m.h)throw Error('bad dimensions');pack.anims[a]={image,w:m.w,h:m.h,dur:m.dur?.length?m.dur:[8],frames:Math.max(1,Math.floor(image.width/m.w)),dirs:Math.max(1,Math.floor(image.height/m.h))};}catch(err){}}));pack.loaded=!!pack.anims.Walk||!!pack.anims.Idle;spriteLoadCount++;$('assetStatus').textContent=`스프라이트 확인 ${spriteLoadCount}/${unique.length} · 현재 ${unique.filter(key=>sprites[key]?.loaded).length}종 성공 · 미연결 시 대체 이미지 사용`; if(roster.some(p=>p.id===id))refreshChoicePreviews();}
+// For spritesheet animations, the row/frame canvas includes transparent padding.
+// Derive the last visible body pixel (central area) per frame so the actual feet
+// land on the SAME world-space floor point as the contact shadow.
+function measureSpriteFeet(sheet){
+ const ground=[];
+ try{
+  const canvas=document.createElement('canvas');canvas.width=sheet.image.naturalWidth||sheet.image.width;canvas.height=sheet.image.naturalHeight||sheet.image.height;
+  const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(sheet.image,0,0);
+  const rgba=c.getImageData(0,0,canvas.width,canvas.height).data;
+  const imageW=canvas.width,w=sheet.w,h=sheet.h;
+  const x0=Math.max(0,Math.floor(w*.20)),x1=Math.min(w,Math.ceil(w*.80));
+  for(let d=0;d<sheet.dirs;d++){
+   let row=[];
+   for(let k=0;k<sheet.frames;k++){
+    let yFound=-1;
+    // Require a few opaque pixels in the center strip; don't mistake
+    // detached particles or long lateral tails for feet.
+    for(let yy=h-1;yy>=0;yy--){
+     let count=0;
+     for(let xx=x0;xx<x1;xx++){
+      if(rgba[(((d*h+yy)*imageW)+(k*w+xx))*4+3]>48){count++;if(count>=2)break}
+     }
+     if(count>=2){yFound=yy+1;break}
+    }
+    row.push(yFound>0?yFound:h*.79);
+   }
+   ground.push(row);
+  }
+ }catch(err){/* Some asset hosts disallow readback; default to approximate placement. */}
+ return ground;
+}
+function footOffset(sheet,d,f){return sheet?.feet?.[d]?.[f]||sheet?.h*.79||32}
+async function preload(id){const pack=sprites[id]={anims:{},loaded:false};let metadata={};try{const xml=await loadXml(BASE+id+'/AnimData.xml');for(const a of ACTIONS)metadata[a]=getAnim(xml,a)}catch(err){}await Promise.all(ACTIONS.map(async a=>{try{let image=await loadImage(BASE+id+'/'+a+'-Anim.png');let m=metadata[a];if(!m?.w||!m?.h){const f=FALLBACK[a];m={w:({25:32,1:40,4:32,7:32,19:48,43:24,16:32,92:48}[Number(id)]||image.height/8||f[0]),h:image.height/8||f[1],dur:Array.from({length:Math.max(1,Math.round(image.width/(image.height/8||f[0])))},()=>8)}}if(image.width<m.w||image.height<m.h)throw Error('bad dimensions');const anim={image,w:m.w,h:m.h,dur:m.dur?.length?m.dur:[8],frames:Math.max(1,Math.floor(image.width/m.w)),dirs:Math.max(1,Math.floor(image.height/m.h))};anim.feet=measureSpriteFeet(anim);pack.anims[a]=anim;}catch(err){}}));pack.loaded=!!pack.anims.Walk||!!pack.anims.Idle;spriteLoadCount++;$('assetStatus').textContent=`스프라이트 확인 ${spriteLoadCount}/${unique.length} · 현재 ${unique.filter(key=>sprites[key]?.loaded).length}종 성공 · 미연결 시 대체 이미지 사용`; if(roster.some(p=>p.id===id))refreshChoicePreviews();}
 let chosen=0;const choices=$('choices');for(let i=0;i<roster.length;i++){let o=roster[i],b=document.createElement('button');b.className='choice'+(!i?' on':'');b.innerHTML=`<canvas width="72" height="72" data-preview="${i}"></canvas><b>${o.name}</b><small>${o.icon} ${o.basic}</small>`;b.onclick=()=>{chosen=i;document.querySelectorAll('.choice').forEach((c,k)=>c.classList.toggle('on',k===i));};choices.appendChild(b)}
-function refreshChoicePreviews(){document.querySelectorAll('[data-preview]').forEach(c=>{let i=+c.dataset.preview,p=roster[i],g=c.getContext('2d');g.clearRect(0,0,72,72);g.imageSmoothingEnabled=false;let anim=sprites[p.id]?.anims.Idle||sprites[p.id]?.anims.Walk;if(anim){g.drawImage(anim.image,0,0,anim.w,anim.h,36-anim.w*.8,63-anim.h*1.6,anim.w*1.6,anim.h*1.6)}else{g.font='35px sans-serif';g.textAlign='center';g.fillText(p.icon,36,45)}})}refreshChoicePreviews();
+function refreshChoicePreviews(){document.querySelectorAll('[data-preview]').forEach(c=>{let i=+c.dataset.preview,p=roster[i],g=c.getContext('2d');g.clearRect(0,0,72,72);g.imageSmoothingEnabled=false;let anim=sprites[p.id]?.anims.Idle||sprites[p.id]?.anims.Walk;if(anim){g.drawImage(anim.image,0,0,anim.w,anim.h,36-anim.w*.8,64-footOffset(anim,0,0)*1.6,anim.w*1.6,anim.h*1.6)}else{g.font='35px sans-serif';g.textAlign='center';g.fillText(p.icon,36,45)}})}refreshChoicePreviews();
 Promise.allSettled(unique.map(preload)).then(()=>{const count=unique.filter(id=>sprites[id]?.loaded).length;$('assetStatus').textContent=count?`연결 확인 완료 · ${count}/${unique.length}종 실제 스프라이트 사용`:'스프라이트 서버 접속 불가 · 기본 캐릭터로 계속 플레이 가능';});
 const map={w:2400,h:1800};let player,enemies=[],projectiles=[],particles=[],gems=[],areas=[],kills=0,wave=1,time=0,spawnTimer=0,gameState='menu',last=0,shake=0,idCounter=0;const ELEMENT_FX={electric:{main:'#ffe16b',accent:'#93f5ff',glow:'#fff7b8'},fire:{main:'#ff9360',accent:'#ffd1a8',glow:'#ffbe7f'},water:{main:'#82d9fb',accent:'#dff9ff',glow:'#a8ecff'},grass:{main:'#9be395',accent:'#e8ffd8',glow:'#b8f4a6'},ghost:{main:'#c48aff',accent:'#f0dcff',glow:'#dcb5ff'},neutral:{main:'#f2f6fb',accent:'#ffffff',glow:'#d9eef8'}};const keys=new Set(),joyVec={x:0,y:0};let mouseAim=null,lastAim={x:1,y:0},skillPointers=new Map(),joyPointer=null,toastTime=0,levelUpText='';
 const mix=(a,b,t)=>a+(b-a)*t,clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),rand=(a,b)=>a+Math.random()*(b-a),len=(x,y)=>Math.hypot(x,y),norm=(x,y)=>{let z=len(x,y)||1;return{x:x/z,y:y/z}};
+function footDust(x,y,size=1){
+ if(Math.random()>.72)return;
+ for(let i=0;i<2;i++)emitParticle({x:x+rand(-12,12)*size,y:y+rand(-3,2),vx:rand(-18,18),vy:rand(-12,-3),life:rand(.18,.34),size:rand(1.7,3.3),color:Math.random()<.5?'#9ac99a':'#456d57',shape:'dot',alpha:.5});
+}
 function emitParticle(o){particles.push({x:o.x,y:o.y,vx:o.vx||0,vy:o.vy||0,life:o.life||.4,max:o.max||o.life||.4,size:o.size||4,color:o.color||'#fff',shape:o.shape||'dot',rot:o.rot||0,spin:o.spin||0,grow:o.grow||0,gravity:o.gravity||0,alpha:o.alpha??1,line:o.line||0})}function fx(x,y,color,n=8,speed=100){for(let i=0;i<n;i++){let a=rand(0,Math.PI*2),s=rand(speed*.25,speed);emitParticle({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.17,.55),max:.55,size:rand(2,5),color,shape:'dot'})}}function elementalBurst(x,y,element='neutral',power=1){const pal=ELEMENT_FX[element]||ELEMENT_FX.neutral;emitParticle({x,y,life:.24,max:.24,size:10+power*7,color:pal.glow,shape:'ring',grow:100+60*power,alpha:.9,line:2.4});const count=Math.round(10+8*power);for(let i=0;i<count;i++){let a=rand(0,Math.PI*2),s=rand(40,170)*power,shape='spark',size=rand(3,7),color=pal.main;if(element==='water'){shape=i%3===0?'drop':'dot';color=i%3===0?pal.accent:pal.main;size=rand(3,6)}else if(element==='grass'){shape=i%2?'leaf':'spark';color=i%2?pal.accent:pal.main;size=rand(4,7)}else if(element==='fire'){shape=i%2?'flame':'spark';color=i%2?pal.main:pal.accent;size=rand(4,8)}else if(element==='electric'){shape=i%2?'spark':'dot';color=i%2?pal.accent:pal.main;size=rand(3,7)}emitParticle({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.18,.48),size,color,shape,rot:a,spin:rand(-10,10),gravity:shape==='drop'?38:0})}}function trailFx(s){const pal=ELEMENT_FX[s.element]||ELEMENT_FX.neutral;if(s.team==='enemy'){emitParticle({x:s.x+rand(-2,2),y:s.y+rand(-2,2),life:.22,size:rand(3,6),color:pal.main,shape:'dot'});return}if(s.element==='electric'){emitParticle({x:s.x-rand(-2,2),y:s.y-rand(-2,2),vx:rand(-20,20),vy:rand(-20,20),life:.16,size:rand(3,5),color:Math.random()<.5?pal.main:pal.accent,shape:'spark',rot:rand(0,7),spin:rand(-14,14)})}else if(s.element==='fire'){emitParticle({x:s.x-rand(-2,2),y:s.y-rand(-2,2),vx:-s.vx*.04+rand(-15,15),vy:-s.vy*.04+rand(-15,15),life:.24,size:rand(4,7),color:Math.random()<.45?pal.accent:pal.main,shape:'flame',grow:-2})}else if(s.element==='water'){emitParticle({x:s.x-rand(-3,3),y:s.y-rand(-3,3),vx:-s.vx*.03+rand(-12,12),vy:-s.vy*.03+rand(-12,12),life:.25,size:rand(3,6),color:Math.random()<.35?pal.accent:pal.main,shape:Math.random()<.5?'drop':'dot',gravity:35})}else if(s.element==='grass'){emitParticle({x:s.x-rand(-3,3),y:s.y-rand(-3,3),vx:-s.vx*.025+rand(-18,18),vy:-s.vy*.025+rand(-18,18),life:.3,size:rand(4,7),color:Math.random()<.5?pal.accent:pal.main,shape:Math.random()<.7?'leaf':'spark',rot:rand(0,7),spin:rand(-9,9)})}}
 function reset(){
  const p=roster[chosen];
@@ -63,7 +99,89 @@ function startButton(){try{if(gameState==='paused')pause();else reset()}catch(er
 // SpriteCollab sheet rows: S=0, SE=1, E=2, NE=3, N=4, NW=5, W=6, SW=7.
 // Canvas input angles: right=0, down=PI/2, left=PI, up=-PI/2.
 function faceFromAngle(a){const step=Math.round(a/(Math.PI/4));return ((2-step)%8+8)%8}
-function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0){const sp=sprites[id]?.anims||{},s=sp[action]||sp.Walk||sp.Idle;if(!s){ctx.save();ctx.translate(x,y);ctx.fillStyle='#07172066';ctx.beginPath();ctx.ellipse(0,0,18*scale,6*scale,0,0,Math.PI*2);ctx.fill();ctx.font=`${Math.round(29*scale)}px sans-serif`;ctx.textAlign='center';ctx.fillText(roster.find(p=>p.id===id)?.icon||({'0019':'🐭','0043':'🌱','0016':'🐦','0092':'👻'}[id]||'◆'),0,-7);ctx.restore();return}let face=faceFromAngle(angle),f=((face%s.dirs)+s.dirs)%s.dirs,frames=Math.min(s.frames,s.dur.length||s.frames),clock=t*60,idx=0;if(frames>1){const sum=s.dur.slice(0,frames).reduce((a,b)=>a+b,0)||1;clock%=sum;for(let i=0;i<frames;i++){if(clock<(s.dur[i]||8)){idx=i;break}clock-=s.dur[i]||8}}let dw=s.w*scale,dh=s.h*scale;ctx.save();ctx.translate(x,y);ctx.fillStyle='#0417206a';ctx.beginPath();ctx.ellipse(0,2,15*scale,5*scale,0,0,Math.PI*2);ctx.fill();if(flash>0)ctx.globalAlpha=.55+Math.cos(t*65)*.35;ctx.drawImage(s.image,idx*s.w,f*s.h,s.w,s.h,-dw/2,-dh+8*scale,dw,dh);ctx.restore()}
+function contactShadow(x,y,scale=1,airborne=false){
+ ctx.save();ctx.translate(x,y+1);
+ const width=15*scale,height=5*scale;
+ // Large diffused penumbra plus a dark, flat contact patch. The shadow is
+ // ALWAYS centered at the world-space feet coordinate, not above/below it.
+ ctx.fillStyle='rgba(4,25,23,.10)';ctx.beginPath();ctx.ellipse(0,2,width*1.58,height*1.85,0,0,Math.PI*2);ctx.fill();
+ const gradient=ctx.createRadialGradient(0,0,0,0,0,width*1.2);
+ gradient.addColorStop(0,airborne?'rgba(3,24,25,.25)':'rgba(2,20,19,.66)');
+ gradient.addColorStop(.55,airborne?'rgba(3,24,25,.14)':'rgba(3,24,23,.38)');
+ gradient.addColorStop(1,'rgba(4,22,22,0)');
+ ctx.save();ctx.scale(1,.34);ctx.fillStyle=gradient;ctx.beginPath();ctx.arc(0,0,width*1.2,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.fillStyle=airborne?'rgba(2,22,22,.21)':'rgba(0,18,16,.4)';ctx.beginPath();ctx.ellipse(0,0,width*.63,height*.45,0,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+function drawFallbackCreature(id,x,y,scale=1,t=0,angle=Math.PI/2){
+ // A sprite-sized creature with visible planted feet, not a floating emoji.
+ const anim=Math.sin(t*11)*1.1;
+ const c=({
+  '0025':['#f7d34d','#ae8437','#ef7073'],
+  '0004':['#fb9a57','#e57546','#ffd18b'],
+  '0007':['#7fd6ef','#358cb4','#c5e9ae'],
+  '0001':['#8ad59a','#4d9674','#83ad64'],
+  '0019':['#b28ec3','#6a557e','#e8c0c8'],
+  '0043':['#66bcd4','#3d7f9a','#79a34a'],
+  '0016':['#d8b789','#8f775d','#f1dfbc'],
+  '0092':['#9168c6','#5c3a86','#dcafff']
+ })[id]||['#b5b5c2','#71758b','#e7ebee'];
+ ctx.save();ctx.translate(x,y);ctx.scale(scale*1.07,scale*1.07);
+ const block=(fill,x,y,w,h)=>{ctx.fillStyle=fill;ctx.fillRect(Math.round(x),Math.round(y),w,h)};
+ const ell=(fill,x,y,rx,ry)=>{ctx.fillStyle=fill;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()};
+ const outline='#25403f';
+ // feet touch world y=0; all rendering remains above it.
+ ell(outline,-7,-2,5,4);ell(outline,7,-2,5,4);
+ block(c[1],-11,-6,9,5);block(c[1],2,-6,9,5);
+ if(id==='0025'){
+  block(outline,-12,-31,7,14);block(outline,6,-31,7,14);
+  block(c[0],-11,-28,5,13);block(c[0],7,-28,5,13);
+  block(c[1],-16,-25,32,22);block(c[0],-14,-24,28,19);
+  block(c[2],-12,-15,7,5);block(c[2],5,-15,7,5);
+  block(c[1],13,-13,9,5);block(c[0],20,-18,5,9);
+ }else if(id==='0004'){
+  block(c[1],-15,-23,30,20);block(c[0],-13,-26,26,23);
+  block(c[1],-12,-34,24,11);block(c[0],-11,-33,22,12);
+  block(c[1],11,-12,11,6);block('#faef9d',19,-18,7,10);
+ }else if(id==='0007'){
+  ell(c[1],0,-14,16,13);ell(c[2],0,-14,12,10);ell(c[0],0,-25,11,9);
+  block(c[0],-17,-12,9,9);block(c[0],8,-12,9,9);
+ }else if(id==='0001'){
+  ell(c[1],0,-20,15,10);ell(c[2],0,-28,13,9);
+  ell(c[0],0,-14,17,11);block(c[1],-12,-8,8,7);block(c[1],4,-8,8,7);
+ }else if(id==='0043'){
+  ell(c[0],0,-15,14,14);block(c[2],-2,-42,5,17);ell(c[2],-10,-35,11,6);ell(c[2],10,-35,11,6);
+ }else if(id==='0016'){
+  ell(c[0],0,-15,14,14);ell(c[2],0,-25,12,9);block(c[1],-13,-8,7,4);block(c[1],6,-8,7,4);
+ }else if(id==='0092'){
+  ell(c[1],0,-17,16,15);ell(c[0],0,-21,15,14);ell(c[2],-5,-21,4,4);ell(c[2],6,-21,4,4);
+ }else{
+  ell(c[0],0,-15,15,13);ell(c[2],0,-26,12,9);
+ }
+ // Two tiny eyes give fallback sprites a consistent physical form.
+ block('#16242d',-7,-24,4,5);block('#16242d',5,-24,4,5);
+ block('#f3fcf6',-6,-24,1,1);block('#f3fcf6',6,-24,1,1);
+ // A minimal changing stance, *never* translate the torso away from the feet.
+ if(anim>0.5){block(c[1],-10,-4,5,2)}else if(anim<-.5){block(c[1],5,-4,5,2)}
+ ctx.restore();
+}
+function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0){
+ const sp=sprites[id]?.anims||{},s=sp[action]||sp.Walk||sp.Idle;
+ const shadowScale=scale*(id==='0092'?.85:1);
+ contactShadow(x,y,shadowScale,id==='0092');
+ if(!s){drawFallbackCreature(id,x,y,scale,t,angle);return}
+ let face=faceFromAngle(angle),f=((face%s.dirs)+s.dirs)%s.dirs,
+ frames=Math.min(s.frames,s.dur.length||s.frames),clock=t*60,idx=0;
+ if(frames>1){const sum=s.dur.slice(0,frames).reduce((a,b)=>a+b,0)||1;clock%=sum;
+  for(let i=0;i<frames;i++){if(clock<(s.dur[i]||8)){idx=i;break}clock-=s.dur[i]||8}}
+ // Important: sheet bottom != visible feet. Use alpha contact analysis.
+ const feet=footOffset(s,f,idx),dw=s.w*scale,dh=s.h*scale;
+ ctx.save();ctx.imageSmoothingEnabled=false;
+ if(flash>0)ctx.globalAlpha=.65+Math.cos(t*65)*.25;
+ ctx.drawImage(s.image,idx*s.w,f*s.h,s.w,s.h,x-dw/2,y-feet*scale,dw,dh);
+ ctx.restore();
+}
+
 function spawnEnemy(){
  // Only one opponent can exist during a match.
  if(enemies.length!==0)return;
@@ -110,7 +228,7 @@ function advance(dt){
  let mag=len(mx,my),moving=mag>.05;
  if(mag>1){mx/=mag;my/=mag}
  if(player.dashTime>0){player.x+=player.dashX*850*dt;player.y+=player.dashY*850*dt;player.dashTime-=dt;fx(player.x,player.y,roster[chosen].color,2,20)}
- else{player.x+=mx*player.speed*dt;player.y+=my*player.speed*dt}
+ else{player.x+=mx*player.speed*dt;player.y+=my*player.speed*dt;if(moving&&Math.random()<dt*15)footDust(player.x,player.y,1)}
  player.x=clamp(player.x,25,map.w-25);player.y=clamp(player.y,30,map.h-24);
  if(moving&&player.actLeft<=0){player.face=Math.atan2(my,mx);player.action='Walk'}
  else if(!moving&&player.actLeft<=0){player.action='Idle'}
@@ -120,7 +238,7 @@ function advance(dt){
   e.actionT+=dt;e.atk-=dt;e.shoot-=dt;e.flash=Math.max(0,e.flash-dt);e.hurt=Math.max(0,e.hurt-dt);
   let dx=player.x-e.x,dy=player.y-e.y,d=len(dx,dy)||1;
   const isRanged=e.kind===3;
-  if(d>e.r+player.r+7&&(!isRanged||d>220)){e.x+=dx/d*e.speed*dt;e.y+=dy/d*e.speed*dt}
+  if(d>e.r+player.r+7&&(!isRanged||d>220)){e.x+=dx/d*e.speed*dt;e.y+=dy/d*e.speed*dt;if(Math.random()<dt*7)footDust(e.x,e.y,.8)}
   else if(isRanged&&d<135){e.x-=dx/d*e.speed*.3*dt;e.y-=dy/d*e.speed*.3*dt}
   e.face=Math.atan2(dy,dx);
   if(d<e.r+player.r+4&&e.atk<=0){hurt(foes[e.kind].damage);e.atk=.92;if(e.kind!==3)e.hurt=.12}
