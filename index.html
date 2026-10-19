@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena | Evolved Duel v12</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena | Expanded Moves v13</title>
 <style>
 :root{--ink:#071823;--glass:#0a2636e0;--line:#9bd9df45;--gold:#ffd667;--sky:#92eeff}*{box-sizing:border-box}html,body{margin:0;min-height:100%;width:100%;height:100%;overflow:hidden;background:#071822;color:#e9fcff;font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;touch-action:none}button{font:inherit;cursor:pointer}#stage{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 32%,#03101868 100%)}#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 16px 0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:8px}.glass{background:var(--glass);border:1px solid var(--line);box-shadow:0 8px 28px #07121c55;backdrop-filter:blur(8px);border-radius:13px}.stats{padding:10px 12px;min-width:180px;max-width:245px}.stats .name{display:flex;justify-content:space-between;font-weight:900;font-size:13px;gap:15px}.stats .name span:last-child{color:#c5ecf8;font-size:11px}.track{position:relative;height:10px;background:#17323b;border-radius:20px;margin-top:6px;overflow:hidden;border:1px solid #6a92924a}.track>i{height:100%;display:block;width:100%;transition:width .1s linear}.track.hp i{background:linear-gradient(90deg,#52be77,#b8f28b)}.track.xp{height:5px;margin-top:5px}.track.xp i{background:#6cdbf8}.rightHud{display:flex;gap:8px}.hudpill{padding:10px 13px;min-width:78px;text-align:center;font-size:11px;color:#bfe9ed}.hudpill b{font-size:19px;display:block;color:white;line-height:1.15}.pause{padding:10px 13px;font-weight:900;background:var(--glass);color:white;pointer-events:auto;min-width:42px}.controls{position:absolute;left:0;bottom:0;right:0;padding:0 max(18px,env(safe-area-inset-left)) calc(20px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-right));display:flex;align-items:end;justify-content:space-between;pointer-events:none;gap:14px;isolation:isolate}.controls:before{content:'';position:absolute;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:calc(7px + env(safe-area-inset-bottom));height:126px;border-radius:34px;background:linear-gradient(180deg,#0f2a39f5,#081c29ef);border:1px solid #c9f0ff22;box-shadow:0 18px 45px #020b1245,inset 0 1px 0 #ffffff10,inset 0 -12px 30px #00000038;backdrop-filter:blur(10px);z-index:-1}#joy{height:136px;width:136px;position:relative;border:2px solid #d2edff45;background:radial-gradient(circle at 35% 30%,#ecffff30,#9bdaf511 55%,#7ebad20e 100%);border-radius:50%;box-shadow:0 10px 24px #01091355,inset 0 0 20px #c6f5ff14,inset 0 2px 0 #ffffff1f;pointer-events:auto;touch-action:none;flex-shrink:0;margin:0 0 8px 8px}.joyShell{position:relative}.joyShell:after{content:'';position:absolute;left:18px;right:18px;bottom:4px;height:16px;border-radius:50%;background:#0008;filter:blur(10px)}#joy:before{content:'MOVE';font-weight:900;letter-spacing:2.5px;position:absolute;top:auto;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:#d3f6ffb8;background:#071c2abf;padding:2px 8px;border-radius:999px;border:1px solid #ffffff18}.nub{width:59px;height:59px;position:absolute;left:calc(50% - 29.5px);top:calc(50% - 29.5px);border-radius:50%;background:linear-gradient(145deg,#d5f8ffcf,#85bdda96);box-shadow:0 5px 19px #020d176b;border:2px solid #ecffffb8;pointer-events:none}.buttons{display:flex;align-items:end;gap:11px;pointer-events:auto;padding:14px 14px 14px 16px;border-radius:28px;border:1px solid #cbf4ff24;background:linear-gradient(180deg,#123043f0,#0a2130ef);box-shadow:0 12px 30px #0007,inset 0 1px 0 #ffffff10,inset 0 -10px 24px #00000024;position:relative;margin:0 8px 10px 0}.buttons:before{content:'SKILLS';position:absolute;left:16px;top:-11px;padding:2px 8px;border-radius:999px;background:#0c2635f7;border:1px solid #cbf4ff24;color:#d2f6ffcc;font-size:9px;font-weight:900;letter-spacing:2.2px}.skill{--c:#ffd45c;position:relative;display:flex;align-items:center;justify-content:center;width:69px;height:69px;border:2px solid color-mix(in srgb,var(--c) 60%,white);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 40%,#193848),#0a2231 72%);box-shadow:0 5px 16px #0008,inset 0 0 18px color-mix(in srgb,var(--c) 18%,transparent),inset 0 2px 0 #ffffff1a;color:white;border-radius:50%;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}.skill.main{width:86px;height:86px}.skill .glyph{font-size:25px;transform:translateY(-7px);filter:drop-shadow(0 2px 1px #0007)}.skill.main .glyph{font-size:35px;transform:translateY(-9px)}.skill small{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:850;text-shadow:none;background:#081f2dcc;padding:2px 7px;border-radius:999px;border:1px solid #ffffff1b;color:#f3fbff}.skill .cooldown{position:absolute;inset:0;border-radius:50%;background:#08131dd7;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:900}.skill.selected{box-shadow:0 0 0 5px #e9fbff1e,0 0 28px var(--c),inset 0 0 16px color-mix(in srgb,var(--c) 20%,white);transform:translateY(-2px) scale(1.03)}.screen{position:absolute;inset:0;z-index:10;background:radial-gradient(ellipse at 50% 35%,#1d4458ef 0%,#071824f7 70%);display:flex;justify-content:center;align-items:center;overflow-y:auto;padding:20px 12px calc(20px + env(safe-area-inset-bottom));pointer-events:auto}.panel{width:min(620px,100%);padding:26px 23px 21px;text-align:center;border:1px solid #98ddf252;background:linear-gradient(155deg,#153449fa,#0a1d2cf9);border-radius:24px;box-shadow:0 20px 100px #020e1baf}.eyebrow{font-weight:900;font-size:10px;letter-spacing:4px;color:#9ce6f3;margin-bottom:6px}.panel h1{margin:0;color:#fff5c5;font-size:clamp(30px,5.5vw,48px);letter-spacing:-2px;line-height:1.1;text-shadow:0 5px #0d3242}.panel h1 em{font-style:normal;color:#ffe26a}.desc{font-size:13px;line-height:1.65;color:#bedae3;margin:12px auto 13px}.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0 19px}.choice{border:1px solid #8acee34d;border-radius:13px;min-width:0;padding:10px 2px 8px;background:#173648;color:#d8eaf3;transition:transform .13s,border-color .13s}.choice.on{border-color:#ffe69b;box-shadow:0 0 0 2px #ffd26833;background:#39516a;transform:translateY(-3px)}.choice canvas{display:block;width:72px;height:72px;margin:0 auto 1px;image-rendering:pixelated;max-width:100%}.choice b{display:block;font-size:12px}.choice small{display:block;color:#99c9d3;font-size:10px;margin-top:3px}.primary{background:linear-gradient(180deg,#ffeb91,#ffbd50);border:0;color:#2d2b2e;font-weight:950;padding:15px 25px;min-width:195px;border-radius:13px;font-size:16px;box-shadow:0 6px 0 #a96924}.primary:active{transform:translateY(4px);box-shadow:0 2px 0 #a96924}.status{min-height:18px;font-size:11px;color:#c4e0e8;margin:10px 0 1px}.credit{font-size:10px;line-height:1.5;color:#9bc0cf;margin-top:14px}.credit a{color:#a9eaf4}.explain{margin:11px 0;font-size:12px;color:#bcd7d8;line-height:1.8}.hidden{display:none!important}#floating{position:absolute;inset:0;pointer-events:none;overflow:hidden}#floating .floater{position:absolute;transform:translate(-50%,-50%);font-weight:900;text-shadow:0 2px #071821,0 0 6px #071821;animation:floatup .7s forwards}@keyframes floatup{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -38px}}#toast{position:absolute;top:22%;width:100%;text-align:center;pointer-events:none;font-weight:1000;font-size:25px;color:#fff3af;text-shadow:0 4px #09242b,0 0 20px #091820;opacity:0;transition:opacity .2s}#toast.show{opacity:1}#tips{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);color:#c9dce68e;white-space:nowrap;font-size:10px;pointer-events:none}#aimHelp{position:absolute;bottom:calc(165px + env(safe-area-inset-bottom));right:20px;color:#eaf7fd9c;font-size:10px;pointer-events:none}@media(max-width:700px){#hud{padding:calc(env(safe-area-inset-top) + 7px) 9px 0}.stats{min-width:137px;padding:8px}.stats .name{font-size:11px}.rightHud{gap:5px}.hudpill{min-width:57px;padding:8px;font-size:10px}.hudpill b{font-size:16px}.pause{padding:8px}.controls{padding-left:12px;padding-right:12px;bottom:4px}.controls:before{height:112px;border-radius:28px}#joy{height:117px;width:117px;margin:0 0 6px 4px}.joyShell:after{left:12px;right:12px}#joy:before{font-size:8px;bottom:7px;padding:2px 7px}.nub{width:52px;height:52px;left:calc(50% - 26px);top:calc(50% - 26px)}.buttons{gap:8px;padding:11px 10px 11px 12px;margin:0 4px 7px 0}.buttons:before{left:12px;font-size:8px}.skill{width:56px;height:56px}.skill.main{width:70px;height:70px}.skill .glyph{font-size:21px;transform:translateY(-5px)}.skill.main .glyph{font-size:29px;transform:translateY(-7px)}.skill small{font-size:8px;bottom:5px;padding:1px 5px}.choices{gap:6px}.panel{padding:22px 13px 15px}.choice canvas{width:60px;height:60px}#aimHelp{bottom:calc(130px + env(safe-area-inset-bottom));font-size:9px}#tips{font-size:8px}}@media(max-width:370px){#joy{height:96px;width:96px}.controls:before{height:102px}.buttons{gap:5px;padding:9px 8px 9px 10px}.skill{width:49px;height:49px}.skill.main{width:61px;height:61px}.skill small{font-size:7px;bottom:4px}.hudpill{min-width:47px}.rightHud{gap:3px}.stats{min-width:120px}}@media(max-height:480px){.panel{padding:14px}.panel h1{font-size:26px}.desc{margin:6px}.choices{margin:7px 0}.choice canvas{width:45px;height:45px}.controls{padding-bottom:15px}#joy{width:92px;height:92px}.skill{width:52px;height:52px}.skill.main{width:65px;height:65px}#aimHelp{display:none}}
 
@@ -77,19 +77,37 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #menu.screen{align-items:flex-start!important;overflow-y:auto!important;touch-action:pan-y!important}
 #menu .panel{margin:auto auto!important;flex-shrink:0}
 @media (max-height:650px){#menu .panel{margin-top:0!important;margin-bottom:0!important}}
+
+/* Four equipped moves and dodge: fixed footprint, reachable on mobile. */
+.buttons{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,64px);gap:7px;padding:12px 10px 10px;align-items:center;justify-items:center}
+.buttons .skill{width:63px;height:63px}.buttons .skill.main{width:66px;height:66px}.buttons .skill.dash{width:49px;height:49px;align-self:start}
+.buttons .skill .glyph,.buttons .skill.main .glyph{font-size:23px;transform:translateY(-7px)}
+.buttons .skill small{font-size:8px;max-width:63px;overflow:hidden;text-overflow:ellipsis;padding:2px 3px;bottom:4px}
+.buttons .skill.dash small{bottom:1px;font-size:7px}.buttons .skill.dash .glyph{font-size:20px}
+.buttons .skill[data-n="0"]{grid-column:1;grid-row:2}.buttons .skill[data-n="1"]{grid-column:2;grid-row:1}
+.buttons .skill[data-n="2"]{grid-column:3;grid-row:1}.buttons .skill[data-n="3"]{grid-column:1;grid-row:1}.buttons .skill[data-n="4"]{grid-column:2;grid-row:2}
+.loadoutSetup{margin:8px 0 12px;padding:12px;background:#0a2534;border:1px solid #74cbd06f;border-radius:12px}
+.loadoutHeading{font-weight:900;color:#fff2b6;text-align:left;font-size:13px;display:flex;gap:8px;justify-content:space-between;align-items:center}
+.loadoutHeading small{font-size:9px;color:#aad4df;font-weight:500}
+.loadoutGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.loadoutGrid label{display:flex;flex-direction:column;gap:5px;color:#b8e4ef;font-size:11px;font-weight:800;text-align:left}
+.loadoutGrid select{width:100%;min-width:0;background:#153f4d;border:1px solid #9ee7d588;border-radius:8px;padding:8px 5px;color:#f6ffff;font-size:12px;touch-action:manipulation}
+.moveDex .moveItem{flex:1 1 120px;min-width:120px}.moveDex .moveItem b{font-size:10px}
+@media(max-width:410px){.controls{gap:3px;padding-right:7px;padding-left:7px}.controls:before{height:151px}.buttons{grid-template-columns:repeat(3,53px);grid-template-rows:repeat(2,54px);gap:5px;padding:8px 6px;margin-right:1px}.buttons .skill,.buttons .skill.main{width:52px;height:52px}.buttons .skill.dash{width:43px;height:43px}.buttons .skill .glyph,.buttons .skill.main .glyph{font-size:20px}.buttons .skill small{max-width:50px;font-size:7px}#joy{height:107px;width:107px;margin-left:0}.nub{width:48px;height:48px;left:calc(50% - 24px);top:calc(50% - 24px)}.loadoutHeading{font-size:11px}.loadoutGrid{gap:5px}.loadoutGrid select{font-size:11px}}
+@media(max-width:350px){#joy{height:95px;width:95px}.buttons{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,50px);gap:4px}.buttons .skill,.buttons .skill.main{width:47px;height:47px}.buttons .skill.dash{width:40px;height:40px}.buttons .skill small{max-width:45px;font-size:7px}.controls{padding-left:4px;padding-right:4px}}
 </style></head><body>
 <canvas id="stage"></canvas><div class="vignette"></div><div id="impactFlash"></div><div id="roundBadge">ANCIENT GROVE · ROUND 01</div><div id="comboBadge"></div><div id="hud"><div class="stats glass"><div class="name"><span id="playerName">⚡ 라이츄</span><span id="healthText">120/120</span></div><div class="track hp"><i id="hpBar"></i></div><div class="condition" id="playerCondition"></div><div class="fuelHud" id="fuelHud" hidden><div class="fuelHeading"><span>🔥 화염방사 에너지</span><span id="fuelValue">100%</span></div><div class="fuelGauge"><i id="fuelFill"></i></div></div></div><div class="versus">VS</div><div class="stats glass enemyStats"><div class="name"><span id="enemyName">상대 포켓몬</span><span id="enemyHealthText">—</span></div><div class="track hp"><i id="enemyHpBar"></i></div><div class="condition" id="enemyCondition"></div></div><button class="pause glass" id="pause" aria-label="일시정지">Ⅱ</button></div>
-<div id="floating"></div><div id="toast"></div><div id="aimHelp">특수기: 10만볼트 · 화염방사 · 에너지볼 · 파도타기 | 드래그 조준</div><div id="tips">PC: WASD 이동 · 마우스 조준 · 1 / 2 / 3 기술 · P 일시정지</div>
-<div class="controls" id="controls"><div class="joyShell"><div id="joy" aria-label="이동 조이스틱"><div class="nub" id="nub"></div></div></div><div class="buttons"><div class="skill" data-n="2" style="--c:#96deff"><span class="glyph">➤</span><small>회피</small><span class="cooldown"></span></div><div class="skill" data-n="1" style="--c:#fa9d6a"><span class="glyph" id="bigSkill">✹</span><small id="bigLabel">강화 기술</small><span class="fuelButton" id="fuelButton" hidden><i id="fuelButtonFill"></i></span><span class="cooldown"></span></div><div class="skill main" data-n="0" style="--c:#ffdd6c"><span class="glyph" id="basicSkill">⚡</span><small id="basicLabel">기본 기술</small><span class="cooldown"></span></div></div></div>
-<div class="screen" id="menu"><div class="panel"><div class="eyebrow">ORIGINAL FAN-MADE · EVOLVED DUEL v12</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 종족값·IV · 원작 기술 위력·명중률·부가효과 · 아레나 HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
+<div id="floating"></div><div id="toast"></div><div id="aimHelp">특수기: 10만볼트 · 화염방사 · 에너지볼 · 파도타기 | 드래그 조준</div><div id="tips">PC: WASD 이동 · 1/2/3/4 기술 · 5 또는 Space 회피 · P 일시정지</div>
+<div class="controls" id="controls"><div class="joyShell"><div id="joy" aria-label="이동 조이스틱"><div class="nub" id="nub"></div></div></div><div class="buttons"><div class="skill" data-n="3" style="--c:#b7d6ff"><span class="glyph" id="extraGlyph3">✦</span><small id="extraLabel3">추가 1</small><span class="cooldown"></span></div><div class="skill" data-n="1" style="--c:#fa9d6a"><span class="glyph" id="bigSkill">✹</span><small id="bigLabel">강화 기술</small><span class="fuelButton" id="fuelButton" hidden><i id="fuelButtonFill"></i></span><span class="cooldown"></span></div><div class="skill dash" data-n="2" style="--c:#96deff"><span class="glyph">➤</span><small>회피</small><span class="cooldown"></span></div><div class="skill main" data-n="0" style="--c:#ffdd6c"><span class="glyph" id="basicSkill">⚡</span><small id="basicLabel">기본 기술</small><span class="cooldown"></span></div><div class="skill" data-n="4" style="--c:#b7ffd6"><span class="glyph" id="extraGlyph4">✧</span><small id="extraLabel4">추가 2</small><span class="cooldown"></span></div></div></div>
+<div class="screen" id="menu"><div class="panel"><div class="eyebrow">ORIGINAL FAN-MADE · EXPANDED MOVES v13</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 4개 장착 기술(추가 2개 편성) · 고유 기술 연출 · HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
   <div class="ivTop"><strong>포켓몬 능력치 · Lv.50</strong><button type="button" id="ivReroll">IV 랜덤</button><button type="button" id="ivPerfect">6V (전부 31)</button></div>
   <label class="naturePicker">성격 <select id="natureSelect" aria-label="성격 선택"></select></label>
   <div class="ivGrid" id="ivGrid"></div>
   <p class="ivNote">최종 진화형 종족값·IV·성격은 원작 기준 · EV 0 · PvP HP 2배 · 기술 피해 80% · 상대 IV는 무작위</p>
-</section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 버튼을 드래그해 조준 · 10만볼트: 유도+마비 · 화염방사: 누르는 동안 지속 분사+화상 · 파도타기: 탭 즉시 탑승 · 에너지볼: 특방 하락<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">PMDCollab/SpriteCollab</a> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a><br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 원본 스프라이트에는 인터넷 연결이 필요하지만, 연결 실패 시에도 기본 캐릭터로 전투할 수 있습니다.<br><a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">원본 사이트 및 개별 아티스트 크레딧</a></div></div></div>
+</section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 4기술 + 회피 · 기술 3·4는 시작 화면에서 변경 · 터치/드래그 조준 · 특수 효과는 기술별로 다름<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">PMDCollab/SpriteCollab</a> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a><br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 원본 스프라이트에는 인터넷 연결이 필요하지만, 연결 실패 시에도 기본 캐릭터로 전투할 수 있습니다.<br><a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">원본 사이트 및 개별 아티스트 크레딧</a></div></div></div>
 <script>
 'use strict';
-const BUILD_VERSION='v12-evolved-form-1v1';
+const BUILD_VERSION='v13-expanded-moves';
 const $=id=>document.getElementById(id),CV=$('stage'),ctx=CV.getContext('2d');let W=innerWidth,H=innerHeight,dpr=1;
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);CV.width=Math.round(W*dpr);CV.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false}addEventListener('resize',resize);resize();
 const BASE='https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/';
@@ -144,7 +162,13 @@ const TYPE_CHART={
  electric:{electric:.5,fire:1,water:2,grass:.5,poison:1,flying:2},
  fire:{electric:1,fire:.5,water:.5,grass:2,poison:1,flying:1},
  water:{electric:1,fire:2,water:.5,grass:.5,poison:1,flying:1},
- grass:{electric:1,fire:.5,water:2,grass:.5,poison:.5,flying:.5}
+ grass:{electric:1,fire:.5,water:2,grass:.5,poison:.5,flying:.5},
+ normal:{electric:1,fire:1,water:1,grass:1,poison:1,flying:1},
+ flying:{electric:.5,fire:1,water:1,grass:2,poison:1,flying:1},
+ dragon:{electric:1,fire:1,water:1,grass:1,poison:1,flying:1},
+ ice:{electric:1,fire:.5,water:.5,grass:2,poison:1,flying:2},
+ poison:{electric:1,fire:1,water:1,grass:2,poison:.5,flying:1},
+ steel:{electric:.5,fire:.5,water:.5,grass:1,poison:1,flying:1}
 };
 // Gen VI+ base powers, categories, accuracy and secondary effects.
 // Surf and Thunderbolt retain the user-chosen real-time riding/homing presentation.
@@ -154,8 +178,58 @@ const MOVE_DB={
  water:{basic:{name:'물대포',power:40,accuracy:100,category:'special',type:'water'},special:{name:'파도타기',power:90,accuracy:100,category:'special',type:'water'}},
  grass:{basic:{name:'나뭇잎',power:55,accuracy:95,category:'physical',type:'grass',highCrit:true},special:{name:'에너지볼',power:90,accuracy:100,category:'special',type:'grass',secondary:'spdef',chance:.10}}
 };
+
+// Modern mainline move powers, accuracy and secondary effect odds; each move uses a unique real-time action.
+// The swap effect of Volt Switch is adapted to a backward reposition in this single-combatant arena.
+const EXTRA_MOVES={
+ electric:[
+  {id:'quickAttack',name:'전광석화',type:'normal',power:40,accuracy:100,category:'physical',cooldown:2.8,mode:'dash',range:210,glyph:'➜',label:'선공 돌진'},
+  {id:'discharge',name:'방전',type:'electric',power:80,accuracy:100,category:'special',secondary:'paralysis',chance:.30,cooldown:5.8,mode:'burst',range:160,glyph:'✣',label:'범위 마비 30%'},
+  {id:'voltSwitch',name:'볼트체인지',type:'electric',power:70,accuracy:100,category:'special',cooldown:5.5,mode:'projectile',range:470,speed:600,glyph:'ϟ',label:'명중 후 후퇴'},
+  {id:'ironTail',name:'아이언테일',type:'steel',power:100,accuracy:75,category:'physical',secondary:'defense',chance:.30,cooldown:4.4,mode:'melee',range:105,glyph:'⚔',label:'방어↓ 30%'}
+ ],
+ fire:[
+  {id:'airSlash',name:'에어슬래시',type:'flying',power:75,accuracy:95,category:'special',secondary:'flinch',chance:.30,cooldown:4.0,mode:'projectile',range:490,speed:610,glyph:'彡',label:'풀죽음 30%'},
+  {id:'dragonPulse',name:'용의파동',type:'dragon',power:85,accuracy:100,category:'special',cooldown:4.8,mode:'beam',range:480,glyph:'✧',label:'장거리 파동'},
+  {id:'heatWave',name:'열풍',type:'fire',power:95,accuracy:90,category:'special',secondary:'burn',chance:.10,cooldown:5.5,mode:'burst',range:180,glyph:'♨',label:'넓은 화염'},
+  {id:'dragonClaw',name:'드래곤클로',type:'dragon',power:80,accuracy:100,category:'physical',cooldown:3.6,mode:'melee',range:115,glyph:'⚔',label:'근거리 베기'}
+ ],
+ water:[
+  {id:'iceBeam',name:'냉동빔',type:'ice',power:90,accuracy:100,category:'special',secondary:'freeze',chance:.10,cooldown:5.1,mode:'beam',range:480,glyph:'❄',label:'얼음 10%'},
+  {id:'aquaJet',name:'아쿠아제트',type:'water',power:40,accuracy:100,category:'physical',cooldown:2.8,mode:'dash',range:240,glyph:'➜',label:'물 돌진'},
+  {id:'hydroPump',name:'하이드로펌프',type:'water',power:110,accuracy:80,category:'special',cooldown:6.0,mode:'projectile',range:500,speed:515,glyph:'◉',label:'고위력 물포'},
+  {id:'flashCannon',name:'러스터캐논',type:'steel',power:80,accuracy:100,category:'special',secondary:'spdef',chance:.10,cooldown:4.5,mode:'beam',range:460,glyph:'✺',label:'특방↓ 10%'}
+ ],
+ grass:[
+  {id:'sludgeBomb',name:'오물폭탄',type:'poison',power:90,accuracy:100,category:'special',secondary:'poison',chance:.30,cooldown:4.9,mode:'projectile',range:460,speed:455,glyph:'☣',label:'독 30%'},
+  {id:'vineWhip',name:'덩굴채찍',type:'grass',power:45,accuracy:100,category:'physical',cooldown:2.7,mode:'melee',range:165,glyph:'〰',label:'중거리 채찍'},
+  {id:'solarBeam',name:'솔라빔',type:'grass',power:120,accuracy:100,category:'special',cooldown:7.5,mode:'charge',range:540,glyph:'☀',label:'0.75초 충전'},
+  {id:'leechSeed',name:'씨뿌리기',type:'grass',power:0,accuracy:90,category:'status',cooldown:7,mode:'seed',range:410,speed:430,glyph:'❀',label:'흡수 씨앗'}
+ ]
+};
+const equippedExtra=Object.fromEntries(Object.keys(EXTRA_MOVES).map(t=>[t,[0,1]]));
+const EXTRA_PALETTE={normal:'#eae0ca',electric:'#ffe676',fire:'#ff9a55',water:'#6dcaff',grass:'#99ee88',flying:'#c4e9ff',dragon:'#b5a0ff',ice:'#9ceeff',poison:'#cc83f6',steel:'#d8e6fa'};
+function equippedMove(actor,slot){if(slot<3)return null;const type=roster[actor.kind].type,which=slot===3?0:1;const indexes=actor===player?equippedExtra[type]:(actor.extraLoadout||equippedExtra[type]);return EXTRA_MOVES[type][indexes[which]]}
+function extraDescription(m){const extras=[];if(m.secondary==='paralysis')extras.push('마비 '+Math.round(m.chance*100)+'%');if(m.secondary==='burn')extras.push('화상 '+Math.round(m.chance*100)+'%');if(m.secondary==='poison')extras.push('독 '+Math.round(m.chance*100)+'%');if(m.secondary==='freeze')extras.push('얼음 '+Math.round(m.chance*100)+'%');if(m.secondary==='flinch')extras.push('풀죽음 '+Math.round(m.chance*100)+'%');if(m.secondary==='spdef')extras.push('특방↓ '+Math.round(m.chance*100)+'%');if(m.secondary==='defense')extras.push('방어↓ '+Math.round(m.chance*100)+'%');return extras.length?extras.join(' · '):m.label}
+function refreshLoadout(){
+ const p=roster[chosen],moves=EXTRA_MOVES[p.type],slots=equippedExtra[p.type];
+ for(let j=0;j<2;j++){
+  const el=$('extraSelect'+(j+3));
+  el.innerHTML=moves.map((m,i)=>`<option value="${i}" ${slots[j]===i?'selected':''}>${m.name} · ${m.power||'변화'} · ${m.type}</option>`).join('');
+ }
+ refreshMoveDex();
+}
+for(let j=0;j<2;j++)$('extraSelect'+(j+3)).addEventListener('change',e=>{
+ const t=roster[chosen].type,k=Number(e.target.value),other=1-j,arr=equippedExtra[t];
+ if(k===arr[other]){arr[other]=arr[j];}arr[j]=k;refreshLoadout();
+});
+function updateExtraButtons(){
+ const t=roster[chosen].type,arr=equippedExtra[t];
+ for(let j=0;j<2;j++){const slot=j+3,m=EXTRA_MOVES[t][arr[j]],button=document.querySelector(`[data-n="${slot}"]`);$('extraGlyph'+slot).textContent=m.glyph;$('extraLabel'+slot).textContent=m.name;button.style.setProperty('--c',EXTRA_PALETTE[m.type]);button.title=`${m.name} · 위력 ${m.power||'—'} · 명중 ${m.accuracy}%`}
+}
+
 function moveDescription(move){if(move.highCrit)return '급소율 상승';if(move.secondary==='paralysis')return '마비 10%';if(move.secondary==='burn')return '화상 10%';if(move.secondary==='spdef')return '특방↓ 10%';return '추가 효과 없음'}
-function refreshMoveDex(){const p=roster[chosen],db=MOVE_DB[p.type];$('moveDex').innerHTML=['basic','special'].map((k,i)=>{const m=db[k];return `<div class="moveItem"><b>${i?'필살기':'기본 기술'} · ${m.name}</b>위력 ${m.power} · 명중 ${m.accuracy}% · ${m.category==='physical'?'물리':'특수'} <em>${moveDescription(m)}</em></div>`}).join('')}
+function refreshMoveDex(){const p=roster[chosen],db=MOVE_DB[p.type],a=equippedExtra[p.type];const list=[db.basic,db.special,...a.map(i=>EXTRA_MOVES[p.type][i])];$('moveDex').innerHTML=list.map((m,i)=>`<div class="moveItem"><b>${i+1} · ${m.name}</b>${m.power?'위력 '+m.power:'변화기'} · 명중 ${m.accuracy}% · ${m.category==='physical'?'물리':m.category==='special'?'특수':'변화'} · <span style="color:${EXTRA_PALETTE[m.type]}">${m.type}</span> <em>${i<2?moveDescription(m):extraDescription(m)}</em></div>`).join('')}
 function effectiveness(attackType,target){return (target.types||[target.type]).reduce((n,t)=>n*(TYPE_CHART[attackType]?.[t]??1),1)}
 // Standard non-weather, non-item, non-ability damage (Gen VI+), with
 // original base damage, integer random roll, STAB, type effectiveness, crit.
@@ -163,7 +237,7 @@ function effectiveness(attackType,target){return (target.types||[target.type]).r
 function calculateDamage(attacker,defender,move,options={}){
  let atk=move.category==='physical'?attacker.stats.atk:attacker.stats.spa;
  if(move.category==='physical'&&attacker.status?.kind==='burn')atk=Math.max(1,Math.floor(atk/2));
- const stage=move.category==='special'?(defender.spdefStage||0):0;
+ const stage=move.category==='special'?(defender.spdefStage||0):(defender.defStage||0);
  const stageFactor=stage>=0?(2+stage)/2:2/(2-stage);
  const def=Math.max(1,Math.floor((move.category==='physical'?defender.stats.def:defender.stats.spd)*stageFactor));
  const base=Math.floor(Math.floor((Math.floor(2*attacker.level/5)+2)*move.power*atk/def)/50)+2;
@@ -181,23 +255,29 @@ function calculateDamage(attacker,defender,move,options={}){
 function moveOf(actor,slot){return MOVE_DB[actor.type][slot]}
 function damagePacket(actor,target,slot,opts){return calculateDamage(actor,target,moveOf(actor,slot),opts)}
 function moveAccuracy(move){return Math.random()*100<(move.accuracy??100)}
-function canAct(actor){if(actor.status?.kind!=='paralysis'||Math.random()>=.25)return true;
+function canAct(actor){if(actor.staggerT>0||actor.status?.kind==='freeze')return false;if(actor.status?.kind!=='paralysis'||Math.random()>=.25)return true;
  for(let i=0;i<8;i++)emitParticle({x:actor.x+rand(-14,14),y:actor.y-rand(12,32),life:rand(.15,.35),size:rand(3,5),color:'#ffe867',shape:'spark'});
  return false}
 function statusDuration(kind){return kind==='burn'?ARENA_BALANCE.burnSeconds:kind==='paralysis'?ARENA_BALANCE.paralysisSeconds:ARENA_BALANCE.spdefDropSeconds}
-function canStatus(target,kind){if(kind==='burn'&&target.types.includes('fire'))return false;
+function canStatus(target,kind){if(kind==='burn'&&target.types.includes('fire'))return false;if(kind==='freeze'&&target.types.includes('ice'))return false;if(kind==='poison'&&(target.types.includes('poison')||target.types.includes('steel')))return false;
  if(kind==='paralysis'&&target.types.includes('electric'))return false;
  return true}
 function applySecondary(target,move,options={}){
  if(!move?.secondary||!canStatus(target,move.secondary)||Math.random()>=(options.chance??move.chance??0))return false;
+ if(move.secondary==='flinch'){
+  target.staggerT=Math.max(target.staggerT||0,.48);playAction(target,'Hurt',.3);emitParticle({x:target.x,y:target.y-19,life:.32,size:12,color:'#d9ecff',shape:'spark'});return true;
+ }
+ if(move.secondary==='defense'){
+  target.defStage=Math.max(-6,(target.defStage||0)-1);target.defTimer=ARENA_BALANCE.spdefDropSeconds;announce('방어가 떨어졌다!');return true;
+ }
  if(move.secondary==='spdef'){
   target.spdefStage=Math.max(-6,(target.spdefStage||0)-1);target.spdefTimer=statusDuration('spdef');
   elementalBurst(target.x,target.y-10,'grass',.35);
   if(target===player)announce('특수방어가 떨어졌다!');else announce('상대의 특수방어가 떨어졌다!');
   return true;
  }
- if(target.status && target.status.kind!==move.secondary)return false;
- target.status={kind:move.secondary,remaining:statusDuration(move.secondary),tick:ARENA_BALANCE.burnTickSeconds};
+ if(target.status)return false;
+ target.status={kind:move.secondary,remaining:move.secondary==='freeze'?1.25:move.secondary==='poison'?9:statusDuration(move.secondary),tick:ARENA_BALANCE.burnTickSeconds};
  elementalBurst(target.x,target.y-10,move.type,.4);
  if(target===player)announce(move.secondary==='burn'?'화상에 걸렸다!':'마비에 걸렸다!');
  else announce(move.secondary==='burn'?'상대에게 화상!':'상대에게 마비!');
@@ -206,21 +286,24 @@ function applySecondary(target,move,options={}){
 function updateStatus(actor,dt){
  if(!actor)return;
  if(actor.status){const st=actor.status;st.remaining-=dt;
-  if(st.kind==='burn'){st.tick-=dt;
+  if(st.kind==='burn'||st.kind==='poison'){st.tick-=dt;
    if(st.tick<=0){st.tick+=ARENA_BALANCE.burnTickSeconds;const damage=Math.max(1,Math.floor(actor.maxHp/16));actor.hp=Math.max(0,actor.hp-damage);
-    emitParticle({x:actor.x,y:actor.y-16,life:.35,size:9,color:'#ff8840',shape:'flame'});
-    showDamage(actor.x,actor.y-6,damage,'fire');
+    emitParticle({x:actor.x,y:actor.y-16,life:.35,size:9,color:st.kind==='poison'?'#cc87f1':'#ff8840',shape:st.kind==='poison'?'dot':'flame'});
+    showDamage(actor.x,actor.y-6,damage,st.kind==='poison'?'grass':'fire');
    }
   }
   if(st.remaining<=0)actor.status=null;
  }
+ actor.staggerT=Math.max(0,(actor.staggerT||0)-dt);
+ if(actor.seeded&&actor.seeded.remaining>0){actor.seeded.remaining-=dt;actor.seeded.tick-=dt;if(actor.seeded.tick<=0){actor.seeded.tick+=1.5;const drain=Math.max(1,Math.floor(actor.maxHp/16));actor.hp=Math.max(0,actor.hp-drain);const caster=actor.seeded.owner==='player'?player:enemies[0];if(caster)caster.hp=Math.min(caster.maxHp,caster.hp+drain);showDamage(actor.x,actor.y,drain,'grass');for(let i=0;i<5;i++)emitParticle({x:actor.x+rand(-9,9),y:actor.y-20,life:.4,size:5,color:'#b4ed80',shape:'leaf'});}if(actor.seeded.remaining<=0)actor.seeded=null;}
+ if((actor.defTimer||0)>0){actor.defTimer-=dt;if(actor.defTimer<=0){actor.defStage=0;actor.defTimer=0}}
  if((actor.spdefTimer||0)>0){actor.spdefTimer-=dt;if(actor.spdefTimer<=0){actor.spdefStage=0;actor.spdefTimer=0}}
 }
-function statusSpeed(actor){return actor.status?.kind==='paralysis'?ARENA_BALANCE.paralysisSlow:1}
-function drawStatusPixels(actor){if(!actor.status&&!actor.spdefStage)return;const tick=Math.floor(time*8),x=actor.x,y=actor.y-40;
+function statusSpeed(actor){return actor.status?.kind==='freeze'||actor.staggerT>0?0:actor.status?.kind==='paralysis'?ARENA_BALANCE.paralysisSlow:1}
+function drawStatusPixels(actor){if(!actor.status&&!actor.spdefStage&&!actor.defStage&&!actor.seeded)return;const tick=Math.floor(time*8),x=actor.x,y=actor.y-40;
  if(actor.status?.kind==='burn'){pxRect(x-12,y+((tick%3)*2),6,8,'#ff702f',.9);pxRect(x+7,y-7+((tick%2)*2),4,7,'#ffde75',.9)}
  else if(actor.status?.kind==='paralysis'){pxRect(x-13,y+(tick%3)*3,6,6,'#fff38b',1);pxRect(x+10,y-6,5,9,'#ffe03c',.9)}
- if(actor.spdefStage){pxRect(x-2,y-15,5,5,'#a6f18d',.9)}
+ if(actor.spdefStage){pxRect(x-2,y-15,5,5,'#a6f18d',.9)}if(actor.defStage){pxRect(x+6,y-16,6,6,'#a7a7ee',.9)}if(actor.seeded){pxRect(x-5,y-24,8,6,'#b8ed75',1)}if(actor.status?.kind==='poison'){pxRect(x-14,y-11,6,6,'#d08de9',1)}if(actor.status?.kind==='freeze'){pxRect(x-12,y-13,7,7,'#99eaff',1)}
 }
 
 
@@ -262,7 +345,7 @@ function measureSpriteFeet(sheet){
 function footOffset(sheet,d,f){return sheet?.feet?.[d]?.[f]||sheet?.h*.79||32}
 async function preload(id){const pack=sprites[id]={anims:{},loaded:false};let metadata={};try{const xml=await loadXml(BASE+id+'/AnimData.xml');for(const a of ACTIONS)metadata[a]=getAnim(xml,a)}catch(err){}await Promise.all(ACTIONS.map(async a=>{try{let image=await loadImage(BASE+id+'/'+a+'-Anim.png');let m=metadata[a];if(!m?.w||!m?.h){const f=FALLBACK[a];m={w:({26:48,6:72,9:64,3:72}[Number(id)]||image.height/8||f[0]),h:image.height/8||f[1],dur:Array.from({length:Math.max(1,Math.round(image.width/(image.height/8||f[0])))},()=>8)}}if(image.width<m.w||image.height<m.h)throw Error('bad dimensions');const anim={image,w:m.w,h:m.h,dur:m.dur?.length?m.dur:[8],frames:Math.max(1,Math.floor(image.width/m.w)),dirs:Math.max(1,Math.floor(image.height/m.h))};anim.feet=measureSpriteFeet(anim);pack.anims[a]=anim;}catch(err){}}));pack.loaded=!!pack.anims.Walk||!!pack.anims.Idle;spriteLoadCount++;$('assetStatus').textContent=`스프라이트 확인 ${spriteLoadCount}/${unique.length} · 현재 ${unique.filter(key=>sprites[key]?.loaded).length}종 성공 · 미연결 시 대체 이미지 사용`; if(roster.some(p=>p.id===id))refreshChoicePreviews();}
 $('fxMode').onclick=()=>{fxQuality=fxQuality==='high'?'low':'high';$('fxMode').textContent=fxQuality==='high'?'✦ 이펙트: 고화질':'⚙ 이펙트: 절전';};
-let chosen=0;const choices=$('choices');for(let i=0;i<roster.length;i++){let o=roster[i],b=document.createElement('button');b.className='choice'+(!i?' on':'');b.innerHTML=`<canvas width="72" height="72" data-preview="${i}"></canvas><b>${o.name}</b><small>${o.icon} ${o.basic}</small>`;b.onclick=()=>{chosen=i;document.querySelectorAll('.choice').forEach((c,k)=>c.classList.toggle('on',k===i));refreshStatPanel();refreshMoveDex();};choices.appendChild(b)}
+let chosen=0;const choices=$('choices');for(let i=0;i<roster.length;i++){let o=roster[i],b=document.createElement('button');b.className='choice'+(!i?' on':'');b.innerHTML=`<canvas width="72" height="72" data-preview="${i}"></canvas><b>${o.name}</b><small>${o.icon} ${o.basic}</small>`;b.onclick=()=>{chosen=i;document.querySelectorAll('.choice').forEach((c,k)=>c.classList.toggle('on',k===i));refreshStatPanel();refreshLoadout();};choices.appendChild(b)}
 const ivGrid=$('ivGrid');
 $('natureSelect').innerHTML=NATURE_LIST.map(k=>`<option value="${k}">${NATURES[k].name}</option>`).join('');
 $('natureSelect').addEventListener('change',e=>{selectedNature=e.target.value;refreshStatPanel()});
@@ -282,7 +365,7 @@ function refreshStatPanel(){
   c.append(label,base,input,output);ivGrid.append(c);
  }
 }
-refreshStatPanel();refreshMoveDex();
+refreshStatPanel();refreshLoadout();
 
 function refreshChoicePreviews(){document.querySelectorAll('[data-preview]').forEach(c=>{
  let i=+c.dataset.preview,p=roster[i],g=c.getContext('2d');g.clearRect(0,0,72,72);g.imageSmoothingEnabled=false;
@@ -420,11 +503,11 @@ function updateCinematic(dt){
 
 function reset(){
  const p=roster[chosen],level=BATTLE_LEVEL,iv={...ivSets[chosen]},stats=computeStats(chosen,iv,level,selectedNature);
- player={x:map.w/2,y:map.h/2,kind:chosen,type:p.type,types:p.types,level,iv,stats,hp:arenaHP(stats.hp),maxHp:arenaHP(stats.hp),speed:speedFromStat(stats.spe),r:17,aim:0,face:Math.PI/2,animT:0,action:'Idle',actLeft:0,inv:0,cd:[0,0,0],dmgBonus:0,fireBonus:0,xp:0,need:24,dashTime:0,dashX:0,dashY:0,moveT:0,channelAim:{x:0,y:-1},fuel:100,maxFuel:100,status:null,spdefStage:0,spdefTimer:0};
+ player={x:map.w/2,y:map.h/2,kind:chosen,type:p.type,types:p.types,level,iv,stats,hp:arenaHP(stats.hp),maxHp:arenaHP(stats.hp),speed:speedFromStat(stats.spe),r:17,aim:0,face:Math.PI/2,animT:0,action:'Idle',actLeft:0,inv:0,cd:[0,0,0,0,0],dmgBonus:0,fireBonus:0,xp:0,need:24,dashTime:0,dashX:0,dashY:0,moveT:0,channelAim:{x:0,y:-1},fuel:100,maxFuel:100,status:null,spdefStage:0,spdefTimer:0,defStage:0,defTimer:0,staggerT:0,seeded:null};
  enemies=[];projectiles=[];specialEffects=[];particles=[];gems=[];areas=[];decals=[];damageTexts=[];shockwaves=[];hitstop=0;flashLevel=0;comboCount=0;comboClock=0;cameraKick={x:0,y:0};kills=0;wave=1;time=0;spawnTimer=0;shake=0;idCounter=0;lastAim={x:0,y:-1};mouseAim=null;skillPointers.clear();joyPointer=null;joyVec.x=joyVec.y=0;
  $('nub').style.transform='';document.querySelectorAll('.skill.selected').forEach(e=>e.classList.remove('selected'));
  gameState='playing';$('menu').classList.add('hidden');$('comboBadge').classList.remove('show');$('playerName').textContent=p.icon+' '+p.name+' Lv.'+BATTLE_LEVEL;
- $('basicSkill').textContent=p.icon;$('basicLabel').textContent=p.basic;$('bigLabel').textContent=p.special;
+ $('basicSkill').textContent=p.icon;$('basicLabel').textContent=p.basic;$('bigLabel').textContent=p.special;updateExtraButtons();
  $('bigSkill').textContent=p.type==='grass'?'◉':p.type==='water'?'≋':p.type==='fire'?'♨':'ϟ';$('fuelHud').hidden=p.type!=='fire';$('fuelButton').hidden=p.type!=='fire';
  $('bigSkill').parentElement.style.setProperty('--c',p.color);
  document.querySelector('[data-n="0"]').style.setProperty('--c',p.color);
@@ -528,7 +611,7 @@ function spawnEnemy(){
  const side=Math.random()<.5?-1:1;
  const x=clamp(player.x+side*Math.min(120,W*.24),60,map.w-60);
  const y=clamp(player.y-Math.min(205,Math.max(120,H*.23)),60,map.h-60);
- enemies.push({uid:++idCounter,id:f.id,kind:idx,type:f.type,types:f.types,level:f.level,iv:f.iv,stats:f.stats,x,y,hp:f.maxHp,maxHp:f.maxHp,speed:f.speed,r:17,atk:1,flash:0,face:Math.PI/2,actionT:rand(0,1),hurt:0,shoot:rand(.9,1.8),tell:0,attackVec:{x:0,y:1},specialCd:rand(1.8,3.2),channeling:false,action:'Idle',fuel:100,maxFuel:100,actLeft:0,status:null,spdefStage:0,spdefTimer:0});
+ enemies.push({uid:++idCounter,id:f.id,kind:idx,type:f.type,types:f.types,level:f.level,iv:f.iv,stats:f.stats,x,y,hp:f.maxHp,maxHp:f.maxHp,speed:f.speed,r:17,atk:1,flash:0,face:Math.PI/2,actionT:rand(0,1),hurt:0,shoot:rand(.9,1.8),tell:0,attackVec:{x:0,y:1},specialCd:rand(1.8,3.2),channeling:false,action:'Idle',fuel:100,maxFuel:100,actLeft:0,status:null,spdefStage:0,spdefTimer:0,defStage:0,defTimer:0,staggerT:0,seeded:null,extraCd:rand(2,3.2),extraLoadout:(()=>{const a=Math.floor(Math.random()*4);return [a,(a+1+Math.floor(Math.random()*3))%4]})()});
 }
 function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let best=null,dis=Infinity;for(let e of enemies){let d=len(e.x-player.x,e.y-player.y);if(d<dis){dis=d;best=e}}return best?norm(best.x-player.x,best.y-player.y):{...lastAim}}
 function playAction(o,action,d=.23){o.action=action;o.animT=0;o.actLeft=d;if(o!==player)o.actionT=0}
@@ -576,6 +659,91 @@ function makeBoltPath(x,y,vx,vy,range,seed=0){
  points.push({x:x+vx*range,y:y+vy*range});
  return points;
 }
+
+function performExtraDamage(actor,target,move,x,y,impact=1){
+ if(!target||target.hp<=0)return false;
+ if(!moveAccuracy(move)){emitParticle({x,y,life:.25,size:7,color:'#e9f5ff',shape:'dot'});return false}
+ const pkt=calculateDamage(actor,target,move),value=arenaDamage(pkt.damage);
+ if(actor===player)hitOpponent(target,value,x,y,move.type,impact,pkt);
+ else {hurt(value);elementalBurst(x,y,move.type,impact);}
+ applySecondary(target,move);
+ if(move.id==='voltSwitch'){
+  const v=norm(actor.x-target.x,actor.y-target.y);actor.x+=v.x*110;actor.y+=v.y*110;clampToArena(actor,actor===player?ARENA.r-26:ARENA.r-22);
+  for(let i=0;i<12;i++)emitParticle({x:actor.x+rand(-20,20),y:actor.y+rand(-16,16),life:.28,size:5,color:'#fbe770',shape:'spark'});
+ }
+ return true;
+}
+function castExtra(move,v,owner='player'){
+ const actor=owner==='player'?player:enemies[0],target=owner==='player'?enemies[0]:player;
+ if(!actor||!target)return false;
+ const profile=roster[actor.kind],x=actor.x+v.x*20,y=actor.y+v.y*20-10;
+ const fxMove={type:'extra',move,owner,age:0,life:move.mode==='charge'?1.35:move.mode==='beam'?.4:move.mode==='dash'?.42:move.mode==='burst'?.55:.37,x,y,origin:{x:actor.x,y:actor.y},vx:v.x,vy:v.y,hit:false,pulse:0};
+ if(move.mode==='projectile'||move.mode==='seed'){
+  projectiles.push({x,y,vx:v.x*(move.speed||535),vy:v.y*(move.speed||535),r:move.id==='hydroPump'?16:move.mode==='seed'?8:12,life:move.range/(move.speed||535)+.12,dmg:0,move,team:owner,kind:1,color:EXTRA_PALETTE[move.type],element:move.type,pierce:0,hit:new Set(),extra:true,pulse:0});
+  emitParticle({x,y,life:.28,size:12,color:EXTRA_PALETTE[move.type],shape:'ring',grow:28});
+ }else if(move.mode==='melee'){
+  const reached=rangedHit(target,x,y,v.x,v.y,move.range,move.id==='vineWhip'?36:55);
+  if(reached)performExtraDamage(actor,target,move,target.x,target.y-11,1.0);
+  fxMove.life=.32;specialEffects.push(fxMove);
+ }else if(move.mode==='burst'){
+  if(len(target.x-actor.x,target.y-actor.y)<move.range+target.r)performExtraDamage(actor,target,move,target.x,target.y-11,1.25);
+  specialEffects.push(fxMove);createRing(actor.x,actor.y,EXTRA_PALETTE[move.type],move.range*.55,.48);
+ }else if(move.mode==='dash'){
+  actor.face=Math.atan2(v.y,v.x);fxMove.life=.34;fxMove.travel=0;specialEffects.push(fxMove);
+ }else if(move.mode==='beam'||move.mode==='charge'){
+  fxMove.life=move.mode==='charge'?1.26:.38;fxMove.fired=false;fxMove.fireAt=move.mode==='charge'?.75:.055;
+  specialEffects.push(fxMove);
+ }
+ playAction(actor,move.mode==='dash'?'Walk':'Attack',.30);
+ if(owner==='player'){announce(move.name+'!');toastTime=.75;}
+ sfx(move.mode==='charge'?230:520,move.mode==='charge'?900:195,.16);
+ return true;
+}
+function resolveExtraProjectile(s,target){
+ if(s.move.mode==='seed'){
+  if(!moveAccuracy(s.move)||target.types.includes('grass'))return false;
+  target.seeded={owner:s.team,remaining:11,tick:1.5};for(let i=0;i<12;i++)emitParticle({x:target.x+rand(-18,18),y:target.y+rand(-16,12),life:.4,size:6,color:'#b7e685',shape:'leaf'});
+  if(s.team==='player')announce('상대에게 씨앗을 심었다!');else announce('씨뿌리기에 당했다!');return true;
+ }
+ return performExtraDamage(s.team==='player'?player:enemies[0],target,s.move,s.x,s.y,1.0);
+}
+function updateExtraSpecial(m,dt){
+ const actor=m.owner==='player'?player:enemies[0],target=m.owner==='player'?enemies[0]:player;
+ if(!actor||!target)return;
+ const move=m.move,color=EXTRA_PALETTE[move.type];
+ if(move.mode==='dash'){
+  const step=move.range/.34*dt;const prevX=actor.x,prevY=actor.y;
+  actor.x+=m.vx*step;actor.y+=m.vy*step;clampToArena(actor,actor===player?ARENA.r-26:ARENA.r-22);
+  if(actor===player)player.inv=Math.max(player.inv,.045);
+  for(let i=0;i<4;i++)emitParticle({x:prevX+rand(-8,8),y:prevY+rand(-12,12),vx:-m.vx*rand(25,75),vy:-m.vy*rand(25,75),life:.20,size:rand(4,8),shape:'spark',color});
+  if(!m.hit&&len(actor.x-target.x,actor.y-target.y)<actor.r+target.r+22){m.hit=true;performExtraDamage(actor,target,move,target.x,target.y-11,1.1);}
+ }else if(move.mode==='beam'||move.mode==='charge'){
+  if(!m.fired&&m.age>=m.fireAt){m.fired=true;
+   const px=actor.x+m.vx*18,py=actor.y+m.vy*18-11;
+   if(rangedHit(target,px,py,m.vx,m.vy,move.range,move.mode==='charge'?37:25))performExtraDamage(actor,target,move,target.x,target.y-11,1.6);
+   for(let i=0;i<24;i++){const t=rand(0,move.range);emitParticle({x:px+m.vx*t+rand(-9,9),y:py+m.vy*t+rand(-9,9),life:.22,size:rand(4,9),color,shape:'spark'});}
+   createRing(px+m.vx*move.range,py+m.vy*move.range,color,40,.35);
+  }
+ }
+}
+function drawExtraSpecial(m,layer){
+ const actor=m.owner==='player'?player:enemies[0];if(!actor)return;
+ const move=m.move,color=EXTRA_PALETTE[move.type],k=Math.min(1,m.age/m.life);
+ if(layer==='under'&&(move.mode==='burst'||move.mode==='dash')){
+  if(move.mode==='burst'){pxCircle(actor.x,actor.y-9,Math.max(6,move.range*k),color,.17,12);pxRing(actor.x,actor.y-9,Math.max(8,move.range*k),9,color,.83,7);}
+  if(move.mode==='dash')for(let i=0;i<8;i++){const d=i*13;pxRect(actor.x-m.vx*d-4,actor.y-m.vy*d-10,8,8,color,.43*(1-i/9));}
+ }
+ if(layer!=='over')return;
+ if(move.mode==='melee'){
+  const px=actor.x+m.vx*24,py=actor.y+m.vy*24-10,nx=-m.vy,ny=m.vx;
+  for(let i=-5;i<=5;i++){const d=move.range*(.35+(.65-Math.abs(i)/11));pxLine(px+m.vx*d+nx*i*8,py+m.vy*d+ny*i*8,px+m.vx*(d+19)+nx*i*8,py+m.vy*(d+19)+ny*i*8,7,color,(1-k)*.9);}
+ }else if(move.mode==='beam'||move.mode==='charge'){
+  if(m.fired){const px=actor.x+m.vx*17,py=actor.y+m.vy*17-12,w=move.mode==='charge'?25:15;
+   for(let b=-w;b<=w;b+=8){const nx=-m.vy,ny=m.vx;pxLine(px+nx*b,py+ny*b,px+m.vx*move.range+nx*b,py+m.vy*move.range+ny*b,7,b===0?'#ffffff':color,.78);}
+  }else{pxRing(actor.x+m.vx*20,actor.y+m.vy*20-14,12+(Math.sin(m.age*22)+1)*7,5,color,.9,5);pxDiamond(actor.x+m.vx*20,actor.y+m.vy*20-14,8+m.age*12,color,.65,5);}
+ }
+}
+
 function castSpecial(v,owner='player',opts={}){
  const actor=owner==='player'?player:enemies[0];
  if(!actor)return null;
@@ -630,6 +798,7 @@ function updateSpecials(dt){
   const actor=m.owner==='player'?player:enemies[0];
   const target=m.owner==='player'?enemies[0]:player;
   if(!actor || !target){continue;}
+  if(m.type==='extra'){updateExtraSpecial(m,dt);if(m.age>=m.life)continue;}
   if(m.type==='flamethrower' && m.controlled){
    const aim=m.owner==='player'?(player.channelAim||lastAim):norm(player.x-actor.x,player.y-actor.y);
    m.vx=aim.x;m.vy=aim.y;actor.face=Math.atan2(m.vy,m.vx);
@@ -698,11 +867,11 @@ function updateSpecials(dt){
  if(enemies[0])enemies[0].riding=specialEffects.some(m=>m.owner==='enemy'&&m.type==='surf'&&m.age<m.life);
 }
 function activate(n,vec,hold=false){
- if(gameState!=='playing'||(n!==1||roster[chosen].type!=='fire')&&player.cd[n]>0)return;
+ if(gameState!=='playing'||((n!==1||roster[chosen].type!=='fire')&&player.cd[n]>0))return;
  let v=vec||targetAim();v=norm(v.x,v.y); if(!len(v.x,v.y))v={x:1,y:0}; lastAim=v;player.channelAim=v;player.aim=Math.atan2(v.y,v.x);player.face=player.aim;
  if(n===0){player.cd[0]=ARENA_BALANCE.basicInterval;if(!canAct(player)){announce('몸이 마비되어 움직일 수 없다!');return;}shoot(0,player.aim);sfx(450,100,.04)}
  if(n===1){
-  if(!canAct(player)){announce('몸이 마비되어 기술 실패!');return;}
+  if(!canAct(player)){announce('상태이상으로 기술 실패!');return;}
   const type=roster[chosen].type;
   if(type==='fire'){
    if(player.fuel<3||specialEffects.some(m=>m.type==='flamethrower'&&m.owner==='player'&&m.age<m.life))return;
@@ -711,6 +880,7 @@ function activate(n,vec,hold=false){
    player.cd[1]=MOVE_SPECS[type].cooldown;castSpecial(v,'player');
   }
  }
+ if(n===3||n===4){const m=equippedMove(player,n);if(!m)return;if(!canAct(player)){player.cd[n]=.4;return;}player.cd[n]=m.cooldown;castExtra(m,v,'player');}
  if(n===2){if(!canAct(player)){player.cd[2]=.5;return;}player.cd[2]=3;player.dashTime=.2;player.dashX=v.x;player.dashY=v.y;player.inv=.36;playAction(player,'Walk',.2);fx(player.x,player.y,'#a8e9ff',20,200);sfx(700,250,.09)}
 }
 let audioCtx;function sfx(a,b,d){try{audioCtx ||=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();let o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type='triangle';o.frequency.setValueAtTime(a,t);o.frequency.exponentialRampToValueAtTime(b,t+d);g.gain.setValueAtTime(.033,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+d)}catch(err){}}
@@ -725,7 +895,7 @@ function openResult(won){
 }
 function gameOver(){stopPlayerChannel();player.hp=0;syncHUD();openResult(false)}
 function victory(){kills=1;projectiles=[];fx(enemies[0].x,enemies[0].y,'#ffe58a',30,195);cinematicImpact(enemies[0].x,enemies[0].y-10,roster[chosen].type,1.8,0);syncHUD();openResult(true)}
-function statusBadge(actor){let s='';if(actor.status?.kind==='burn')s+='<span class="burn">화상</span>';if(actor.status?.kind==='paralysis')s+='<span class="paralysis">마비</span>';if((actor.spdefStage||0)<0)s+='<span class="spdef">특방 '+actor.spdefStage+'</span>';return s}
+function statusBadge(actor){let s='';if(actor.status?.kind==='burn')s+='<span class="burn">화상</span>';if(actor.status?.kind==='paralysis')s+='<span class="paralysis">마비</span>';if((actor.spdefStage||0)<0)s+='<span class="spdef">특방 '+actor.spdefStage+'</span>';if((actor.defStage||0)<0)s+='<span class="spdef">방어 '+actor.defStage+'</span>';if(actor.seeded)s+='<span class="spdef">씨뿌리기</span>';if(actor.status?.kind==='poison')s+='<span class="spdef">독</span>';if(actor.status?.kind==='freeze')s+='<span class="spdef">얼음</span>';return s}
 function syncHUD(){
  $('hpBar').style.width=(clamp(player.hp/player.maxHp,0,1)*100)+'%';
  $('playerCondition').innerHTML=statusBadge(player);
@@ -767,16 +937,18 @@ function advance(dt){
  // A match always has one and only one enemy. No waves or respawns.
  for(const e of enemies){
   updateStatus(e,dt);if(e.hp<=0){victory();return;}
-  e.actionT+=dt;e.actLeft=Math.max(0,(e.actLeft||0)-dt);e.atk-=dt;e.shoot-=dt;e.specialCd=Math.max(0,e.specialCd-dt);e.flash=Math.max(0,e.flash-dt);e.hurt=Math.max(0,e.hurt-dt);
+  e.actionT+=dt;e.actLeft=Math.max(0,(e.actLeft||0)-dt);e.atk-=dt;e.shoot-=dt;e.extraCd=Math.max(0,(e.extraCd||0)-dt);e.specialCd=Math.max(0,e.specialCd-dt);e.flash=Math.max(0,e.flash-dt);e.hurt=Math.max(0,e.hurt-dt);
   const data=roster[e.kind];if(data.type==='fire')updateFuel(e,'enemy',dt);
-  if(e.tell>0){e.tell-=dt;if(e.tell<=0){e.x+=e.attackVec.x*27;e.y+=e.attackVec.y*27;clampToArena(e,ARENA.r-22);if(len(player.x-e.x,player.y-e.y)<74)hurt(arenaDamage(damagePacket(e,player,'basic').damage));applySecondary(player,moveOf(e,'basic'));createRing(e.x,e.y,'#ffa49b',30,.21);}}
+  if(e.tell>0){e.tell-=dt;if(e.tell<=0){if(e.staggerT>0||e.status?.kind==='freeze'){e.tell=0;continue;}e.x+=e.attackVec.x*27;e.y+=e.attackVec.y*27;clampToArena(e,ARENA.r-22);if(len(player.x-e.x,player.y-e.y)<74)hurt(arenaDamage(damagePacket(e,player,'basic').damage));applySecondary(player,moveOf(e,'basic'));createRing(e.x,e.y,'#ffa49b',30,.21);}}
   let dx=player.x-e.x,dy=player.y-e.y,d=len(dx,dy)||1;
   if(e.tell<=0&&d>130){e.x+=dx/d*e.speed*statusSpeed(e)*dt;e.y+=dy/d*e.speed*statusSpeed(e)*dt;if(Math.random()<dt*7)footDust(e.x,e.y,.8)}
   else if(e.tell<=0&&d<82){e.x-=dx/d*e.speed*statusSpeed(e)*.22*dt;e.y-=dy/d*e.speed*statusSpeed(e)*.22*dt}
   e.face=Math.atan2(dy,dx);
   if(e.actLeft<=0)e.action=d>130?'Walk':'Idle';
-  if(d<e.r+player.r+24&&e.atk<=0&&e.tell<=0){e.tell=.35;e.attackVec=norm(dx,dy);e.atk=1.42;playImpactSound('windup');}
+  if(d<e.r+player.r+24&&e.atk<=0&&e.tell<=0&&e.staggerT<=0){e.tell=.35;e.attackVec=norm(dx,dy);e.atk=1.42;playImpactSound('windup');}
   if(gameState!=='playing')return;
+  let didExtra=false;if(e.extraCd<=0&&d<440&&!e.riding){const possible=e.extraLoadout.map(i=>EXTRA_MOVES[data.type][i]).filter(m=>m.mode==='dash'||m.mode==='projectile'||m.mode==='seed'||d<m.range+55);const extra=possible[Math.floor(Math.random()*possible.length)];if(extra&&canAct(e)){didExtra=castExtra(extra,norm(dx,dy),'enemy');e.extraCd=extra.cooldown*1.6+rand(.5,1.2);}else e.extraCd=1.0;}
+  if(didExtra||e.staggerT>0||e.status?.kind==='freeze'){clampToArena(e,ARENA.r-22);continue;}
   if(data.type==='fire' && d<295 && e.fuel>=55 && !specialEffects.some(m=>m.owner==='enemy'&&m.type==='flamethrower'&&m.age<m.life)){
     if(canAct(e))castSpecial(norm(dx,dy),'enemy',{controlled:true});
   }else if(data.type!=='fire' && d<460 && e.specialCd<=0){
@@ -793,11 +965,11 @@ function advance(dt){
     if(s.hit?.has(e.uid))continue;
     if(len(s.x-e.x,s.y-(e.y-11))<s.r+e.r){
      s.hit.add(e.uid);
-     if(moveAccuracy(s.move)){hitOpponent(e,s.dmg,s.x,s.y,s.element||'neutral',.6,s.info);applySecondary(e,s.move);fx(s.x,s.y,s.color,4,80);}else{emitParticle({x:s.x,y:s.y,life:.24,size:6,color:'#eef4fb',shape:'dot'});}
+     if(s.extra){resolveExtraProjectile(s,e);fx(s.x,s.y,s.color,5,85);}else if(moveAccuracy(s.move)){hitOpponent(e,s.dmg,s.x,s.y,s.element||'neutral',.6,s.info);applySecondary(e,s.move);fx(s.x,s.y,s.color,4,80);}else{emitParticle({x:s.x,y:s.y,life:.24,size:6,color:'#eef4fb',shape:'dot'});}
      if(s.pierce>0)s.pierce--;else{s.life=0;break}
     }
    }
-  }else if(player.inv<=0&&len(s.x-player.x,s.y-(player.y-11))<s.r+player.r){if(moveAccuracy(s.move)){elementalBurst(s.x,s.y,s.element||'neutral',1);hurt(s.dmg);applySecondary(player,s.move);}else{emitParticle({x:s.x,y:s.y,life:.24,size:6,color:'#eef4fb',shape:'dot'});}s.life=0;}
+  }else if(player.inv<=0&&len(s.x-player.x,s.y-(player.y-11))<s.r+player.r){if(s.extra){resolveExtraProjectile(s,player);elementalBurst(s.x,s.y,s.element||'neutral',.8);}else if(moveAccuracy(s.move)){elementalBurst(s.x,s.y,s.element||'neutral',1);hurt(s.dmg);applySecondary(player,s.move);}else{emitParticle({x:s.x,y:s.y,life:.24,size:6,color:'#eef4fb',shape:'dot'});}s.life=0;}
   if(gameState!=='playing')return;
   if(s.x<0||s.y<0||s.x>map.w||s.y>map.h)s.life=0;
  }
@@ -824,8 +996,25 @@ function pxCircle(cx,cy,r,color,a=1,size=4){for(let y=-r;y<=r;y+=size){for(let x
 function pxRing(cx,cy,r,thick,color,a=1,size=4){const inner=Math.max(0,r-thick),r2=r*r,i2=inner*inner;for(let y=-r;y<=r;y+=size){for(let x=-r;x<=r;x+=size){const d=x*x+y*y;if(d<=r2&&d>=i2)pxRect(cx+x,cy+y,size,size,color,a)}}}
 function pxDiamond(cx,cy,r,color,a=1,size=4){for(let y=-r;y<=r;y+=size){const w=r-Math.abs(y);for(let x=-w;x<=w;x+=size)pxRect(cx+x,cy+y,size,size,color,a)}}
 function drawProjectileSprite(s){
- const pal=ELEMENT_FX[s.element]||ELEMENT_FX.neutral,ang=Math.atan2(s.vy,s.vx),u={x:Math.cos(ang),y:Math.sin(ang)},n={x:-u.y,y:u.x};
+ const pal=ELEMENT_FX[s.element]||{main:EXTRA_PALETTE[s.element]||'#d6ddf3',accent:'#ffffff'},ang=Math.atan2(s.vy,s.vx),u={x:Math.cos(ang),y:Math.sin(ang)},n={x:-u.y,y:u.x};
  ctx.save();ctx.translate(s.x,s.y);ctx.globalAlpha=s.team==='enemy'?.92:.98;
+ if(s.extra){
+  const id=s.move.id;
+  if(id==='airSlash'){
+   ctx.rotate(ang);for(let i=-1;i<=1;i++){pxLine(-12,i*7-5,12,i*7-5,5,'#b8eeff',.95);pxLine(-4,i*7-8,15,i*7-8,3,'#f8ffff',.85)}
+  }else if(id==='hydroPump'){
+   pxCircle(0,0,17,'#257fb5',.94,6);pxCircle(0,0,12,'#71deff',.94,4);pxRect(-3,-3,7,6,'#ffffff',.9);
+   for(let i=0;i<3;i++)pxRect(-17-i*4,((i%2)*6)-6,5,5,'#b2f6ff',.8);
+  }else if(id==='sludgeBomb'){
+   pxCircle(0,0,12,'#894abe',.95,5);pxRect(-6,-7,7,7,'#e0a8ff',.9);pxRect(3,3,5,5,'#b2f563',1);
+   pxRect(-12,7,4,4,'#c38bef',.75);
+  }else if(id==='voltSwitch'){
+   pxLine(-14,-6,-4,5,8,'#f8bf38',1);pxLine(-4,5,3,-7,7,'#ffe773',1);pxLine(3,-7,13,5,7,'#ffffff',.94);
+  }else if(id==='leechSeed'){
+   pxDiamond(0,0,9,'#c0ec76',1,4);pxRect(-3,-3,6,6,'#597a30');pxRect(4,-8,4,5,'#dff5b8');
+  }else {pxDiamond(0,0,12,EXTRA_PALETTE[s.element],.95,5);pxDiamond(0,0,5,'#ffffff',.88,3)}
+  ctx.restore();return;
+ }
  if(s.element==='electric'){
   const pts=[[-10,0],[-4,-6],[1,0],[7,-5],[13,0]];
   for(let i=0;i<pts.length-1;i++)pxLine(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],5,pal.main,.95,.7);
@@ -902,6 +1091,7 @@ function drawSurf(m){
 }
 function drawSpecials(layer){
  for(const m of specialEffects){
+  if(m.type==='extra'){drawExtraSpecial(m,layer);continue;}
   if(layer==='under' && m.type==='surf')drawSurf(m);
   if(layer!=='over')continue;
   if(m.type==='thunderbolt'||m.type==='boltEcho')drawThunderbolt(m);
@@ -961,7 +1151,7 @@ document.querySelectorAll('.skill').forEach(b=>{
  b.addEventListener('pointercancel',e=>release(e,true));
  b.addEventListener('lostpointercapture',e=>release(e,true));
 });
-addEventListener('keydown',e=>{let k=e.key.toLowerCase();keys.add(k);if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(e.repeat)return;if(k==='1')activate(0);if(k==='2'){if(roster[chosen].type==='fire')activate(1,targetAim(),true);else activate(1);}if(k==='3')activate(2);if(k===' ')activate(0);if(k==='p'||k==='escape')pause()});addEventListener('keyup',e=>{let k=e.key.toLowerCase();keys.delete(k);if(k==='2')stopPlayerChannel()});CV.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')mouseAim={x:e.clientX,y:e.clientY}});CV.addEventListener('pointerdown',e=>{if(gameState==='playing'&&e.pointerType==='mouse'){mouseAim={x:e.clientX,y:e.clientY};if(e.button===2)activate(1,targetAim(),true);else activate(0)}});CV.addEventListener('pointerup',e=>{if(e.button===2)stopPlayerChannel()});CV.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('visibilitychange',()=>{if(document.hidden&&gameState==='playing')pause()});
+addEventListener('keydown',e=>{let k=e.key.toLowerCase();keys.add(k);if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(e.repeat)return;if(k==='1')activate(0);if(k==='2'){if(roster[chosen].type==='fire')activate(1,targetAim(),true);else activate(1);}if(k==='3')activate(3);if(k==='4')activate(4);if(k==='5'||k===' ')activate(2);if(k==='p'||k==='escape')pause()});addEventListener('keyup',e=>{let k=e.key.toLowerCase();keys.delete(k);if(k==='2')stopPlayerChannel()});CV.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')mouseAim={x:e.clientX,y:e.clientY}});CV.addEventListener('pointerdown',e=>{if(gameState==='playing'&&e.pointerType==='mouse'){mouseAim={x:e.clientX,y:e.clientY};if(e.button===2)activate(1,targetAim(),true);else activate(0)}});CV.addEventListener('pointerup',e=>{if(e.button===2)stopPlayerChannel()});CV.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('visibilitychange',()=>{if(document.hidden&&gameState==='playing')pause()});
 // iOS Safari: block rapid-double-tap zoom while retaining pointer-based attack controls.
 let lastTouchEnd=0,lastTouchAt={x:0,y:0};
 document.addEventListener('touchend',e=>{
