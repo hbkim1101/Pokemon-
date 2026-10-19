@@ -197,8 +197,7 @@ function playAction(o,action,d=.23){o.action=action;o.animT=0;o.actLeft=d}
 function shoot(kind,ang){const p=roster[chosen],v={x:Math.cos(ang),y:Math.sin(ang)},damage=(kind===0?p.shot:p.shot*1.9)+player.dmgBonus;let spread=kind===1?(p.type==='water'?1:3):1;for(let i=0;i<spread;i++){let a=ang+(i-(spread-1)/2)*(kind===1?.18:0),s=p.type==='grass'?500:560;projectiles.push({x:player.x+v.x*20,y:player.y+v.y*20,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:kind===1?13:7,life:kind===1?1.1:.85,dmg:damage*(kind===1&&spread>1?.66:1),team:'player',kind,color:p.color,element:p.type,pierce:kind===1?(p.type==='fire'?2:1):0,hit:new Set(),pulse:rand(0,Math.PI*2)})}fx(player.x+v.x*20,player.y+v.y*20,p.color,7,140);playAction(player,kind===0?'Shoot':'Attack',kind===0?.21:.32)}
 // Signature moves use independent state machines and collision rules.
 const MOVE_SPECS={
- electric:{id:'thunderbolt',name:'10만볼트',cooldown:5.2,damage:62,range:460},
- fire:{id:'flamethrower',name:'화염방사',cooldown:5.6,damage:8.6,range:315},
+ electric:{id:'thunderbolt',name:'10만볼트',cooldown:5.2,damage:62,range:460}, fire:{id:'flamethrower',name:'화염방사',cooldown:5.6,damage:8.6,range:315},
  grass:{id:'energyball',name:'에너지볼',cooldown:5.7,damage:68,range:490},
  water:{id:'surf',name:'파도타기',cooldown:6.2,damage:65,range:390}
 };
@@ -397,8 +396,7 @@ function advance(dt){
   if(gameState!=='playing')return;
   if(isRanged&&d<490&&e.shoot<=0){let v=norm(dx,dy);projectiles.push({x:e.x,y:e.y-10,vx:v.x*200,vy:v.y*200,r:8,life:3,dmg:11,team:'enemy',kind:3,color:'#c48aff',element:'ghost',pulse:rand(0,Math.PI*2)});e.shoot=rand(2.2,3.4)}
   e.x=clamp(e.x,22,map.w-22);e.y=clamp(e.y,24,map.h-24);
- }
- updateSpecials(dt);
+ } updateSpecials(dt);
  if(enemies[0]?.hp<=0){victory();return}
  for(const s of projectiles){
   s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;s.pulse=(s.pulse||0)+dt*8;trailFx(s);
