@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v23.
+// Dependency-free regression tests for Pokemon Arena v24.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -10,7 +10,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=23'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=24'), 'Motion Studio not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -68,6 +68,9 @@ const exposed = [
   ' activate:(slot)=>activate(slot),',
   ' hurtPlayer:(amount)=>hurt(amount),',
   ' direction:(angle)=>faceFromAngle(angle),',
+  ' flameTiming:(id)=>flameShootTiming(id),',
+  ' spriteClock:(actor)=>combatSpriteClock(actor,combatAnimation(actor),actor.animT||0),',
+  ' stopFlame:()=>stopPlayerChannel(),',
   ' signature:(type)=>signatureAnimation(type),',
   ' actionOf:(actor)=>combatAnimation(actor),',
   ' state:()=>({gameState,player,enemies,specialEffects,extras:EXTRA_SKILLS_ENABLED}),',
@@ -121,6 +124,32 @@ for(let k=0;k<4;k++){
   api.advance(0.016);
   api.draw();
 }
+// Sustained Flamethrower: one windup, then hold the original PMD HitFrame.
+api.setChosen(1);
+api.reset();
+api.state().enemies[0].shoot=1000;
+api.state().enemies[0].specialCd=1000;
+api.state().enemies[0].atk=1000;
+api.state().enemies[0].extraCd=1000;
+const charizard=api.state().player;
+const timing=api.flameTiming('0006');
+assert(timing.hold>0 && timing.end>timing.hold, 'Invalid Shoot phase timing');
+api.activate(1);
+assert.equal(api.actionOf(charizard),'Shoot','Channel must use Shoot');
+api.state().specialEffects.find(m=>m.type==='flamethrower').age=timing.hold+1.5;
+const heldClock=api.spriteClock(charizard);
+assert(Math.abs(heldClock-timing.hold)<1e-8,'Long flame channel must hold a stable pose');
+api.state().specialEffects.find(m=>m.type==='flamethrower').age=timing.hold+3.5;
+assert.equal(api.spriteClock(charizard),heldClock,'Shoot animation must not loop on hold');
+api.stopFlame();
+api.advance(.016);
+assert(charizard.flameRecovery,'Releasing flame must start recovery frames');
+const releaseClock=api.spriteClock(charizard);
+assert(releaseClock>=heldClock,'Release must move forward from held frame');
+for(let i=0;i<40;i++)api.advance(.035);
+assert.equal(charizard.flameRecovery,null,'Flamethrower recovery must finish');
+assert.notEqual(api.actionOf(charizard),'Shoot','Caster must leave sustained Shoot pose');
+
 const pmdAngles=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
 for(let direction=0;direction<8;direction++)assert.equal(api.direction(pmdAngles[direction]),direction,'PMD row is mapped to the wrong angle');
 assert(!html.includes('let didExtra=false;'), 'AI legacy move block still enabled');
