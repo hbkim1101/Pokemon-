@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v24.
+// Dependency-free regression tests for Pokemon Arena v25.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -10,7 +10,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=24'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=25'), 'Motion Studio not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -69,6 +69,8 @@ const exposed = [
   ' hurtPlayer:(amount)=>hurt(amount),',
   ' direction:(angle)=>faceFromAngle(angle),',
   ' flameTiming:(id)=>flameShootTiming(id),',
+  ' flameClock:(age,info)=>flameChannelClock(age,info),',
+  ' testShootMetadata:()=>{const shoot=sprites[roster[1].id].anims.Shoot;shoot.frames=18;shoot.dur=[4,2,4,2,1,1,1,2,4,2,2,2,2,2,2,2,2,4];shoot.hitFrame=8;shoot.returnFrame=11;return shoot;},',
   ' spriteClock:(actor)=>combatSpriteClock(actor,combatAnimation(actor),actor.animT||0),',
   ' stopFlame:()=>stopPlayerChannel(),',
   ' signature:(type)=>signatureAnimation(type),',
@@ -124,7 +126,7 @@ for(let k=0;k<4;k++){
   api.advance(0.016);
   api.draw();
 }
-// Sustained Flamethrower: one windup, then hold the original PMD HitFrame.
+// Sustained Flamethrower: avoid recoil/Hurt-like HitFrame; hold forward-emission frame.
 api.setChosen(1);
 api.reset();
 api.state().enemies[0].shoot=1000;
@@ -132,8 +134,17 @@ api.state().enemies[0].specialCd=1000;
 api.state().enemies[0].atk=1000;
 api.state().enemies[0].extraCd=1000;
 const charizard=api.state().player;
-const timing=api.flameTiming('0006');
+const sheet=api.testShootMetadata(),timing=api.flameTiming('0006');
 assert(timing.hold>0 && timing.end>timing.hold, 'Invalid Shoot phase timing');
+assert.equal(timing.hitFrame,8,'Original HitFrame metadata lost');
+assert.equal(timing.returnFrame,11,'Original ReturnFrame metadata lost');
+assert(timing.windupFrame<=5,'Windup should not play the recoil-like middle frames');
+assert(timing.holdFrame>=12&&timing.holdFrame!==timing.hitFrame,'Sustained emission must not freeze Hurt-like HitFrame 8');
+const visualFrameAt=(seconds)=>{let clock=(seconds*60)%sheet.dur.reduce((a,b)=>a+b,0);
+ for(let i=0;i<sheet.frames;i++){if(clock<sheet.dur[i])return i;clock-=sheet.dur[i];}return 0};
+assert.equal(visualFrameAt(timing.hold),timing.holdFrame,'Held clock must display intended forward-emission frame');
+assert.equal(visualFrameAt(api.flameClock(timing.windup+.025,timing)),timing.holdFrame,'Post-windup clock must skip Hurt-like recoil section');
+assert(visualFrameAt(api.flameClock(timing.windup-.02,timing))<=timing.windupFrame,'Early windup must stay in preparation frames');
 api.activate(1);
 assert.equal(api.actionOf(charizard),'Shoot','Channel must use Shoot');
 api.state().specialEffects.find(m=>m.type==='flamethrower').age=timing.hold+1.5;
@@ -159,4 +170,4 @@ assert.equal(api.signature('electric'),'Shoot');
 assert.equal(api.signature('fire'),'Shoot');
 assert.equal(api.signature('water'),'Attack');
 assert.equal(api.signature('grass'),'Shoot');
-console.log('PASS: 4 Pokemon, 8 directions, 6 animations (192 cells), ranged Shoot / lunge Attack / Charge, dash & signature rendering');
+console.log('PASS: 4 Pokemon, 192 motion cells, Flamethrower forward-frame hold (recoil skipped), clean release, dash & signature rendering');
