@@ -5,10 +5,11 @@ const css=document.createElement('style');
 css.textContent=`
 /* Motion Studio / four-move lock, v22 */
 body .skill[data-n="3"],body .skill[data-n="4"],body .loadoutSetup{display:none!important}
-body .buttons{grid-template-columns:repeat(3,67px)!important;grid-template-rows:repeat(2,67px)!important;gap:5px!important}
-body .buttons .skill[data-n="1"]{grid-column:2!important;grid-row:1!important}
+body .buttons{grid-template-columns:repeat(2,clamp(46px,13vw,65px))!important;grid-template-rows:repeat(2,clamp(46px,13vw,65px))!important;gap:6px!important;align-items:center!important}
+body .buttons .skill[data-n="1"]{grid-column:1!important;grid-row:1!important}
 body .buttons .skill[data-n="0"]{grid-column:2!important;grid-row:2!important}
-body .buttons .skill[data-n="2"]{grid-column:3!important;grid-row:2!important}
+body .buttons .skill[data-n="2"]{grid-column:1!important;grid-row:2!important}
+@media(max-width:390px){body .buttons{padding:8px 6px!important}body .buttons .skill{max-width:100%;max-height:100%}}
 body.studio-open #hud,body.studio-open #controls,body.studio-open #toast,body.studio-open #tips,body.studio-open #aimHelp,body.studio-open #roundBadge,body.studio-open #comboBadge{display:none!important}
 #openMotionStudio{margin:9px auto 3px;border:1px solid #70dbb9;background:#113747;color:#f0fffa;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer}
 #motionStudio{display:none;position:fixed;inset:0;z-index:190;pointer-events:none;font-family:system-ui,sans-serif;color:#ecfffc}
@@ -42,7 +43,7 @@ studioNode.innerHTML=`
 <button data-action="Idle">대기</button><button data-action="Walk">이동</button><button data-action="Attack">공격</button><button data-action="Shoot">발사</button><button data-action="Hurt">피격</button></div>
 <div class="studioGroup" id="studioDirections"><span class="sLabel">방향</span>
 <button data-dir="4">↖</button><button data-dir="5">↑</button><button data-dir="6">↗</button><button data-dir="3">←</button><button data-dir="7">→</button><button data-dir="2">↙</button><button data-dir="1">↓</button><button data-dir="0">↘</button></div>
-<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button>
+<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button>
 <label class="studioSpeed">재생 속도 <input type="range" id="studioSpeed" min="0.25" max="2" step=".25" value="1"><span id="studioSpeedLabel">1.0×</span></label></div>
 <p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p><p class="studioMeta" id="studioAudit" aria-live="polite">검사하면 캐릭터별 원본 8방향 모션 누락을 표시합니다.</p>
 </div>`;
@@ -52,7 +53,7 @@ launcher.id='openMotionStudio';
 launcher.type='button';
 launcher.textContent='🎞 캐릭터 모션 · 4종 기술 테스트';
 $('start').insertAdjacentElement('afterend',launcher);
-const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:1,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false};
+const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:1,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false};
 const faces=[Math.PI/4,Math.PI/2,3*Math.PI/4,Math.PI,-3*Math.PI/4,-Math.PI/2,-Math.PI/4,0];
 const testActions=['Idle','Walk','Attack','Shoot','Hurt'];
 function meta(){
@@ -64,6 +65,8 @@ function meta(){
  for(const btn of studioNode.querySelectorAll('[data-actor]'))btn.classList.toggle('active',+btn.dataset.actor===state.kind);
  for(const btn of studioNode.querySelectorAll('[data-action]'))btn.classList.toggle('active',btn.dataset.action===state.action);
  for(const btn of studioNode.querySelectorAll('[data-dir]'))btn.classList.toggle('active',+btn.dataset.dir===state.dir);
+ $('studioCompare').classList.toggle('active',state.compare);
+ $('studioCompare').setAttribute('aria-pressed',String(state.compare));
 }
 function audit(){
   let valid=0,total=0;const missing=[];
@@ -86,7 +89,7 @@ function audit(){
 function open(){
  if(state.open)return;
  state.previous=gameState;state.menuVisible=!$('menu').classList.contains('hidden');
- state.open=true;state.last=performance.now();state.auto=false;state.completed=false;
+ state.open=true;state.last=performance.now();state.auto=false;state.completed=false;state.compare=false;
  gameState='studio';stopPlayerChannel();$('menu').classList.add('hidden');document.body.classList.add('studio-open');
  select(chosen,'Idle',1);audit();
 }
@@ -98,7 +101,7 @@ function close(){
  if(state.menuVisible)$('menu').classList.remove('hidden');
 }
 function attack(which){
- state.auto=false;state.completed=false;
+ state.auto=false;state.completed=false;state.compare=false;
  const t=roster[state.kind].type;
  state.action=which==='basic'?'Shoot':'Attack';state.clock=0;
  state.preview={type:which==='basic'?'basic':MOVE_SPECS[t].id,age:0,life:which==='basic'?1.25:t==='fire'?1.45:1.25};
@@ -112,8 +115,9 @@ studioNode.addEventListener('click',(e)=>{
  if(btn.dataset.action!==undefined){state.auto=false;state.completed=false;select(undefined===state.kind?0:state.kind,btn.dataset.action);return;}
  if(btn.dataset.dir!==undefined){state.auto=false;state.completed=false;select(state.kind,state.action,+btn.dataset.dir);return;}
  if(btn.dataset.test)attack(btn.dataset.test);
+ if(btn.id==='studioCompare'){state.compare=!state.compare;state.auto=false;state.preview=null;state.completed=false;meta();}
  if(btn.id==='studioReplay'){state.auto=false;state.completed=false;select();}
- if(btn.id==='studioCycle'){state.auto=true;state.completed=false;state.autoIndex=0;state.autoTime=0;select(0,'Idle',0);}
+ if(btn.id==='studioCycle'){state.auto=true;state.compare=false;state.completed=false;state.autoIndex=0;state.autoTime=0;select(0,'Idle',0);}
  if(btn.id==='studioStop'){state.auto=false;meta();}
  if(btn.id==='studioAuditBtn')audit();
 });
@@ -158,7 +162,24 @@ function render(){
  for(let xx=0;xx<W;xx+=32){ctx.beginPath();ctx.moveTo(xx,horizon);ctx.lineTo(xx,H);ctx.stroke();}
  const scale=W<520?1.75:2.2;
  pxRing(cx,cy+1,49,2,'#b6f9e1',.43,5);pxRing(cx,cy+1,64,2,sp.color,.28,6);
- if(state.action==='Walk'){const ox=Math.sin(state.clock*7)*12;for(let i=0;i<3;i++)pxRect(cx-ox*(i+1)*1.2-5,cy+12+i*5,10,4,'#d8edbe',.2);}
+ if(state.compare){
+   const top=studioNode.querySelector('.studioPanel').getBoundingClientRect().top;
+   const region=Math.max(160,top-62),ch=Math.max(75,Math.min(160,region/2)),cw=W/4;
+   const y0=Math.max(67,top/2-ch+19),dirs=[5,6,7,0,1,2,3,4];
+   const active=sprites[sp.id]?.anims?.[state.action]||sprites[sp.id]?.anims?.Walk||sprites[sp.id]?.anims?.Idle;
+   const scale=Math.max(.37,Math.min(W<520?1:1.32,(cw-14)/(active?.w||80),(ch-20)/(active?.h||80)));
+   for(let i=0;i<8;i++){
+     const xx=(i%4+.5)*cw,yy=y0+Math.floor(i/4)*ch+ch*.72,d=dirs[i],angle=faces[d];
+     ctx.globalAlpha=state.dir===d?1:.93;
+     pxRing(xx,yy+1,Math.max(17,scale*27),2,sp.color,.28,4);
+     spriteDraw(sp.id,xx,yy,angle,state.action,state.clock,scale,state.action==='Hurt'?.35:0,'player');
+     ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillStyle='#eafff7';
+     ctx.fillText(['↘','↓','↙','←','↖','↑','↗','→'][d],xx,yy-Math.max(48,scale*(active?.h||80)+8));
+   }
+   ctx.globalAlpha=1;ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillStyle='#fff7d2';ctx.fillText(sp.name+' · '+state.action+' · 8방향 원본 비교',W/2,Math.max(67,y0-24));
+   ctx.restore();return;
+  }
+  if(state.action==='Walk'){const ox=Math.sin(state.clock*7)*12;for(let i=0;i<3;i++)pxRect(cx-ox*(i+1)*1.2-5,cy+12+i*5,10,4,'#d8edbe',.2);}
  spriteDraw(sp.id,cx,cy,a,state.action,state.clock,scale,state.action==='Hurt'?.9:0,'player');
  if(state.action==='Hurt' && state.clock<.4){const n=Math.max(0,1-state.clock/.4);fxStar(cx+Math.cos(a)*-16,cy-42,12+20*(1-n),'fire',n);pxRing(cx,cy-28,18+35*(1-n),4,'#ffe6d6',n,4);}
  if(state.preview)drawStudioEffects(cx,cy,a);
@@ -168,7 +189,7 @@ function render(){
 }
 const originalDraw=draw;
 draw=function(){if(state.open)render();else originalDraw();};
-window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,auto:state.auto}),preview:attack};
+window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,auto:state.auto,compare:state.compare}),preview:attack,audit};
  
 // Layered hand-pixel treatments applied on top of existing combat rendering.
 // All colors are procedural pixels, rather than footage-copied artwork.
