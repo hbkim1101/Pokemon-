@@ -23,7 +23,7 @@ body.studio-open #motionStudio{display:block}
 #motionStudio button:focus-visible{outline:2px solid #fff}
 #motionStudio .sLabel{min-width:50px;font-size:10px;font-weight:900;color:#a9e9d7;text-align:left}
 #motionStudio .studioExit{pointer-events:auto;border-color:#d4aaaa;background:#4a242b;min-width:64px}
-#motionStudio .studioMeta{font-size:10px;color:#c8ded8;text-align:center;line-height:1.65;margin:4px}
+#motionStudio .studioMeta{font-size:10px;color:#c8ded8;text-align:center;line-height:1.65;margin:4px}#motionStudio #studioAudit{color:#b8efd6;max-width:730px;margin:auto}
 #motionStudio .studioSpeed{display:inline-flex;align-items:center;gap:6px;font-size:11px}
 #motionStudio input[type=range]{max-width:110px;accent-color:#d1f18f}
 @media(max-width:520px){#motionStudio .studioPanel{max-height:60vh;padding:8px 7px max(15px,env(safe-area-inset-bottom))}#motionStudio .studioGroup{gap:3px;margin-bottom:5px}#motionStudio button{padding:7px 6px;font-size:10px}#motionStudio .sLabel{min-width:35px;font-size:9px}}
@@ -42,9 +42,9 @@ studioNode.innerHTML=`
 <button data-action="Idle">대기</button><button data-action="Walk">이동</button><button data-action="Attack">공격</button><button data-action="Shoot">발사</button><button data-action="Hurt">피격</button></div>
 <div class="studioGroup" id="studioDirections"><span class="sLabel">방향</span>
 <button data-dir="4">↖</button><button data-dir="5">↑</button><button data-dir="6">↗</button><button data-dir="3">←</button><button data-dir="7">→</button><button data-dir="2">↙</button><button data-dir="1">↓</button><button data-dir="0">↘</button></div>
-<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button>
+<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button>
 <label class="studioSpeed">재생 속도 <input type="range" id="studioSpeed" min="0.25" max="2" step=".25" value="1"><span id="studioSpeedLabel">1.0×</span></label></div>
-<p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p>
+<p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p><p class="studioMeta" id="studioAudit" aria-live="polite">검사하면 캐릭터별 원본 8방향 모션 누락을 표시합니다.</p>
 </div>`;
 document.body.append(studioNode);
 const launcher=document.createElement('button');
@@ -65,7 +65,22 @@ function meta(){
  for(const btn of studioNode.querySelectorAll('[data-action]'))btn.classList.toggle('active',btn.dataset.action===state.action);
  for(const btn of studioNode.querySelectorAll('[data-dir]'))btn.classList.toggle('active',+btn.dataset.dir===state.dir);
 }
-function select(kind=state.kind,action=state.action,dir=state.dir){
+function audit(){
+  let valid=0,total=0;const missing=[];
+  for(const character of roster)for(const action of testActions){
+   const sheet=sprites[character.id]?.anims?.[action];
+   for(let direction=0;direction<8;direction++){
+    total++;
+    if(sheet?.image&&sheet.frames>0&&sheet.dirs>direction)valid++;
+    else missing.push(character.name+'/'+action+'/'+['남','남서','서','북서','북','북동','동','남동'][direction]);
+   }
+  }
+  const ready=roster.filter(c=>sprites[c.id]?.loaded).length;
+  const summary=`원본 방향·모션 셀 ${valid}/${total} · 로딩 완료 ${ready}/4종`;
+  $('studioAudit').textContent=missing.length?`${summary} · 미사용 원본 ${missing.length}개: ${missing.slice(0,6).join(', ')}${missing.length>6?' 외 '+(missing.length-6)+'개':''} · 누락은 대체 모션으로 재생`:`${summary} · 전부 원본 8방향 확인`;
+  return {valid,total,missing};
+ }
+ function select(kind=state.kind,action=state.action,dir=state.dir){
  state.kind=kind;state.action=action;state.dir=dir;state.clock=0;state.preview=null;meta();
 }
 function open(){
@@ -73,7 +88,7 @@ function open(){
  state.previous=gameState;state.menuVisible=!$('menu').classList.contains('hidden');
  state.open=true;state.last=performance.now();state.auto=false;state.completed=false;
  gameState='studio';stopPlayerChannel();$('menu').classList.add('hidden');document.body.classList.add('studio-open');
- select(chosen,'Idle',1);
+ select(chosen,'Idle',1);audit();
 }
 function close(){
  if(!state.open)return;
@@ -100,6 +115,7 @@ studioNode.addEventListener('click',(e)=>{
  if(btn.id==='studioReplay'){state.auto=false;state.completed=false;select();}
  if(btn.id==='studioCycle'){state.auto=true;state.completed=false;state.autoIndex=0;state.autoTime=0;select(0,'Idle',0);}
  if(btn.id==='studioStop'){state.auto=false;meta();}
+ if(btn.id==='studioAuditBtn')audit();
 });
 $('studioSpeed').addEventListener('input',e=>{state.speed=Number(e.target.value)||1;$('studioSpeedLabel').textContent=state.speed.toFixed(2)+'×';});
 addEventListener('keydown',e=>{if(state.open && (e.key==='Escape'||e.key.toLowerCase()==='p')){e.preventDefault();close();} });
@@ -132,7 +148,7 @@ function render(){
  const now=performance.now(),dt=Math.min(.06,Math.max(0,(now-state.last)/1000))*state.speed;state.last=now;
  state.clock+=dt;
  if(state.preview){state.preview.age+=dt;if(state.preview.age>state.preview.life)state.preview=null;}
- if(state.auto){state.autoTime+=dt;if(state.autoTime>.77){state.autoTime=0;state.autoIndex++;if(state.autoIndex>=4*8*testActions.length){state.auto=false;state.completed=true;meta();}else{const k=Math.floor(state.autoIndex/(8*5)),d=Math.floor(state.autoIndex/5)%8,ac=testActions[state.autoIndex%5];select(k,ac,d);}}}
+ if(state.auto){state.autoTime+=dt;if(state.autoTime>.77){state.autoTime=0;state.autoIndex++;if(state.autoIndex>=4*8*testActions.length){state.auto=false;state.completed=true;meta();audit();}else{const k=Math.floor(state.autoIndex/(8*5)),d=Math.floor(state.autoIndex/5)%8,ac=testActions[state.autoIndex%5];select(k,ac,d);}}}
  const cx=W*.5,cy=Math.min(H*.48,Math.max(175,H-(Math.min(H*.6,440)+65))),sp=roster[state.kind],a=faces[state.dir];
  ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.globalAlpha=1;
  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#122f43');bg.addColorStop(.6,'#235660');bg.addColorStop(1,'#142d37');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
