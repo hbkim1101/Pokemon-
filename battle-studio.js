@@ -200,7 +200,7 @@ function render(){
   let spriteClock=state.clock;
   if(state.preview?.type==='flamethrower'){
    const timing=flameShootTiming(sp.id),p=state.preview,releaseStart=p.life-.22;
-   spriteClock=p.age<releaseStart?Math.min(p.age,timing.hold):
+   spriteClock=p.age<releaseStart?flameChannelClock(p.age,timing):
     timing.hold+(timing.end-timing.hold)*Math.min(1,(p.age-releaseStart)/.22);
   }
   spriteDraw(sp.id,cx+Math.cos(a)*offset,cy+Math.sin(a)*offset,a,state.action,spriteClock,scale,state.action==='Hurt'?.9:0,'player');
