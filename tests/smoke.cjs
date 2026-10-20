@@ -114,8 +114,10 @@ for(let k=0;k<4;k++){
   api.hurtPlayer(1);
   assert.equal(api.actionOf(api.state().player),'Hurt','Hit must show Hurt animation');
   api.advance(.035);
-  for(let tick=0;tick<8;tick++)api.advance(.035);
+  // Hitstop can postpone state updates for several frames; allow enough simulated frames.
+  for(let tick=0;tick<20;tick++)api.advance(.035);
   assert.equal(api.state().player.hurt,0,'Player Hurt animation must expire');
+  assert.notEqual(api.actionOf(api.state().player),'Hurt','Rendered Hurt pose must release');
   api.advance(0.016);
   api.draw();
 }
