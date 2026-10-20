@@ -2053,6 +2053,8 @@ if(/vfxdemo/i.test(location.hash)){
     if(n===1&&roster[chosen].type==='fire'){activate(1,aim,true);setTimeout(stopPlayerChannel,900)}
     else activate(n,aim,false);
     step++;
+    // Capture hook (classic-script lets are not on window).
+    window.__specialEffects=specialEffects;window.__player=player;window.__enemy=enemies[0];
    },820);
    document.documentElement.dataset.vfxdemo='1';
   };
