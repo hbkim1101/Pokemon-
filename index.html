@@ -100,9 +100,9 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #toast{font-family:system-ui,sans-serif;font-weight:1000;letter-spacing:.5px;filter:drop-shadow(0 2px #0b2637)}
 </style></head><body>
 <canvas id="stage"></canvas><div class="vignette"></div><div id="impactFlash"></div><div id="roundBadge">ANCIENT GROVE · ROUND 01</div><div id="comboBadge"></div><div id="hud"><div class="stats glass"><div class="name"><span id="playerName">⚡ 라이츄</span><span id="healthText">120/120</span></div><div class="track hp"><i id="hpBar"></i></div><div class="condition" id="playerCondition"></div><div class="fuelHud" id="fuelHud" hidden><div class="fuelHeading"><span>🔥 화염방사 에너지</span><span id="fuelValue">100%</span></div><div class="fuelGauge"><i id="fuelFill"></i></div></div></div><div class="versus">VS</div><div class="stats glass enemyStats"><div class="name"><span id="enemyName">상대 포켓몬</span><span id="enemyHealthText">—</span></div><div class="track hp"><i id="enemyHpBar"></i></div><div class="condition" id="enemyCondition"></div></div><button class="pause glass" id="pause" aria-label="일시정지">Ⅱ</button></div>
-<div id="floating"></div><div id="toast"></div><div id="aimHelp">PIXEL STUDIO v24 · 화염방사 발사 자세 유지</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
+<div id="floating"></div><div id="toast"></div><div id="aimHelp">PIXEL STUDIO v25 · 화염방사 피격 유사 프레임 수정</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
 <div class="controls" id="controls"><div class="joyShell"><div id="joy" aria-label="이동 조이스틱"><div class="nub" id="nub"></div></div></div><div class="buttons"><div class="skill" data-n="3" style="--c:#b7d6ff"><span class="glyph" id="extraGlyph3">✦</span><small id="extraLabel3">추가 1</small><span class="cooldown"></span></div><div class="skill" data-n="1" style="--c:#fa9d6a"><span class="glyph" id="bigSkill">✹</span><small id="bigLabel">강화 기술</small><span class="fuelButton" id="fuelButton" hidden><i id="fuelButtonFill"></i></span><span class="cooldown"></span></div><div class="skill dash" data-n="2" style="--c:#96deff"><span class="glyph">➤</span><small>회피</small><span class="cooldown"></span></div><div class="skill main" data-n="0" style="--c:#ffdd6c"><span class="glyph" id="basicSkill">⚡</span><small id="basicLabel">기본 기술</small><span class="cooldown"></span></div><div class="skill" data-n="4" style="--c:#b7ffd6"><span class="glyph" id="extraGlyph4">✧</span><small id="extraLabel4">추가 2</small><span class="cooldown"></span></div></div></div>
-<div class="screen" id="menu"><div class="panel"><div class="eyebrow">PMD 8-WAY · MOTION STUDIO v24</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 기본 공격 + 포켓몬별 고유 기술 1개 · 8방향 모션 테스트 · HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
+<div class="screen" id="menu"><div class="panel"><div class="eyebrow">PMD 8-WAY · MOTION STUDIO v25</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 기본 공격 + 포켓몬별 고유 기술 1개 · 8방향 모션 테스트 · HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
   <div class="ivTop"><strong>포켓몬 능력치 · Lv.50</strong><button type="button" id="ivReroll">IV 랜덤</button><button type="button" id="ivPerfect">6V (전부 31)</button></div>
   <label class="naturePicker">성격 <select id="natureSelect" aria-label="성격 선택"></select></label>
   <div class="ivGrid" id="ivGrid"></div>
@@ -110,7 +110,7 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 기본 공격 + 고유 기술 + 회피 · 4가지 고유 기술(포켓몬별 1개) · 터치/드래그 조준 · 모션 스튜디오에서 8방향 프레임 테스트<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">HGSS 4방향 animated overworld sprites + PokéAPI/PMDCollab fallback<br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 4방향 포켓몬 스프라이트는 인터넷 연결이 필요하며, 실패 시 대체 스프라이트로 계속 플레이할 수 있습니다.<br><a href="https://github.com/teobz/pkmn-hgss-animated-overworld-sprites" target="_blank" rel="noopener">HGSS directional sprite source</a> · <a href="https://pokeapi.github.io/sprites/" target="_blank" rel="noopener">PokéAPI</a> · <a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">PMDCollab fallback</a></div></div></div>
 <script>
 'use strict';
-const BUILD_VERSION='v24-flamethrower-channel-pose';
+const BUILD_VERSION='v25-flamethrower-forward-pose';
 const EXTRA_SKILLS_ENABLED=false; // Advanced moves remain archived in the database but cannot be used in this build.
 const $=id=>document.getElementById(id),CV=$('stage'),ctx=CV.getContext('2d');let W=innerWidth,H=innerHeight,dpr=1;
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);CV.width=Math.round(W*dpr);CV.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false}addEventListener('resize',resize);resize();
@@ -776,16 +776,29 @@ function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let
 // PMD action-role mapping verified against original frame sheets:
  // Shoot = ranged skill casting, Attack = forward/melee lunge, Charge = stationary power-up.
  function signatureAnimation(type){return type==='water'?'Attack':'Shoot'}
- // PMD Shoot is a one-shot animation. Hold its XML HitFrame for a sustained flame.
+ // PMD Shoot HitFrame is the attack IMPACT cue, not necessarily a firing stance.
+ // In Charizard 0006/0005 it is a head-back, recoil-like pose resembling Hurt.
+ // Play the initial windup once, skip that recoil segment, then hold a forward
+ // emission pose AFTER ReturnFrame until the continuous flame is released.
  function flameShootTiming(id){
   const sheet=sprites[id]?.anims?.Shoot;
-  if(!sheet)return {hold:.25,end:.48};
+  if(!sheet)return {windup:.17,hold:.37,end:.51,windupFrame:3,holdFrame:9,hitFrame:5};
   const frames=Math.max(1,Math.min(sheet.frames,sheet.dur?.length||sheet.frames));
   const durations=Array.from({length:frames},(_,i)=>Math.max(1,sheet.dur?.[i]||8));
-  const hit=Math.min(frames-1,Math.max(0,sheet.hitFrame??Math.floor(frames*.42)));
-  const at=frame=>durations.slice(0,frame).reduce((a,b)=>a+b,0)/60;
-  const total=durations.reduce((a,b)=>a+b,0)/60;
-  return {hold:Math.min(total-.001,at(hit)+Math.min(.012,(durations[hit]||2)/120)),end:Math.max(0,total-.002)};
+  const hitFrame=Math.min(frames-1,Math.max(0,sheet.hitFrame??Math.floor(frames*.45)));
+  const returnFrame=Math.min(frames-1,Math.max(hitFrame,sheet.returnFrame??Math.floor(frames*.63)));
+  const holdFrame=Math.min(frames-1,Math.max(Math.min(frames-1,returnFrame+2),Math.floor(frames*.7)));
+  const windupFrame=Math.min(Math.max(0,holdFrame-1),Math.max(0,Math.min(hitFrame-2,Math.floor(frames*.32))));
+  const at=frame=>durations.slice(0,Math.min(frames,frame)).reduce((a,b)=>a+b,0)/60;
+  const total=at(frames);
+  return {
+   windup:Math.min(at(windupFrame+1),at(holdFrame)),
+   hold:Math.min(total-.001,at(holdFrame)+Math.min(.007,durations[holdFrame]/120)),
+   end:Math.max(0,total-.002),windupFrame,holdFrame,hitFrame,returnFrame
+  };
+ }
+ function flameChannelClock(age,timing){
+  return age<timing.windup?age:timing.hold;
  }
  function activeFlameChannel(actor){
   return specialEffects.find(m=>m.type==='flamethrower'&&m.controlled&&m.owner===(actor===player?'player':'enemy')&&m.age<m.life&&!m.end);
@@ -800,7 +813,7 @@ function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let
  function combatSpriteClock(actor,action,normalClock){
   if(action!=='Shoot')return normalClock;
   const flame=activeFlameChannel(actor),timing=flameShootTiming(actor.id||roster[actor.kind].id);
-  if(flame)return Math.min(flame.age,timing.hold);
+  if(flame)return flameChannelClock(flame.age,timing);
   if(actor.flameRecovery){
    const rec=actor.flameRecovery,u=Math.min(1,rec.elapsed/rec.duration);
    return Math.min(timing.end,rec.start+(timing.end-rec.start)*u);
@@ -992,7 +1005,7 @@ function stopPlayerChannel(){
    m.end=true;
    // Prepare recovery immediately so pointerup does not briefly show Idle/Walk.
    const timing=flameShootTiming(roster[player.kind].id);
-   player.flameRecovery={elapsed:0,duration:.22,start:Math.min(m.age,timing.hold)};
+   player.flameRecovery={elapsed:0,duration:.22,start:flameChannelClock(m.age,timing)};
   }
  }
 }
@@ -1014,7 +1027,7 @@ function updateSpecials(dt){
    const aim=m.owner==='player'?(player.channelAim||lastAim):norm(player.x-actor.x,player.y-actor.y);
    m.vx=aim.x;m.vy=aim.y;actor.face=Math.atan2(m.vy,m.vx);
    if(m.end){
-    if(!actor.flameRecovery){actor.flameRecovery={elapsed:0,duration:.22,start:Math.min(m.age,flameShootTiming(actor.id||roster[actor.kind].id).hold)};}
+    if(!actor.flameRecovery){actor.flameRecovery={elapsed:0,duration:.22,start:flameChannelClock(m.age,flameShootTiming(actor.id||roster[actor.kind].id))};}
     m.age=m.life;
    }
   }
@@ -1791,4 +1804,4 @@ document.addEventListener('touchend',e=>{
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});
-</script><script src="./battle-studio.js?v=24"></script></body></html>
+</script><script src="./battle-studio.js?v=25"></script></body></html>
