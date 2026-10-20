@@ -142,6 +142,8 @@ assert(Math.abs(heldClock-timing.hold)<1e-8,'Long flame channel must hold a stab
 api.state().specialEffects.find(m=>m.type==='flamethrower').age=timing.hold+3.5;
 assert.equal(api.spriteClock(charizard),heldClock,'Shoot animation must not loop on hold');
 api.stopFlame();
+assert(charizard.flameRecovery,'Pointerup must start recovery without a one-frame flash');
+assert.equal(api.actionOf(charizard),'Shoot','Release must remain in Shoot until recovery finishes');
 api.advance(.016);
 assert(charizard.flameRecovery,'Releasing flame must start recovery frames');
 const releaseClock=api.spriteClock(charizard);
