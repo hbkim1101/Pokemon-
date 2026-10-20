@@ -66,6 +66,7 @@ const exposed = [
   ' draw:()=>draw(),',
   ' advance:(dt)=>advance(dt),',
   ' activate:(slot)=>activate(slot),',
+  ' hurtPlayer:(amount)=>hurt(amount),',
   ' direction:(angle)=>faceFromAngle(angle),',
   ' signature:(type)=>signatureAnimation(type),',
   ' actionOf:(actor)=>combatAnimation(actor),',
@@ -109,6 +110,12 @@ for(let k=0;k<4;k++){
   api.activate(2);
   assert.equal(api.state().player.action,'Attack','Dash must use Attack instead of Walk');
   assert.equal(api.actionOf(api.state().player),'Attack','Rendered dash must use Attack');
+  api.state().player.inv=0;
+  api.hurtPlayer(1);
+  assert.equal(api.actionOf(api.state().player),'Hurt','Hit must show Hurt animation');
+  api.advance(.035);
+  for(let tick=0;tick<8;tick++)api.advance(.035);
+  assert.equal(api.state().player.hurt,0,'Player Hurt animation must expire');
   api.advance(0.016);
   api.draw();
 }
