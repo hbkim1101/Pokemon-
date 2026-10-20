@@ -987,7 +987,14 @@ function castSpecial(v,owner='player',opts={}){
  return move;
 }
 function stopPlayerChannel(){
- for(const m of specialEffects){if(m.owner==='player'&&m.type==='flamethrower'&&m.controlled){m.end=true;}}
+ for(const m of specialEffects){
+  if(m.owner==='player'&&m.type==='flamethrower'&&m.controlled&&!m.end&&m.age<m.life){
+   m.end=true;
+   // Prepare recovery immediately so pointerup does not briefly show Idle/Walk.
+   const timing=flameShootTiming(roster[player.kind].id);
+   player.flameRecovery={elapsed:0,duration:.22,start:Math.min(m.age,timing.hold)};
+  }
+ }
 }
 function updateFuel(actor,owner,dt){
  if(!actor)return;
