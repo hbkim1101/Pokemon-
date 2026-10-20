@@ -1036,8 +1036,13 @@ function updateSpecials(dt){
   }else if(m.type==='flamethrower'){
    const length=Math.min(m.range,m.age*710+24); m.x=actor.x+m.vx*18; m.y=actor.y+m.vy*18-10; m.stream=length;
    m.decalTick-=dt; if(m.decalTick<=0){m.decalTick+=.14; impactMark(m.x+m.vx*(length*.65),m.y+m.vy*(length*.65),'fire',.72)}
-   const amount=Math.min(10,Math.round(3+dt*190)); const perpX=-m.vy,perpY=m.vx;
-   for(let i=0;i<amount;i++){const u=rand(.05,1),dist=rand(10,Math.max(15,length))*u,spread=(10+dist*.24)*rand(-1,1); emitParticle({x:m.x+m.vx*dist+perpX*spread,y:m.y+m.vy*dist+perpY*spread,vx:m.vx*rand(50,135)+perpX*rand(-30,30),vy:m.vy*rand(50,135)+perpY*rand(-30,30)-rand(0,20),life:rand(.12,.25),size:rand(5,12),shape:'flame',color:Math.random()<.4?'#ffe69c':Math.random()<.6?'#ffb14b':'#ff6332',rot:Math.atan2(m.vy,m.vx)});}
+   // Beam body is drawn by fxDrawFlameBeam; only sparse 1-texel rim sparks (watched-04)
+   const perpX=-m.vy,perpY=m.vx;
+   if(Math.random()<dt*8){
+    const dist=rand(SPRITE_PX*4,Math.max(SPRITE_PX*5,length*.9));
+    const side=(Math.random()<.5?-1:1)*(SPRITE_PX*6+dist*.08);
+    emitParticle({x:m.x+m.vx*dist+perpX*side,y:m.y+m.vy*dist+perpY*side,vx:perpX*rand(-20,20),vy:perpY*rand(-20,20)-10,life:rand(.1,.2),size:SPRITE_PX,shape:'dot',color:Math.random()<.5?'#fff8e0':'#ffc857',alpha:.95});
+   }
    m.tick-=dt;
    if(m.tick<=0){m.tick+=.09; const dx=target.x-m.x,dy=target.y-11-m.y,along=dx*m.vx+dy*m.vy,cross=Math.abs(dx*m.vy-dy*m.vx); if(along>0&&along<length+target.r&&cross<(16+along*.34+target.r)){ if(m.owner==='player'){
     hitOpponent(target,m.damage*.1,target.x,target.y-10,'fire',.35,m.info);
@@ -1445,45 +1450,44 @@ function pxJaggedBurst(cx,cy,r,ink,body,hot,a=1){
  }
 }
 function pxLayeredBeam(x0,y0,x1,y1,halfW,cols,opts={}){
- // Continuous thick beam: ink rim → body → accent → hot core + optional spiral (watched-04/05).
- // cols = {ink, body, accent, hot}
+ // Continuous thick beam (watched-04/05): dark 1-texel rim → orange body → yellow → white core + white spiral.
  const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy)||1;
  const ux=dx/L, uy=dy/L, nx=-uy, ny=ux;
  const S=SPRITE_PX;
- const half=Math.max(S*2, Math.round(halfW/S)*S);
- const step=S;
+ const half=Math.max(S*3, Math.round(halfW/S)*S);
  const tAge=opts.t||0;
  const spiral=opts.spiral!==false;
  const wobble=opts.wobble!==false;
- for(let d=0; d<=L; d+=step){
-  const u=d/L;
-  // undulating width (flame silhouette)
-  const wave=wobble? (Math.sin(tAge*16+d*.08)*S + Math.sin(tAge*9+d*.15)*S*.5) : 0;
-  const w=Math.max(S, Math.round((half*(.85+u*.2)+wave)/S)*S);
+ const alpha=opts.alpha??1;
+ // Step along beam one texel at a time for a solid column (no gaps / no blob chain)
+ for(let d=0; d<=L; d+=S){
+  const u=d/Math.max(1,L);
+  const wave=wobble ? Math.round((Math.sin(tAge*14+d*.1)*S + Math.sin(tAge*7+d*.2)*S*.4)/S)*S : 0;
+  const w=Math.max(S*2, half + wave - Math.round(u*S)); // slight taper optional
   const cx=x0+ux*d, cy=y0+uy*d;
   for(let s=-w; s<=w; s+=S){
    const abs=Math.abs(s);
    let col;
-   if(abs>=w-S*.1) col=cols.ink;
-   else if(abs>=w*0.55) col=cols.body;
-   else if(abs>=w*0.28) col=cols.accent;
+   if(abs >= w) col=cols.ink;                 // exact outer rim (1 texel)
+   else if(abs >= w-S) col=cols.ink;          // keep rim thick enough to read
+   else if(abs >= Math.round(w*0.62/S)*S) col=cols.body;
+   else if(abs >= Math.round(w*0.32/S)*S) col=cols.accent;
    else col=cols.hot;
-   pxTex(cx+nx*s, cy+ny*s, col, opts.alpha??1);
+   pxTex(cx+nx*s, cy+ny*s, col, alpha);
   }
-  // white spiral streaks (1 texel) wrapping the beam
-  if(spiral && (Math.floor(d/S)%2===0)){
-   const phase=tAge*10+d*.12;
-   const side=Math.sin(phase)*w*.72;
-   pxTex(cx+nx*side, cy+ny*side, '#ffffff', (opts.alpha??1)*.95);
-   if((Math.floor(d/S)%4)===0){
-    const side2=Math.sin(phase+2.1)*w*.5;
-    pxTex(cx+nx*side2, cy+ny*side2, cols.accent||'#fff6a0', (opts.alpha??1)*.85);
+  // white spiral streaks wrapping the body (1 texel)
+  if(spiral){
+   const phase=tAge*11+d*.14;
+   const side=Math.round((Math.sin(phase)* (w-S*2) )/S)*S;
+   pxTex(cx+nx*side, cy+ny*side, '#ffffff', alpha);
+   if((Math.floor(d/S)%3)===0){
+    const side2=Math.round((Math.sin(phase+2.2)*(w-S*3))/S)*S;
+    pxTex(cx+nx*side2, cy+ny*side2, cols.accent||'#ffc857', alpha*.9);
    }
   }
  }
- // tip hotspot
  if(opts.tip!==false){
-  pxJaggedBurst(x1,y1, half*1.1, cols.ink, cols.body, cols.hot, (opts.alpha??1)*.95);
+  pxJaggedBurst(x1,y1, Math.max(S*4, half*1.05), cols.ink, cols.body, cols.hot, alpha*.95);
  }
 }
 function pxBeamHead(x,y,ang,halfW,cols,a=1){
@@ -1631,22 +1635,19 @@ function fxDrawFlameBeam(m){
  const length=m.stream||0;if(length<SPRITE_PX*6)return;
  const vx=m.vx,vy=m.vy,nx=-vy,ny=vx,t=m.age;
  const x0=m.x, y0=m.y, x1=m.x+vx*length, y1=m.y+vy*length;
- // watched-04/05: continuous thick beam — white core, yellow, orange, dark 1-texel rim + white spirals
- const cols={ink:'#3d120c', body:'#ff5f1f', accent:'#ffc857', hot:'#fff8e0'};
- const half=SPRITE_PX*(fxQuality==='low'?5:7);
- pxLayeredBeam(x0,y0,x1,y1,half,cols,{t, spiral:true, tip:true, wobble:true, alpha:1});
- // dense impact burst at tip (clash language)
- pxJaggedBurst(x1,y1, half*1.35, '#2a100c', '#ff7020', '#ffffff', .98);
- pxRadialLines(x1,y1, half*.4, half*2.2, fxQuality==='low'?10:16, '#fff3c8', .9, .7);
- for(let i=0;i<8;i++){
-  const a=t*6+i*.9;
-  pxDustClump(x1+Math.cos(a)*half*1.4, y1+Math.sin(a)*half*.9, i+Math.floor(t*8), 1, .85);
+ const cols={ink:'#2a0e0a', body:'#ff4a12', accent:'#ffd24a', hot:'#fff8e8'};
+ const half=SPRITE_PX*(fxQuality==='low'?6:8);
+ pxLayeredBeam(x0,y0,x1,y1,half,cols,{t, spiral:true, tip:false, wobble:true, alpha:1});
+ // tip: dense clash burst (watched-04)
+ pxJaggedBurst(x1,y1, half*1.5, '#1a0a08', '#ff5a18', '#ffffff', .98);
+ pxRadialLines(x1,y1, half*.3, half*2.4, fxQuality==='low'?12:18, '#fff3c8', .92, .68);
+ pxRadialLines(x1,y1, half*.5, half*1.8, 10, '#ffb040', .75, .68);
+ for(let i=0;i<10;i++){
+  const a=t*5+i*.7;
+  pxDustClump(x1+Math.cos(a)*half*1.5, y1+Math.sin(a)*half*.85, i+Math.floor(t*6), 1+(i%2), .9);
  }
- // sparse embers along rim (not chain-of-blobs)
- for(let d=SPRITE_PX*4; d<length; d+=SPRITE_PX*6){
-  const side=(Math.sin(t*14+d*.1)>=0?1:-1)*half;
-  pxTex(x0+vx*d+nx*side, y0+vy*d+ny*side, (d/SPRITE_PX)%2?'#ffb14b':'#ffe69c', .9);
- }
+ // mouth flare
+ pxJaggedBurst(x0,y0, SPRITE_PX*4, cols.ink, cols.body, cols.hot, .9);
 }
 function fxDrawThunder(m){
  const pts=m.path||[];if(pts.length<2)return;
@@ -1813,7 +1814,7 @@ function fxDrawActorMotion(o){
   if(kind==='electric'){
    for(let i=0;i<4;i++){const off=(i-1.5)*8;fxRect(tx+vx*18+nx*off-2,ty+vy*8+ny*off-2,4,4,i%2?'#93f5ff':'#ffe16b',.85);if(i<3)pxLine(tx+nx*off,ty+ny*off,tx+vx*(18+6*pulse)+nx*(off+4),ty+vy*(10+4*pulse)+ny*(off-3),2,'#fff8b8',.75,.8)}
   } else if(kind==='fire'){
-   for(let i=0;i<3;i++){const off=(i-1)*6;fxStamp('ember',tx+vx*(12+phase*10)+nx*off,ty+vy*(4+phase*5)+ny*off*.2,10,12,i,.72+phase*.18,0)}
+   for(let i=0;i<3;i++){const off=(i-1)*SPRITE_PX*2;pxTex(tx+vx*(12+phase*8)+nx*off,ty+vy*(4+phase*4)+ny*off*.2,i%2?'#ffc857':'#fff8e0',.8)}
    fxStamp('flameCore',tx+vx*(18+phase*10),ty+vy*(4+phase*6),12,20,Math.floor(time*12)%4,.7+phase*.2,Math.atan2(vy,vx)-Math.PI/2);
   } else if(kind==='water'){
    for(let i=0;i<4;i++){const off=(i-1.5)*7;fxStamp('water',tx+vx*(14+phase*8)+nx*off,ty+vy*(6+phase*4)+ny*off*.2,7,14+phase*10,i,.75,a)}
