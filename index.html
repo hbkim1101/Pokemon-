@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena | Fire Remaster Pixel v18</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena | Showdown Battlers v19</title>
 <style>
 :root{--ink:#071823;--glass:#0a2636e0;--line:#9bd9df45;--gold:#ffd667;--sky:#92eeff}*{box-sizing:border-box}html,body{margin:0;min-height:100%;width:100%;height:100%;overflow:hidden;background:#071822;color:#e9fcff;font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;touch-action:none}button{font:inherit;cursor:pointer}#stage{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 32%,#03101868 100%)}#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 16px 0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:8px}.glass{background:var(--glass);border:1px solid var(--line);box-shadow:0 8px 28px #07121c55;backdrop-filter:blur(8px);border-radius:13px}.stats{padding:10px 12px;min-width:180px;max-width:245px}.stats .name{display:flex;justify-content:space-between;font-weight:900;font-size:13px;gap:15px}.stats .name span:last-child{color:#c5ecf8;font-size:11px}.track{position:relative;height:10px;background:#17323b;border-radius:20px;margin-top:6px;overflow:hidden;border:1px solid #6a92924a}.track>i{height:100%;display:block;width:100%;transition:width .1s linear}.track.hp i{background:linear-gradient(90deg,#52be77,#b8f28b)}.track.xp{height:5px;margin-top:5px}.track.xp i{background:#6cdbf8}.rightHud{display:flex;gap:8px}.hudpill{padding:10px 13px;min-width:78px;text-align:center;font-size:11px;color:#bfe9ed}.hudpill b{font-size:19px;display:block;color:white;line-height:1.15}.pause{padding:10px 13px;font-weight:900;background:var(--glass);color:white;pointer-events:auto;min-width:42px}.controls{position:absolute;left:0;bottom:0;right:0;padding:0 max(18px,env(safe-area-inset-left)) calc(20px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-right));display:flex;align-items:end;justify-content:space-between;pointer-events:none;gap:14px;isolation:isolate}.controls:before{content:'';position:absolute;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:calc(7px + env(safe-area-inset-bottom));height:126px;border-radius:34px;background:linear-gradient(180deg,#0f2a39f5,#081c29ef);border:1px solid #c9f0ff22;box-shadow:0 18px 45px #020b1245,inset 0 1px 0 #ffffff10,inset 0 -12px 30px #00000038;backdrop-filter:blur(10px);z-index:-1}#joy{height:136px;width:136px;position:relative;border:2px solid #d2edff45;background:radial-gradient(circle at 35% 30%,#ecffff30,#9bdaf511 55%,#7ebad20e 100%);border-radius:50%;box-shadow:0 10px 24px #01091355,inset 0 0 20px #c6f5ff14,inset 0 2px 0 #ffffff1f;pointer-events:auto;touch-action:none;flex-shrink:0;margin:0 0 8px 8px}.joyShell{position:relative}.joyShell:after{content:'';position:absolute;left:18px;right:18px;bottom:4px;height:16px;border-radius:50%;background:#0008;filter:blur(10px)}#joy:before{content:'MOVE';font-weight:900;letter-spacing:2.5px;position:absolute;top:auto;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:#d3f6ffb8;background:#071c2abf;padding:2px 8px;border-radius:999px;border:1px solid #ffffff18}.nub{width:59px;height:59px;position:absolute;left:calc(50% - 29.5px);top:calc(50% - 29.5px);border-radius:50%;background:linear-gradient(145deg,#d5f8ffcf,#85bdda96);box-shadow:0 5px 19px #020d176b;border:2px solid #ecffffb8;pointer-events:none}.buttons{display:flex;align-items:end;gap:11px;pointer-events:auto;padding:14px 14px 14px 16px;border-radius:28px;border:1px solid #cbf4ff24;background:linear-gradient(180deg,#123043f0,#0a2130ef);box-shadow:0 12px 30px #0007,inset 0 1px 0 #ffffff10,inset 0 -10px 24px #00000024;position:relative;margin:0 8px 10px 0}.buttons:before{content:'SKILLS';position:absolute;left:16px;top:-11px;padding:2px 8px;border-radius:999px;background:#0c2635f7;border:1px solid #cbf4ff24;color:#d2f6ffcc;font-size:9px;font-weight:900;letter-spacing:2.2px}.skill{--c:#ffd45c;position:relative;display:flex;align-items:center;justify-content:center;width:69px;height:69px;border:2px solid color-mix(in srgb,var(--c) 60%,white);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 40%,#193848),#0a2231 72%);box-shadow:0 5px 16px #0008,inset 0 0 18px color-mix(in srgb,var(--c) 18%,transparent),inset 0 2px 0 #ffffff1a;color:white;border-radius:50%;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}.skill.main{width:86px;height:86px}.skill .glyph{font-size:25px;transform:translateY(-7px);filter:drop-shadow(0 2px 1px #0007)}.skill.main .glyph{font-size:35px;transform:translateY(-9px)}.skill small{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:850;text-shadow:none;background:#081f2dcc;padding:2px 7px;border-radius:999px;border:1px solid #ffffff1b;color:#f3fbff}.skill .cooldown{position:absolute;inset:0;border-radius:50%;background:#08131dd7;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:900}.skill.selected{box-shadow:0 0 0 5px #e9fbff1e,0 0 28px var(--c),inset 0 0 16px color-mix(in srgb,var(--c) 20%,white);transform:translateY(-2px) scale(1.03)}.screen{position:absolute;inset:0;z-index:10;background:radial-gradient(ellipse at 50% 35%,#1d4458ef 0%,#071824f7 70%);display:flex;justify-content:center;align-items:center;overflow-y:auto;padding:20px 12px calc(20px + env(safe-area-inset-bottom));pointer-events:auto}.panel{width:min(620px,100%);padding:26px 23px 21px;text-align:center;border:1px solid #98ddf252;background:linear-gradient(155deg,#153449fa,#0a1d2cf9);border-radius:24px;box-shadow:0 20px 100px #020e1baf}.eyebrow{font-weight:900;font-size:10px;letter-spacing:4px;color:#9ce6f3;margin-bottom:6px}.panel h1{margin:0;color:#fff5c5;font-size:clamp(30px,5.5vw,48px);letter-spacing:-2px;line-height:1.1;text-shadow:0 5px #0d3242}.panel h1 em{font-style:normal;color:#ffe26a}.desc{font-size:13px;line-height:1.65;color:#bedae3;margin:12px auto 13px}.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0 19px}.choice{border:1px solid #8acee34d;border-radius:13px;min-width:0;padding:10px 2px 8px;background:#173648;color:#d8eaf3;transition:transform .13s,border-color .13s}.choice.on{border-color:#ffe69b;box-shadow:0 0 0 2px #ffd26833;background:#39516a;transform:translateY(-3px)}.choice canvas{display:block;width:72px;height:72px;margin:0 auto 1px;image-rendering:pixelated;max-width:100%}.choice b{display:block;font-size:12px}.choice small{display:block;color:#99c9d3;font-size:10px;margin-top:3px}.primary{background:linear-gradient(180deg,#ffeb91,#ffbd50);border:0;color:#2d2b2e;font-weight:950;padding:15px 25px;min-width:195px;border-radius:13px;font-size:16px;box-shadow:0 6px 0 #a96924}.primary:active{transform:translateY(4px);box-shadow:0 2px 0 #a96924}.status{min-height:18px;font-size:11px;color:#c4e0e8;margin:10px 0 1px}.credit{font-size:10px;line-height:1.5;color:#9bc0cf;margin-top:14px}.credit a{color:#a9eaf4}.explain{margin:11px 0;font-size:12px;color:#bcd7d8;line-height:1.8}.hidden{display:none!important}#floating{position:absolute;inset:0;pointer-events:none;overflow:hidden}#floating .floater{position:absolute;transform:translate(-50%,-50%);font-weight:900;text-shadow:0 2px #071821,0 0 6px #071821;animation:floatup .7s forwards}@keyframes floatup{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -38px}}#toast{position:absolute;top:22%;width:100%;text-align:center;pointer-events:none;font-weight:1000;font-size:25px;color:#fff3af;text-shadow:0 4px #09242b,0 0 20px #091820;opacity:0;transition:opacity .2s}#toast.show{opacity:1}#tips{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);color:#c9dce68e;white-space:nowrap;font-size:10px;pointer-events:none}#aimHelp{position:absolute;bottom:calc(165px + env(safe-area-inset-bottom));right:20px;color:#eaf7fd9c;font-size:10px;pointer-events:none}@media(max-width:700px){#hud{padding:calc(env(safe-area-inset-top) + 7px) 9px 0}.stats{min-width:137px;padding:8px}.stats .name{font-size:11px}.rightHud{gap:5px}.hudpill{min-width:57px;padding:8px;font-size:10px}.hudpill b{font-size:16px}.pause{padding:8px}.controls{padding-left:12px;padding-right:12px;bottom:4px}.controls:before{height:112px;border-radius:28px}#joy{height:117px;width:117px;margin:0 0 6px 4px}.joyShell:after{left:12px;right:12px}#joy:before{font-size:8px;bottom:7px;padding:2px 7px}.nub{width:52px;height:52px;left:calc(50% - 26px);top:calc(50% - 26px)}.buttons{gap:8px;padding:11px 10px 11px 12px;margin:0 4px 7px 0}.buttons:before{left:12px;font-size:8px}.skill{width:56px;height:56px}.skill.main{width:70px;height:70px}.skill .glyph{font-size:21px;transform:translateY(-5px)}.skill.main .glyph{font-size:29px;transform:translateY(-7px)}.skill small{font-size:8px;bottom:5px;padding:1px 5px}.choices{gap:6px}.panel{padding:22px 13px 15px}.choice canvas{width:60px;height:60px}#aimHelp{bottom:calc(130px + env(safe-area-inset-bottom));font-size:9px}#tips{font-size:8px}}@media(max-width:370px){#joy{height:96px;width:96px}.controls:before{height:102px}.buttons{gap:5px;padding:9px 8px 9px 10px}.skill{width:49px;height:49px}.skill.main{width:61px;height:61px}.skill small{font-size:7px;bottom:4px}.hudpill{min-width:47px}.rightHud{gap:3px}.stats{min-width:120px}}@media(max-height:480px){.panel{padding:14px}.panel h1{font-size:26px}.desc{margin:6px}.choices{margin:7px 0}.choice canvas{width:45px;height:45px}.controls{padding-bottom:15px}#joy{width:92px;height:92px}.skill{width:52px;height:52px}.skill.main{width:65px;height:65px}#aimHelp{display:none}}
 
@@ -107,16 +107,19 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <label class="naturePicker">성격 <select id="natureSelect" aria-label="성격 선택"></select></label>
   <div class="ivGrid" id="ivGrid"></div>
   <p class="ivNote">최종 진화형 종족값·IV·성격은 원작 기준 · EV 0 · PvP HP 2배 · 기술 피해 80% · 상대 IV는 무작위</p>
-</section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 4기술 + 회피 · 기술 3·4는 시작 화면에서 변경 · 터치/드래그 조준 · 특수 효과는 기술별로 다름<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">PMDCollab/SpriteCollab</a> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a><br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 원본 스프라이트에는 인터넷 연결이 필요하지만, 연결 실패 시에도 기본 캐릭터로 전투할 수 있습니다.<br><a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">원본 사이트 및 개별 아티스트 크레딧</a></div></div></div>
+</section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 4기술 + 회피 · 기술 3·4는 시작 화면에서 변경 · 터치/드래그 조준 · 특수 효과는 기술별로 다름<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">PokéAPI hosted battle sprites / Pokémon Showdown style battlers + PMDCollab fallback<br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 배틀용 스프라이트는 인터넷 연결이 필요하며, 실패 시 대체 스프라이트로 계속 플레이할 수 있습니다.<br><a href="https://pokeapi.github.io/sprites/" target="_blank" rel="noopener">PokéAPI sprite browser</a> · <a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">PMDCollab fallback credit</a></div></div></div>
 <script>
 'use strict';
-const BUILD_VERSION='v18-fire-remaster';
+const BUILD_VERSION='v19-showdown-battlers';
 const $=id=>document.getElementById(id),CV=$('stage'),ctx=CV.getContext('2d');let W=innerWidth,H=innerHeight,dpr=1;
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);CV.width=Math.round(W*dpr);CV.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false}addEventListener('resize',resize);resize();
 const BASE='https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/';
+const SHOWDOWN_FRONT='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/';
+const SHOWDOWN_BACK='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/back/';
+const OFFICIAL_ART='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/';
 // This flag is absent in iOS file preview / Quick Look when scripts are disabled.
 document.getElementById('jsWarning').classList.add('hidden');
-document.getElementById('assetStatus').textContent='스프라이트 연결 확인 중 · 게임은 바로 시작할 수 있습니다.';
+document.getElementById('assetStatus').textContent='배틀 스프라이트 연결 확인 중 · 게임은 바로 시작할 수 있습니다.';
 const roster=[
  {id:'0026',name:'라이츄',type:'electric',icon:'⚡',color:'#f6d36c',basic:'전기쇼크',special:'10만볼트',types:['electric'],base:{hp:60,atk:90,def:55,spa:90,spd:80,spe:110}},
  {id:'0006',name:'리자몽',type:'fire',icon:'🔥',color:'#ff9863',basic:'불꽃세례',special:'화염방사',types:['fire','flying'],base:{hp:78,atk:84,def:78,spa:109,spd:85,spe:100}},
@@ -310,7 +313,7 @@ function drawStatusPixels(actor){if(!actor.status&&!actor.spdefStage&&!actor.def
 }
 
 
-const sprites={};const FALLBACK={Walk:[32,40,4],Idle:[40,56,6],Attack:[80,80,10],Shoot:[40,56,11],Hurt:[48,64,2]};const ACTIONS=['Walk','Idle','Attack','Shoot','Hurt'];let spriteLoadCount=0;const unique=[...new Set(roster.map(o=>o.id))];
+const sprites={};const battleSprites={};const FALLBACK={Walk:[32,40,4],Idle:[40,56,6],Attack:[80,80,10],Shoot:[40,56,11],Hurt:[48,64,2]};const ACTIONS=['Walk','Idle','Attack','Shoot','Hurt'];let spriteLoadCount=0;const unique=[...new Set(roster.map(o=>o.id))];
 function getAnim(xml,name){let nodes=[...xml.getElementsByTagName('Anim')],node=nodes.find(n=>n.getElementsByTagName('Name')[0]?.textContent===name);if(!node)return null;const val=key=>Number(node.getElementsByTagName(key)[0]?.textContent||0);return {w:val('FrameWidth'),h:val('FrameHeight'),dur:[...node.getElementsByTagName('Duration')].map(n=>+n.textContent)}}
 function loadImage(url){return new Promise((resolve,reject)=>{const im=new Image();let ended=false;const timer=setTimeout(()=>finish(false),5500);function finish(ok){if(ended)return;ended=true;clearTimeout(timer);im.onload=im.onerror=null;if(ok)resolve(im);else reject(Error('스프라이트 요청 실패 또는 시간 초과'))}im.crossOrigin='anonymous';im.onload=()=>finish(true);im.onerror=()=>finish(false);im.src=url})}
 async function loadXml(url){const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),4200);try{const r=await fetch(url,{mode:'cors',signal:ctrl.signal});if(!r.ok)throw Error('HTTP '+r.status);return new DOMParser().parseFromString(await r.text(),'application/xml')}finally{clearTimeout(timer)}}
@@ -346,6 +349,40 @@ function measureSpriteFeet(sheet){
  return ground;
 }
 function footOffset(sheet,d,f){return sheet?.feet?.[d]?.[f]||sheet?.h*.79||32}
+async function preloadBattle(id){
+ const num=String(Number(id));
+ const pack=battleSprites[id]||(battleSprites[id]={loaded:false});
+ const tried=[];
+ async function tryLoad(key,url){tried.push(url);try{pack[key]=await loadImage(url);return true}catch(err){return false}}
+ let okFront=await tryLoad('front',SHOWDOWN_FRONT+num+'.gif');
+ if(!okFront) okFront=await tryLoad('front',SHOWDOWN_FRONT+num+'.png');
+ let okBack=await tryLoad('back',SHOWDOWN_BACK+num+'.gif');
+ if(!okBack) okBack=await tryLoad('back',SHOWDOWN_BACK+num+'.png');
+ await tryLoad('art',OFFICIAL_ART+num+'.png');
+ pack.loaded=!!(pack.front||pack.back||pack.art); pack.tried=tried;
+ return pack;
+}
+function drawBattleSprite(id,x,y,scale=1,role='player',flash=0,angle=0,action='Idle',t=0){
+ const pack=battleSprites[id];
+ const shadowScale=scale*1.02;
+ contactShadow(x,y,shadowScale,false);
+ if(!pack?.loaded)return false;
+ const img=(role==='player'?(pack.back||pack.front||pack.art):(pack.front||pack.back||pack.art));
+ if(!img)return false;
+ const base=Math.min(154, Math.max(86, img.naturalHeight||img.height||96));
+ const spriteScale=scale*(role==='player'?1.7:1.55)*(id==='0006'?1.05:1);
+ const dh=base*spriteScale, dw=((img.naturalWidth||img.width||96)/(img.naturalHeight||img.height||96))*dh;
+ let dx=0,dy=0,rot=0,sx=1,sy=1;
+ if(action==='Walk'){dy-=Math.abs(Math.sin(t*10))*4; sx=1+.015*Math.sin(t*10); sy=1-.02*Math.sin(t*10)}
+ else if(action==='Shoot'){const p=Math.sin(Math.min(t,.22)/.22*Math.PI);dx+=Math.cos(angle)*8*p;dy+=Math.sin(angle)*4*p-3.5*p;rot=.04*Math.sin(angle)*p; sx=1+.045*p; sy=1-.025*p}
+ else if(action==='Hurt'){const q=Math.sin(t*35)*2.5;dx-=Math.cos(angle)*q*.7;dy-=Math.sin(angle)*q*.4;rot=.05*Math.sin(t*28)}
+ ctx.save();ctx.imageSmoothingEnabled=false;ctx.translate(x+dx,y+dy);ctx.rotate(rot);ctx.scale(sx,sy);
+ if(flash>0)ctx.globalAlpha=.78+.2*Math.cos(t*60);
+ ctx.drawImage(img,-dw/2,-dh,dw,dh);
+ ctx.restore();
+ return true;
+}
+
 async function preload(id){const pack=sprites[id]={anims:{},loaded:false};let metadata={};try{const xml=await loadXml(BASE+id+'/AnimData.xml');for(const a of ACTIONS)metadata[a]=getAnim(xml,a)}catch(err){}await Promise.all(ACTIONS.map(async a=>{try{let image=await loadImage(BASE+id+'/'+a+'-Anim.png');let m=metadata[a];if(!m?.w||!m?.h){const f=FALLBACK[a];m={w:({26:48,6:72,9:64,3:72}[Number(id)]||image.height/8||f[0]),h:image.height/8||f[1],dur:Array.from({length:Math.max(1,Math.round(image.width/(image.height/8||f[0])))},()=>8)}}if(image.width<m.w||image.height<m.h)throw Error('bad dimensions');const anim={image,w:m.w,h:m.h,dur:m.dur?.length?m.dur:[8],frames:Math.max(1,Math.floor(image.width/m.w)),dirs:Math.max(1,Math.floor(image.height/m.h))};anim.feet=measureSpriteFeet(anim);pack.anims[a]=anim;}catch(err){}}));pack.loaded=!!pack.anims.Walk||!!pack.anims.Idle;spriteLoadCount++;$('assetStatus').textContent=`스프라이트 확인 ${spriteLoadCount}/${unique.length} · 현재 ${unique.filter(key=>sprites[key]?.loaded).length}종 성공 · 미연결 시 대체 이미지 사용`; if(roster.some(p=>p.id===id))refreshChoicePreviews();}
 $('fxMode').onclick=()=>{fxQuality=fxQuality==='high'?'low':'high';$('fxMode').textContent=fxQuality==='high'?'✦ 이펙트: 고화질':'⚙ 이펙트: 절전';};
 let chosen=0;const choices=$('choices');for(let i=0;i<roster.length;i++){let o=roster[i],b=document.createElement('button');b.className='choice'+(!i?' on':'');b.innerHTML=`<canvas width="72" height="72" data-preview="${i}"></canvas><b>${o.name}</b><small>${o.icon} ${o.basic}</small>`;b.onclick=()=>{chosen=i;document.querySelectorAll('.choice').forEach((c,k)=>c.classList.toggle('on',k===i));refreshStatPanel();refreshLoadout();};choices.appendChild(b)}
@@ -372,16 +409,22 @@ refreshStatPanel();refreshLoadout();
 
 function refreshChoicePreviews(){document.querySelectorAll('[data-preview]').forEach(c=>{
  let i=+c.dataset.preview,p=roster[i],g=c.getContext('2d');g.clearRect(0,0,72,72);g.imageSmoothingEnabled=false;
- let anim=sprites[p.id]?.anims.Idle||sprites[p.id]?.anims.Walk;
- if(anim){
-  const frame=0,dir=0,scale=Math.min(1.65,62/Math.max(1,anim.w),61/Math.max(1,anim.h));
-  const dw=anim.w*scale,dh=anim.h*scale,feet=footOffset(anim,dir,frame)*scale;
-  g.drawImage(anim.image,frame*anim.w,dir*anim.h,anim.w,anim.h,36-dw/2,69-feet,dw,dh)
+ const pack=battleSprites[p.id];
+ const img=pack?.art||pack?.back||pack?.front;
+ if(img){
+  const iw=img.naturalWidth||img.width||96, ih=img.naturalHeight||img.height||96;
+  const scale=Math.min(60/iw,58/ih)*1.7, dw=iw*scale, dh=ih*scale;
+  g.drawImage(img,36-dw/2,67-dh,dw,dh);
  }else{
-  drawFallbackCreature(p.id,36,69,p.id==='0006'?.86:1.07,0,Math.PI/2,g)
+  let anim=sprites[p.id]?.anims.Idle||sprites[p.id]?.anims.Walk;
+  if(anim){
+   const frame=0,dir=0,scale=Math.min(1.65,62/Math.max(1,anim.w),61/Math.max(1,anim.h));
+   const dw=anim.w*scale,dh=anim.h*scale,feet=footOffset(anim,dir,frame)*scale;
+   g.drawImage(anim.image,frame*anim.w,dir*anim.h,anim.w,anim.h,36-dw/2,69-feet,dw,dh)
+  }else drawFallbackCreature(p.id,36,69,p.id==='0006'?.86:1.07,0,Math.PI/2,g)
  }
 })}refreshChoicePreviews();
-Promise.allSettled(unique.map(preload)).then(()=>{const count=unique.filter(id=>sprites[id]?.loaded).length;$('assetStatus').textContent=count?`연결 확인 완료 · ${count}/${unique.length}종 실제 스프라이트 사용`:'스프라이트 서버 접속 불가 · 기본 캐릭터로 계속 플레이 가능';});
+Promise.allSettled(unique.map(async id=>{await Promise.allSettled([preload(id),preloadBattle(id)])})).then(()=>{const count=unique.filter(id=>battleSprites[id]?.loaded||sprites[id]?.loaded).length;$('assetStatus').textContent=count?`연결 확인 완료 · ${count}/${unique.length}종 battler sprite 사용`:'스프라이트 서버 접속 불가 · 대체 캐릭터로 계속 플레이 가능'; refreshChoicePreviews();});
 const map={w:2400,h:1800};let player,enemies=[],projectiles=[],specialEffects=[],particles=[],gems=[],areas=[],kills=0,wave=1,time=0,spawnTimer=0,gameState='menu',last=0,shake=0,idCounter=0;let decals=[],damageTexts=[],shockwaves=[],hitstop=0,flashLevel=0,flashColor='#fff5cf',comboCount=0,comboClock=0,fxQuality='high',cameraKick={x:0,y:0};const ARENA={cx:map.w/2,cy:map.h/2,r:455};const mobileDevice=/iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);const maxParticles=()=>fxQuality==='high'?(mobileDevice?300:420):(mobileDevice?110:170);const ELEMENT_FX={electric:{main:'#ffe16b',accent:'#93f5ff',glow:'#fff7b8'},fire:{main:'#ff9360',accent:'#ffd1a8',glow:'#ffbe7f'},water:{main:'#82d9fb',accent:'#dff9ff',glow:'#a8ecff'},grass:{main:'#9be395',accent:'#e8ffd8',glow:'#b8f4a6'},ghost:{main:'#c48aff',accent:'#f0dcff',glow:'#dcb5ff'},neutral:{main:'#f2f6fb',accent:'#ffffff',glow:'#d9eef8'}};const keys=new Set(),joyVec={x:0,y:0};let mouseAim=null,lastAim={x:1,y:0},skillPointers=new Map(),joyPointer=null,toastTime=0,levelUpText='';
 const mix=(a,b,t)=>a+(b-a)*t,clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),rand=(a,b)=>a+Math.random()*(b-a),len=(x,y)=>Math.hypot(x,y),norm=(x,y)=>{let z=len(x,y)||1;return{x:x/z,y:y/z}};
 function footDust(x,y,size=1){
@@ -593,7 +636,8 @@ function drawFallbackCreature(id,x,y,scale=1,t=0,angle=Math.PI/2,renderCtx=ctx){
  b('#f2fbf5',-10,-29,2,2);b('#f2fbf5',8,-29,2,2);
  ctx.restore();
 }
-function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0){
+function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0,role='player'){
+ if(drawBattleSprite(id,x,y,scale,role,flash,angle,action,t))return;
  const sp=sprites[id]?.anims||{},s=sp[action]||sp.Walk||sp.Idle;
  const shadowScale=scale*(id==='0092'?.85:1);
  contactShadow(x,y,shadowScale,id==='0092');
@@ -613,6 +657,7 @@ function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0){
  ctx.drawImage(s.image,idx*s.w,f*s.h,s.w,s.h,-dw/2,-dh/2,dw,dh);
  ctx.restore();
 }
+
 
 function combatantData(idx){const p=roster[idx],level=BATTLE_LEVEL,iv=makeIV(),stats=computeStats(idx,iv,level,'neutral');return {id:p.id,name:p.name,type:p.type,types:p.types,level,iv,stats,maxHp:arenaHP(stats.hp),speed:speedFromStat(stats.spe),color:p.color,icon:p.icon,special:p.special,basic:p.basic}}
 function spawnEnemy(){
@@ -997,6 +1042,7 @@ function advance(dt){
  if(toastTime>0){toastTime-=dt;if(toastTime<=0)$('toast').classList.remove('show')}
  syncHUD();
 }
+
 function drawLeafShape(size){
  size=Math.max(8,size);const s=Math.max(2,Math.round(size/5));
  pxRect(-s*2,-s,s*2,s,'#7cd671');pxRect(0,-s,s*2,s,'#bdf49e');
@@ -1532,7 +1578,7 @@ function drawGround(ox,oy){paintArenaFloor(ox,oy)}
 function draw(){ctx.clearRect(0,0,W,H);if(!player){ctx.fillStyle='#11323d';ctx.fillRect(0,0,W,H);return}const sh=shake?(Math.random()-.5)*shake:0,ox=Math.round(W/2-player.x+sh+cameraKick.x),oy=Math.round(H/2-player.y+sh+cameraKick.y);drawGround(ox,oy);ctx.save();ctx.translate(ox,oy);renderDecals();fxDrawScenes('ground');renderImpactLights();
 drawSpecials('under');
 for(const m of specialEffects){if(m.type==='extra'&&m.move.mode==='charge'&&!m.fired)fxDrawChargeHalo(m.owner==='player'?player:enemies[0]);}
-let render=[];for(const e of enemies)render.push({y:e.y,kind:0,obj:e});render.push({y:player.y,kind:1,obj:player});render.sort((a,b)=>a.y-b.y);for(const it of render){let e=it.obj;if(it.kind===0){const act=e.hurt>0?'Hurt':(e.action||'Walk');spriteDraw(e.id,e.x,e.y-(e.riding?10:0),e.face,act,e.actionT,1.43,e.flash);fxDrawActorMotion(e);drawStatusPixels(e);fxDrawStatus(e);if(e.tell>0){ctx.save();ctx.strokeStyle='#ff9079';ctx.lineWidth=2.8;ctx.globalAlpha=.45+.4*Math.sin(time*23)**2;ctx.beginPath();ctx.arc(e.x,e.y,38+10*Math.sin(time*17)**2,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.attackVec.x*65,e.y+e.attackVec.y*65);ctx.stroke();ctx.restore()}ctx.fillStyle='#102837c7';ctx.fillRect(e.x-17,e.y-56,34,5);ctx.fillStyle='#ff737f';ctx.fillRect(e.x-17,e.y-56,34*clamp(e.hp/e.maxHp,0,1),5)}else{spriteDraw(roster[chosen].id,player.x,player.y-(player.riding?10:0),player.face,player.action,player.animT,1.43,player.inv>0?.2:0);fxDrawActorMotion(player);drawStatusPixels(player);fxDrawStatus(player)}}
+let render=[];for(const e of enemies)render.push({y:e.y,kind:0,obj:e});render.push({y:player.y,kind:1,obj:player});render.sort((a,b)=>a.y-b.y);for(const it of render){let e=it.obj;if(it.kind===0){const act=e.hurt>0?'Hurt':(e.action||'Walk');spriteDraw(e.id,e.x,e.y-(e.riding?10:0),e.face,act,e.actionT,1.43,e.flash,'enemy');fxDrawActorMotion(e);drawStatusPixels(e);fxDrawStatus(e);if(e.tell>0){ctx.save();ctx.strokeStyle='#ff9079';ctx.lineWidth=2.8;ctx.globalAlpha=.45+.4*Math.sin(time*23)**2;ctx.beginPath();ctx.arc(e.x,e.y,38+10*Math.sin(time*17)**2,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.attackVec.x*65,e.y+e.attackVec.y*65);ctx.stroke();ctx.restore()}ctx.fillStyle='#102837c7';ctx.fillRect(e.x-17,e.y-56,34,5);ctx.fillStyle='#ff737f';ctx.fillRect(e.x-17,e.y-56,34*clamp(e.hp/e.maxHp,0,1),5)}else{spriteDraw(roster[chosen].id,player.x,player.y-(player.riding?10:0),player.face,player.action,player.animT,1.43,player.inv>0?.2:0,'player');fxDrawActorMotion(player);drawStatusPixels(player);fxDrawStatus(player)}}
 for(const g of gems){ctx.save();ctx.translate(g.x,g.y+Math.sin(g.t*5)*4);ctx.fillStyle='#4af8ed55';ctx.beginPath();ctx.arc(0,0,10,0,7);ctx.fill();ctx.rotate(Math.PI/4);ctx.fillStyle='#85ffe9';ctx.fillRect(-5,-5,10,10);ctx.fillStyle='#e7fffa';ctx.fillRect(-2,-5,4,4);ctx.restore()}
 for(const s of projectiles)drawProjectileSprite(s)
 drawSpecials('over');fxDrawScenes('over');
