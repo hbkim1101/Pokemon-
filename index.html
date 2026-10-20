@@ -528,7 +528,7 @@ function footDust(x,y,size=1){
  for(let i=0;i<2;i++)emitParticle({x:x+rand(-12,12)*size,y:y+rand(-3,2),vx:rand(-18,18),vy:rand(-12,-3),life:rand(.18,.34),size:rand(1.7,3.3),color:Math.random()<.5?'#9ac99a':'#456d57',shape:'dot',alpha:.5});
 }
 function emitParticle(o){const sz=Math.max(SPRITE_PX,Math.round((o.size||SPRITE_PX*2)/SPRITE_PX)*SPRITE_PX);particles.push({x:o.x,y:o.y,vx:o.vx||0,vy:o.vy||0,life:o.life||.4,max:o.max||o.life||.4,size:sz,color:o.color||'#fff',shape:o.shape||'dot',rot:o.rot||0,spin:o.spin||0,grow:o.grow||0,gravity:o.gravity||0,alpha:o.alpha??1,line:o.line||0,ink:o.ink||null});if(particles.length>maxParticles())particles.splice(0,particles.length-maxParticles());}
-function fx(x,y,color,n=8,speed=100){for(let i=0;i<n;i++){let a=rand(0,Math.PI*2),s=rand(speed*.25,speed);emitParticle({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.15,.42),max:.42,size:rand(3,6),color,shape:Math.random()<.55?'spark':'dot'})}}
+function fx(x,y,color,n=8,speed=100){for(let i=0;i<n;i++){let a=rand(0,Math.PI*2),s=rand(speed*.25,speed);emitParticle({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.15,.42),max:.42,size:SPRITE_PX*(1+(Math.random()<.45?1:0)),color,shape:Math.random()<.55?'spark':'dot'})}}
 function arcadePal(element){return ELEMENT_FX[element]||ELEMENT_FX.neutral}
 function elementalBurst(x,y,element='neutral',power=1){
  const pal=arcadePal(element);
@@ -1229,7 +1229,7 @@ function pxDiamond(cx,cy,r,color,a=1,size=SPRITE_PX){
  for(let y=-r;y<=r;y+=cell){const w=r-Math.abs(y);for(let x=-w;x<=w;x+=cell)pxRect(cx+x,cy+y,cell,cell,color,a)}
 }
 function drawPixelShard(x,y,w,h,color,a=.95){const ww=Math.max(SPRITE_PX,Math.round(w/SPRITE_PX)*SPRITE_PX),hh=Math.max(SPRITE_PX,Math.round(h/SPRITE_PX)*SPRITE_PX);pxRect(x-ww/2,y-hh/2,ww,hh,color,a)}
-function drawPixelSparkBurst(x,y,r,color,a=.9){for(let i=0;i<8;i++){const ang=i*Math.PI/4;pxRect(x+Math.cos(ang)*r-3,y+Math.sin(ang)*r-3,6,6,color,a)}pxRect(x-3,y-3,6,6,'#ffffff',a)}
+function drawPixelSparkBurst(x,y,r,color,a=.9){for(let i=0;i<8;i++){const ang=i*Math.PI/4;pxCell(x+Math.cos(ang)*r,y+Math.sin(ang)*r,color,a)}pxCell(x,y,'#ffffff',a)}pxRect(x-3,y-3,6,6,'#ffffff',a)}
 function drawPixelCrescent(x,y,ang,inner,outer,c1,c2,a=.95){ctx.save();ctx.translate(x,y);ctx.rotate(ang);for(let row=-outer;row<=outer;row+=6){const t=Math.abs(row)/outer;const len=outer*(1-t*t);const start=Math.max(0,inner*(1-t*t));for(let xx=start;xx<=len;xx+=6){drawPixelShard(xx,row,6,6,xx>len-12?c2:c1,a)}}ctx.restore()}
 function drawPixelOrbital(x,y,rot,r,colors,size=6){for(let i=0;i<colors.length;i++){const ang=rot+i*(Math.PI*2/colors.length);drawPixelShard(x+Math.cos(ang)*r,y+Math.sin(ang)*r,size,size,colors[i],.95)}}
 function drawPixelWaveBand(x,y,dirX,dirY,sideX,sideY,aheadStart,aheadEnd,halfW,c1,c2,foam=false){for(let side=-halfW;side<=halfW;side+=8){const ahead=aheadStart+(aheadEnd-aheadStart)*(1-Math.abs(side)/Math.max(1,halfW));for(let t=-28;t<ahead;t+=8){pxRect(x+dirX*t+sideX*side-4,y+dirY*t+sideY*side-4,8,8,c1,.88)}for(let t=0;t<ahead;t+=8){pxRect(x+dirX*t+sideX*side-4,y+dirY*t+sideY*side-4,8,8,c2,.94)}if(foam&&Math.round((side+halfW)/8)%2===0)pxRect(x+dirX*ahead+sideX*side-4,y+dirY*ahead+sideY*side-4,8,8,'#f7ffff',.98)}}
@@ -1306,7 +1306,7 @@ function drawParticleSprite(p){
  else{pxRect(-s/2,-s/2,s,s,p.ink||'#102028',alpha*.35);pxRect(-s/2,-s/2,s,s,p.color,alpha)}
  ctx.restore()
 }
-function drawAreaPulse(a){let t=1-a.life/.3,r=Math.round(a.r+(a.max-a.r)*t),pal=arcadePal(a.element);ctx.save();ctx.globalAlpha=1-t;pxRing(a.x,a.y,r+3,10,pal.ink||'#1a2030',.7,4);pxRing(a.x,a.y,r,9,pal.main,.9,4);pxRing(a.x,a.y,Math.max(8,Math.round(r*.7)),5,pal.accent,.96,4);pxRing(a.x,a.y,Math.max(6,Math.round(r*.42)),3,pal.hot||'#fff',.85,4);for(let i=0;i<12;i++){let ang=i*Math.PI/6+t*2.4;fxRect(a.x+Math.cos(ang)*r*.92-3,a.y+Math.sin(ang)*r*.92-3,6,6,i%2?pal.main:pal.hot||'#fff',.95)}ctx.restore()}
+function drawAreaPulse(a){let t=1-a.life/.3,r=Math.round((a.r+(a.max-a.r)*t)/SPRITE_PX)*SPRITE_PX,pal=arcadePal(a.element);ctx.save();ctx.globalAlpha=1-t;pxRing(a.x,a.y,r+SPRITE_PX,SPRITE_PX*2,pal.ink||'#1a2030',.7,SPRITE_PX);pxRing(a.x,a.y,r,SPRITE_PX*2,pal.main,.9,SPRITE_PX);pxRing(a.x,a.y,Math.max(SPRITE_PX*4,Math.round(r*.7/SPRITE_PX)*SPRITE_PX),SPRITE_PX,pal.accent,.96,SPRITE_PX);pxRing(a.x,a.y,Math.max(SPRITE_PX*3,Math.round(r*.42/SPRITE_PX)*SPRITE_PX),SPRITE_PX,pal.hot||'#fff',.85,SPRITE_PX);for(let i=0;i<12;i++){let ang=i*Math.PI/6+t*2.4;pxCell(a.x+Math.cos(ang)*r*.92,a.y+Math.sin(ang)*r*.92,i%2?pal.main:pal.hot||'#fff',.95)}ctx.restore()}
 function legacy_drawThunderbolt(m){
  const pts=m.path||[],fade=m.type==='boltEcho'?clamp(1-m.age/m.life,0,1):.97;if(!pts.length)return;
  ctx.save();ctx.globalAlpha=fade;
