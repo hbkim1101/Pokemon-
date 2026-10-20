@@ -66,6 +66,7 @@ const exposed = [
   ' draw:()=>draw(),',
   ' advance:(dt)=>advance(dt),',
   ' activate:(slot)=>activate(slot),',
+  ' direction:(angle)=>faceFromAngle(angle),',
   ' state:()=>({gameState,player,enemies,specialEffects,extras:EXTRA_SKILLS_ENABLED}),',
   ' injectSheets:()=>{for(const actor of roster){const anims={};for(const key of ACTIONS){anims[key]={image:{width:240,height:448},w:60,h:56,frames:4,dirs:8,dur:[8,8,8,8]}}sprites[actor.id]={anims,variant:"mock",loaded:true}}}',
   '};'
@@ -78,6 +79,7 @@ api.injectSheets();
 assert.equal(api.studio.audit().valid,160);
 for(let k=0;k<4;k++){
   api.setChosen(k);
+  const beforeStudio=api.state().gameState;
   api.studio.open();
   assert.equal(api.state().gameState,'studio');
   for(const action of ['basic','special']){api.studio.preview(action);api.draw();}
@@ -86,7 +88,7 @@ for(let k=0;k<4;k++){
   api.draw();
   api.studio.setCompare(false);
   api.studio.close();
-  assert.equal(api.state().gameState,'menu');
+  assert.equal(api.state().gameState,beforeStudio,'Studio did not restore the previous game state');
   api.reset();
   assert.equal(api.state().enemies.length,1);
   api.activate(3);api.activate(4);
@@ -97,5 +99,7 @@ for(let k=0;k<4;k++){
   api.advance(0.016);
   api.draw();
 }
+const pmdAngles=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
+for(let direction=0;direction<8;direction++)assert.equal(api.direction(pmdAngles[direction]),direction,'PMD row is mapped to the wrong angle');
 assert(!html.includes('let didExtra=false;'), 'AI legacy move block still enabled');
 console.log('PASS: 4 Pokemon, 8 directions, 5 animation sheets, 4 signature moves, disabled extra moves, studio lifecycle and rendering');
