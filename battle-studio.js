@@ -159,7 +159,14 @@ function drawStudioEffects(x,y,a){
 function render(){
  const now=performance.now(),dt=Math.min(.06,Math.max(0,(now-state.last)/1000))*state.speed;state.last=now;
  state.clock+=dt;
- if(state.preview){state.preview.age+=dt;if(state.preview.age>state.preview.life)state.preview=null;}
+ if(state.preview){
+  state.preview.age+=dt;
+  if(state.preview.age>state.preview.life){
+   const finished=state.preview.type;
+   state.preview=null;
+   if(finished==='flamethrower'){state.action='Idle';state.clock=0;meta();}
+  }
+ }
  if(state.auto){state.autoTime+=dt;if(state.autoTime>.77){state.autoTime=0;state.autoIndex++;if(state.autoIndex>=roster.length*8*testActions.length){state.auto=false;state.completed=true;meta();audit();}else{const count=testActions.length,k=Math.floor(state.autoIndex/(8*count)),d=Math.floor(state.autoIndex/count)%8,ac=testActions[state.autoIndex%count];select(k,ac,d);}}}
  const cx=W*.5,cy=Math.min(H*.48,Math.max(175,H-(Math.min(H*.6,440)+65))),sp=roster[state.kind],a=faces[state.dir];
  ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.globalAlpha=1;
@@ -190,7 +197,13 @@ function render(){
   if(state.action==='Walk'){const ox=Math.sin(state.clock*7)*12;for(let i=0;i<3;i++)pxRect(cx-ox*(i+1)*1.2-5,cy+12+i*5,10,4,'#d8edbe',.2);}
  const dashPreview=state.preview?.type==='dash',dk=dashPreview?Math.min(1,state.preview.age/state.preview.life):0;
   const offset=dashPreview?Math.min(74,W*.14)*(dk<.55?dk/.55:1-(dk-.55)/.45):0;
-  spriteDraw(sp.id,cx+Math.cos(a)*offset,cy+Math.sin(a)*offset,a,state.action,state.clock,scale,state.action==='Hurt'?.9:0,'player');
+  let spriteClock=state.clock;
+  if(state.preview?.type==='flamethrower'){
+   const timing=flameShootTiming(sp.id),p=state.preview,releaseStart=p.life-.22;
+   spriteClock=p.age<releaseStart?Math.min(p.age,timing.hold):
+    timing.hold+(timing.end-timing.hold)*Math.min(1,(p.age-releaseStart)/.22);
+  }
+  spriteDraw(sp.id,cx+Math.cos(a)*offset,cy+Math.sin(a)*offset,a,state.action,spriteClock,scale,state.action==='Hurt'?.9:0,'player');
  if(state.action==='Hurt' && state.clock<.4){const n=Math.max(0,1-state.clock/.4);fxStar(cx+Math.cos(a)*-16,cy-42,12+20*(1-n),'fire',n);pxRing(cx,cy-28,18+35*(1-n),4,'#ffe6d6',n,4);}
  if(state.preview)drawStudioEffects(cx,cy,a);
  ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillStyle='#f3fff1';ctx.fillText(sp.name+' · '+state.action,cx,Math.max(95,cy-135));
