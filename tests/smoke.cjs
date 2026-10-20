@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v22.
+// Dependency-free regression tests for Pokemon Arena v23.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -10,7 +10,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=22'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=23'), 'Motion Studio not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -67,6 +67,8 @@ const exposed = [
   ' advance:(dt)=>advance(dt),',
   ' activate:(slot)=>activate(slot),',
   ' direction:(angle)=>faceFromAngle(angle),',
+  ' signature:(type)=>signatureAnimation(type),',
+  ' actionOf:(actor)=>combatAnimation(actor),',
   ' state:()=>({gameState,player,enemies,specialEffects,extras:EXTRA_SKILLS_ENABLED}),',
   ' injectSheets:()=>{for(const actor of roster){const anims={};for(const key of ACTIONS){anims[key]={image:{width:240,height:448},w:60,h:56,frames:4,dirs:8,dur:[8,8,8,8]}}sprites[actor.id]={anims,variant:"mock",loaded:true}}}',
   '};'
@@ -76,13 +78,17 @@ const api = sandbox.__smoke;
 assert.equal(api.state().gameState,'menu');
 assert.equal(api.state().extras,false);
 api.injectSheets();
-assert.equal(api.studio.audit().valid,160);
+assert.equal(api.studio.audit().valid,192);
 for(let k=0;k<4;k++){
   api.setChosen(k);
   const beforeStudio=api.state().gameState;
   api.studio.open();
   assert.equal(api.state().gameState,'studio');
-  for(const action of ['basic','special']){api.studio.preview(action);api.draw();}
+  for(const action of ['basic','special','dash']){
+    api.studio.preview(action);
+    assert.equal(api.studio.getState().action,action==='dash'?'Attack':action==='basic'?'Shoot':k===2?'Attack':'Shoot', 'Studio action role mismatch');
+    api.draw();
+  }
   api.studio.setCompare(true);
   assert.equal(api.studio.getState().compare,true);
   api.draw();
@@ -94,12 +100,23 @@ for(let k=0;k<4;k++){
   api.activate(3);api.activate(4);
   assert.equal(api.state().player.cd[3],0,'Old skill 3 activated');
   assert.equal(api.state().player.cd[4],0,'Old skill 4 activated');
+  api.activate(0);
+  assert.equal(api.state().player.action,'Shoot','Basic ranged move should use Shoot');
   api.activate(1);
   assert(api.state().specialEffects.length>0,'Signature move did not cast');
+  assert.equal(api.state().player.action,k===2?'Attack':'Shoot','Signature move action role mismatch');
+  assert.equal(api.actionOf(api.state().player),k===2?'Attack':'Shoot','Rendered signature motion mismatched');
+  api.activate(2);
+  assert.equal(api.state().player.action,'Attack','Dash must use Attack instead of Walk');
+  assert.equal(api.actionOf(api.state().player),'Attack','Rendered dash must use Attack');
   api.advance(0.016);
   api.draw();
 }
 const pmdAngles=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
 for(let direction=0;direction<8;direction++)assert.equal(api.direction(pmdAngles[direction]),direction,'PMD row is mapped to the wrong angle');
 assert(!html.includes('let didExtra=false;'), 'AI legacy move block still enabled');
-console.log('PASS: 4 Pokemon, 8 directions, 5 animation sheets, 4 signature moves, disabled extra moves, studio lifecycle and rendering');
+assert.equal(api.signature('electric'),'Shoot');
+assert.equal(api.signature('fire'),'Shoot');
+assert.equal(api.signature('water'),'Attack');
+assert.equal(api.signature('grass'),'Shoot');
+console.log('PASS: 4 Pokemon, 8 directions, 6 animations (192 cells), ranged Shoot / lunge Attack / Charge, dash & signature rendering');
