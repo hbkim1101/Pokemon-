@@ -1111,7 +1111,7 @@ function advance(dt){
   updateStatus(e,dt);if(e.hp<=0){victory();return;}
   e.actionT+=dt;e.actLeft=Math.max(0,(e.actLeft||0)-dt);e.atk-=dt;e.shoot-=dt;e.extraCd=Math.max(0,(e.extraCd||0)-dt);e.specialCd=Math.max(0,e.specialCd-dt);e.flash=Math.max(0,e.flash-dt);e.hurt=Math.max(0,e.hurt-dt);
   const data=roster[e.kind];if(data.type==='fire')updateFuel(e,'enemy',dt);
-  if(e.tell>0){e.tell-=dt;if(e.tell<=0){if(e.staggerT>0||e.status?.kind==='freeze'){e.tell=0;continue;}e.x+=e.attackVec.x*27;e.y+=e.attackVec.y*27;clampToArena(e,ARENA.r-22);if(len(player.x-e.x,player.y-e.y)<74)hurt(arenaDamage(damagePacket(e,player,'basic').damage));applySecondary(player,moveOf(e,'basic'));createRing(e.x,e.y,'#ffa49b',30,.21);}}
+  if(e.tell>0){e.tell-=dt;if(e.tell<=0){if(e.staggerT>0||e.status?.kind==='freeze'){e.tell=0;continue;}e.x+=e.attackVec.x*27;e.y+=e.attackVec.y*27;playAction(e,'Attack',.32);clampToArena(e,ARENA.r-22);if(len(player.x-e.x,player.y-e.y)<74)hurt(arenaDamage(damagePacket(e,player,'basic').damage));applySecondary(player,moveOf(e,'basic'));createRing(e.x,e.y,'#ffa49b',30,.21);}}
   let dx=player.x-e.x,dy=player.y-e.y,d=len(dx,dy)||1;
   if(e.tell<=0&&d>130){e.x+=dx/d*e.speed*statusSpeed(e)*dt;e.y+=dy/d*e.speed*statusSpeed(e)*dt;if(Math.random()<dt*7)footDust(e.x,e.y,.8)}
   else if(e.tell<=0&&d<82){e.x-=dx/d*e.speed*statusSpeed(e)*.22*dt;e.y-=dy/d*e.speed*statusSpeed(e)*.22*dt}
