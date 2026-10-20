@@ -835,35 +835,52 @@ function updateCinematic(dt){
 }
 
 
+// Classic Substitute doll art in *source texels* (same scale language as heroes: × SPRITE_SCALE).
+// Footprint 32×40 texels — matches typical PMD walk sprite size used by the four heroes.
+const SUB_DOLL_W_TEXELS=32, SUB_DOLL_H_TEXELS=40;
 function drawSubstituteDoll(x,y,flash=0,t=0){
- // Classic brown sack Substitute (대타출동 인형) on SPRITE_PX grid — standing, no blur.
- contactShadow(x,y,1.05,false);
- const S=SPRITE_PX;
+ // Classic doll: green body, white face, angry eyes, stick arms, little feet. SPRITE_PX grid, no blur.
+ contactShadow(x,y,SPRITE_SCALE*1.1,false);
+ const sc=SPRITE_SCALE;
+ const ink='#163820', body='#42c45e', bodyDeep='#2f9a48', face='#ffffff', faceShade='#e8efe6';
+ const stick='#7a5230', stickDark='#4e321c', foot='#246638', eye='#101410', brow='#0a0e0a';
  ctx.save();ctx.imageSmoothingEnabled=false;
- if(flash>0)ctx.globalAlpha=.7+Math.cos(t*50)*.25;
- const baseY=y;
- // body sack
- for(let yy=-28;yy<=-4;yy+=S)for(let xx=-14;xx<=14;xx+=S){
-  const ny=yy+16, nx=xx;
-  if((nx*nx)/(14*14)+(ny*ny)/(14*14)>1.05)continue;
-  const edge=Math.abs(xx)>=12||yy<=-26||yy>=-6;
-  pxTex(x+xx, baseY+yy, edge?'#4a2e18':'#8b5a2b', .98);
+ if(flash>0)ctx.globalAlpha=.72+Math.cos(t*50)*.22;
+ // Local source-texel coords: (0,0) = feet; draw upward like hero sprites.
+ const put=(tx,ty,col,a=1)=>{pxTex(x+tx*sc, y+ty*sc, col, a)};
+ // green body (tall rounded plush)
+ for(let ty=-38;ty<=-3;ty++)for(let tx=-13;tx<=13;tx++){
+  const cy=ty+20.5, cx=tx;
+  if((cx*cx)/(12.2*12.2)+(cy*cy)/(17.8*17.8)>1)continue;
+  const rim=Math.abs(tx)>=11||ty<=-36||ty>=-5;
+  put(tx,ty, rim?ink:(Math.abs(tx)>7||ty<-32?bodyDeep:body));
  }
- // lighter belly
- for(let yy=-18;yy<=-8;yy+=S)for(let xx=-8;xx<=8;xx+=S)pxTex(x+xx,baseY+yy,'#c4a06a',.95);
- // spiral
- pxTex(x,baseY-14,'#3a2410',1);pxTex(x+S,baseY-14,'#3a2410',1);pxTex(x+S,baseY-14-S,'#3a2410',1);
- pxTex(x,baseY-14-2*S,'#3a2410',1);pxTex(x-S,baseY-14-2*S,'#3a2410',1);pxTex(x-S,baseY-14-S,'#3a2410',1);
- // eyes
- pxTex(x-S*3,baseY-20,'#1a120c',1);pxTex(x+S*3,baseY-20,'#1a120c',1);
- pxTex(x-S*3,baseY-20-S,'#fff8e0',.9);pxTex(x+S*3,baseY-20-S,'#fff8e0',.9);
- // arms
- for(let i=0;i<4;i++){pxTex(x-S*8,baseY-12+i*S,'#6e4420',.95);pxTex(x+S*8,baseY-12+i*S,'#6e4420',.95)}
- // feet
- pxTex(x-S*4,baseY-2,'#3a2410',1);pxTex(x-S*2,baseY-2,'#3a2410',1);
- pxTex(x+S*2,baseY-2,'#3a2410',1);pxTex(x+S*4,baseY-2,'#3a2410',1);
- // horn nubs
- pxTex(x-S*2,baseY-30,'#5a3a1c',1);pxTex(x+S*2,baseY-30,'#5a3a1c',1);
+ // ear/horn nubs
+ for(const s of [-1,1]){put(s*4,-39,body);put(s*3,-40,body);put(s*3,-39,ink);put(s*4,-40,ink)}
+ // large white face plate (reads at battle scale)
+ for(let ty=-30;ty<=-11;ty++)for(let tx=-9;tx<=9;tx++){
+  const cy=ty+20.5, cx=tx;
+  if((cx*cx)/(8.4*8.4)+(cy*cy)/(9.6*9.6)>1)continue;
+  put(tx,ty, (Math.abs(tx)>=8||ty<=-29||ty>=-12)?faceShade:face);
+ }
+ // angry brows (\\ /) + eyes
+ put(-6,-26,brow);put(-5,-26,brow);put(-4,-25,brow);put(-7,-25,brow);
+ put(6,-26,brow);put(5,-26,brow);put(4,-25,brow);put(7,-25,brow);
+ put(-5,-23,eye);put(-4,-23,eye);put(-5,-22,eye);put(-4,-22,eye);
+ put(5,-23,eye);put(4,-23,eye);put(5,-22,eye);put(4,-22,eye);
+ // angry mouth
+ put(-3,-16,eye);put(-2,-15,eye);put(-1,-15,eye);put(0,-15,eye);put(1,-15,eye);put(2,-15,eye);put(3,-16,eye);
+ put(-2,-14,eye);put(2,-14,eye);
+ // stick arms (clear brown sticks out from sides)
+ for(let i=0;i<9;i++){
+  put(-14-Math.floor(i/4), -24+i, i%3===0?stickDark:stick);
+  put(14+Math.floor(i/4), -24+i, i%3===0?stickDark:stick);
+ }
+ put(-16,-16,stick);put(-17,-15,stickDark);put(-16,-14,stick);
+ put(16,-16,stick);put(17,-15,stickDark);put(16,-14,stick);
+ // little feet
+ put(-6,-2,foot);put(-5,-2,foot);put(-4,-2,foot);put(-6,-1,ink);put(-5,-1,foot);put(-4,-1,ink);
+ put(6,-2,foot);put(5,-2,foot);put(4,-2,foot);put(6,-1,ink);put(5,-1,foot);put(4,-1,ink);
  ctx.restore();
 }
 function spawnSubstituteDoll(atX,atY){
