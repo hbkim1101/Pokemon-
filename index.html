@@ -1092,7 +1092,7 @@ function advance(dt){
  time+=dt;
  updateCinematic(dt);
  updateStatus(player,dt);if(player.hp<=0){gameOver();return;}
- player.inv=Math.max(0,player.inv-dt);player.cd=player.cd.map(v=>Math.max(0,v-dt));
+ player.inv=Math.max(0,player.inv-dt);player.hurt=Math.max(0,(player.hurt||0)-dt);player.cd=player.cd.map(v=>Math.max(0,v-dt));
  if(roster[chosen].type==='fire')updateFuel(player,'player',dt);
  player.actLeft=Math.max(0,player.actLeft-dt);player.animT+=dt;
  let mx=joyVec.x+(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0);
