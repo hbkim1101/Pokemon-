@@ -100,9 +100,9 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #toast{font-family:system-ui,sans-serif;font-weight:1000;letter-spacing:.5px;filter:drop-shadow(0 2px #0b2637)}
 </style></head><body>
 <canvas id="stage"></canvas><div class="vignette"></div><div id="impactFlash"></div><div id="roundBadge">ANCIENT GROVE · ROUND 01</div><div id="comboBadge"></div><div id="hud"><div class="stats glass"><div class="name"><span id="playerName">⚡ 라이츄</span><span id="healthText">120/120</span></div><div class="track hp"><i id="hpBar"></i></div><div class="condition" id="playerCondition"></div><div class="fuelHud" id="fuelHud" hidden><div class="fuelHeading"><span>🔥 화염방사 에너지</span><span id="fuelValue">100%</span></div><div class="fuelGauge"><i id="fuelFill"></i></div></div></div><div class="versus">VS</div><div class="stats glass enemyStats"><div class="name"><span id="enemyName">상대 포켓몬</span><span id="enemyHealthText">—</span></div><div class="track hp"><i id="enemyHpBar"></i></div><div class="condition" id="enemyCondition"></div></div><button class="pause glass" id="pause" aria-label="일시정지">Ⅱ</button></div>
-<div id="floating"></div><div id="toast"></div><div id="aimHelp">PIXEL STUDIO v23 · SHOOT / ATTACK / CHARGE 분리</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
+<div id="floating"></div><div id="toast"></div><div id="aimHelp">PIXEL STUDIO v24 · 화염방사 발사 자세 유지</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
 <div class="controls" id="controls"><div class="joyShell"><div id="joy" aria-label="이동 조이스틱"><div class="nub" id="nub"></div></div></div><div class="buttons"><div class="skill" data-n="3" style="--c:#b7d6ff"><span class="glyph" id="extraGlyph3">✦</span><small id="extraLabel3">추가 1</small><span class="cooldown"></span></div><div class="skill" data-n="1" style="--c:#fa9d6a"><span class="glyph" id="bigSkill">✹</span><small id="bigLabel">강화 기술</small><span class="fuelButton" id="fuelButton" hidden><i id="fuelButtonFill"></i></span><span class="cooldown"></span></div><div class="skill dash" data-n="2" style="--c:#96deff"><span class="glyph">➤</span><small>회피</small><span class="cooldown"></span></div><div class="skill main" data-n="0" style="--c:#ffdd6c"><span class="glyph" id="basicSkill">⚡</span><small id="basicLabel">기본 기술</small><span class="cooldown"></span></div><div class="skill" data-n="4" style="--c:#b7ffd6"><span class="glyph" id="extraGlyph4">✧</span><small id="extraLabel4">추가 2</small><span class="cooldown"></span></div></div></div>
-<div class="screen" id="menu"><div class="panel"><div class="eyebrow">PMD 8-WAY · MOTION STUDIO v23</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 기본 공격 + 포켓몬별 고유 기술 1개 · 8방향 모션 테스트 · HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
+<div class="screen" id="menu"><div class="panel"><div class="eyebrow">PMD 8-WAY · MOTION STUDIO v24</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 기본 공격 + 포켓몬별 고유 기술 1개 · 8방향 모션 테스트 · HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
   <div class="ivTop"><strong>포켓몬 능력치 · Lv.50</strong><button type="button" id="ivReroll">IV 랜덤</button><button type="button" id="ivPerfect">6V (전부 31)</button></div>
   <label class="naturePicker">성격 <select id="natureSelect" aria-label="성격 선택"></select></label>
   <div class="ivGrid" id="ivGrid"></div>
@@ -110,7 +110,7 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 기본 공격 + 고유 기술 + 회피 · 4가지 고유 기술(포켓몬별 1개) · 터치/드래그 조준 · 모션 스튜디오에서 8방향 프레임 테스트<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">HGSS 4방향 animated overworld sprites + PokéAPI/PMDCollab fallback<br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 4방향 포켓몬 스프라이트는 인터넷 연결이 필요하며, 실패 시 대체 스프라이트로 계속 플레이할 수 있습니다.<br><a href="https://github.com/teobz/pkmn-hgss-animated-overworld-sprites" target="_blank" rel="noopener">HGSS directional sprite source</a> · <a href="https://pokeapi.github.io/sprites/" target="_blank" rel="noopener">PokéAPI</a> · <a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">PMDCollab fallback</a></div></div></div>
 <script>
 'use strict';
-const BUILD_VERSION='v23-pmd-action-roles';
+const BUILD_VERSION='v24-flamethrower-channel-pose';
 const EXTRA_SKILLS_ENABLED=false; // Advanced moves remain archived in the database but cannot be used in this build.
 const $=id=>document.getElementById(id),CV=$('stage'),ctx=CV.getContext('2d');let W=innerWidth,H=innerHeight,dpr=1;
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);CV.width=Math.round(W*dpr);CV.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false}addEventListener('resize',resize);resize();
@@ -324,7 +324,7 @@ const PMD_VARIANT_PATHS={
 };
 const variantCandidates=id=>[...new Set([...(PMD_VARIANT_PATHS[id]||[]),''])];
 const pmdBasePath=(id,variant='')=>BASE+id+(variant?'/'+variant:'')+'/';
-function getAnim(xml,name){let nodes=[...xml.getElementsByTagName('Anim')],node=nodes.find(n=>n.getElementsByTagName('Name')[0]?.textContent===name);if(!node)return null;const val=key=>Number(node.getElementsByTagName(key)[0]?.textContent||0);return {w:val('FrameWidth'),h:val('FrameHeight'),dur:[...node.getElementsByTagName('Duration')].map(n=>+n.textContent)}}
+function getAnim(xml,name){let nodes=[...xml.getElementsByTagName('Anim')],node=nodes.find(n=>n.getElementsByTagName('Name')[0]?.textContent===name);if(!node)return null;const val=key=>Number(node.getElementsByTagName(key)[0]?.textContent||0),optional=key=>{const tag=node.getElementsByTagName(key)[0];return tag?Number(tag.textContent):null};return {w:val('FrameWidth'),h:val('FrameHeight'),dur:[...node.getElementsByTagName('Duration')].map(n=>+n.textContent),hitFrame:optional('HitFrame'),returnFrame:optional('ReturnFrame')}}
 function loadImage(url){return new Promise((resolve,reject)=>{const im=new Image();let ended=false;const timer=setTimeout(()=>finish(false),5500);function finish(ok){if(ended)return;ended=true;clearTimeout(timer);im.onload=im.onerror=null;if(ok)resolve(im);else reject(Error('스프라이트 요청 실패 또는 시간 초과'))}im.crossOrigin='anonymous';im.onload=()=>finish(true);im.onerror=()=>finish(false);im.src=url})}
 async function loadXml(url){const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),4200);try{const r=await fetch(url,{mode:'cors',signal:ctrl.signal});if(!r.ok)throw Error('HTTP '+r.status);return new DOMParser().parseFromString(await r.text(),'application/xml')}finally{clearTimeout(timer)}}
 // For spritesheet animations, the row/frame canvas includes transparent padding.
@@ -453,7 +453,7 @@ async function preload(id){
       m={w:({26:48,6:72,9:64,3:72}[Number(id)]||image.height/8||f[0]),h:image.height/8||f[1],dur:Array.from({length:Math.max(1,Math.round(image.width/(image.height/8||f[0])))},()=>8)}
     }
     if(image.width<m.w||image.height<m.h)throw Error('bad dimensions');
-    const anim={image,w:m.w,h:m.h,dur:m.dur?.length?m.dur:[8],frames:Math.max(1,Math.floor(image.width/m.w)),dirs:Math.max(1,Math.floor(image.height/m.h))};
+    const anim={image,w:m.w,h:m.h,dur:m.dur?.length?m.dur:[8],frames:Math.max(1,Math.floor(image.width/m.w)),dirs:Math.max(1,Math.floor(image.height/m.h)),hitFrame:m.hitFrame??null,returnFrame:m.returnFrame??null};
     anim.feet=measureSpriteFeet(anim);
     temp[a]=anim;
    }catch(err){}
@@ -776,12 +776,44 @@ function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let
 // PMD action-role mapping verified against original frame sheets:
  // Shoot = ranged skill casting, Attack = forward/melee lunge, Charge = stationary power-up.
  function signatureAnimation(type){return type==='water'?'Attack':'Shoot'}
+ // PMD Shoot is a one-shot animation. Hold its XML HitFrame for a sustained flame.
+ function flameShootTiming(id){
+  const sheet=sprites[id]?.anims?.Shoot;
+  if(!sheet)return {hold:.25,end:.48};
+  const frames=Math.max(1,Math.min(sheet.frames,sheet.dur?.length||sheet.frames));
+  const durations=Array.from({length:frames},(_,i)=>Math.max(1,sheet.dur?.[i]||8));
+  const hit=Math.min(frames-1,Math.max(0,sheet.hitFrame??Math.floor(frames*.42)));
+  const at=frame=>durations.slice(0,frame).reduce((a,b)=>a+b,0)/60;
+  const total=durations.reduce((a,b)=>a+b,0)/60;
+  return {hold:Math.min(total-.001,at(hit)+Math.min(.012,(durations[hit]||2)/120)),end:Math.max(0,total-.002)};
+ }
+ function activeFlameChannel(actor){
+  return specialEffects.find(m=>m.type==='flamethrower'&&m.controlled&&m.owner===(actor===player?'player':'enemy')&&m.age<m.life&&!m.end);
+ }
  function combatAnimation(actor){
   if(!actor)return 'Idle';
   if((actor.hurt||0)>0)return 'Hurt';
   if((actor.dashTime||0)>0||actor.riding)return 'Attack';
-  if(specialEffects.some(m=>m.type==='flamethrower'&&m.owner===(actor===player?'player':'enemy')&&m.age<m.life&&!m.end))return 'Shoot';
+  if(activeFlameChannel(actor)||actor.flameRecovery)return 'Shoot';
   return actor.action||'Idle';
+ }
+ function combatSpriteClock(actor,action,normalClock){
+  if(action!=='Shoot')return normalClock;
+  const flame=activeFlameChannel(actor),timing=flameShootTiming(actor.id||roster[actor.kind].id);
+  if(flame)return Math.min(flame.age,timing.hold);
+  if(actor.flameRecovery){
+   const rec=actor.flameRecovery,u=Math.min(1,rec.elapsed/rec.duration);
+   return Math.min(timing.end,rec.start+(timing.end-rec.start)*u);
+  }
+  return normalClock;
+ }
+ function tickFlameRecovery(actor,dt){
+  if(!actor?.flameRecovery)return;
+  actor.flameRecovery.elapsed+=dt;
+  if(actor.flameRecovery.elapsed>=actor.flameRecovery.duration){
+   actor.flameRecovery=null;
+   if(actor.action==='Shoot'&&actor.actLeft<=0){actor.action='Idle';actor.animT=0;actor.actionT=0}
+  }
  }
  function playAction(o,action,d=.23){o.action=action;o.animT=0;o.actLeft=d;if(o!==player)o.actionT=0}
 function shoot(kind,ang){
@@ -930,7 +962,7 @@ function castSpecial(v,owner='player',opts={}){
   for(let i=0;i<10;i++)emitParticle({x:x+rand(-9,9),y:y+rand(-9,9),vx:rand(-65,65),vy:rand(-65,65),life:rand(.12,.24),size:rand(2,5),shape:'spark',color:i%2?'#fff4ad':'#a3f7ff'});
   sfx(640,1220,.16);
  }else if(move.type==='flamethrower'){
-  move.tick=.08;move.stream=0;move.decalTick=.1;
+  actor.flameRecovery=null;move.tick=.08;move.stream=0;move.decalTick=.1;
   sfx(150,65,.2);
  }else if(move.type==='energyball'){
   move.x=x+v.x*14;move.y=y+v.y*14;
@@ -974,7 +1006,10 @@ function updateSpecials(dt){
   if(m.type==='flamethrower' && m.controlled){
    const aim=m.owner==='player'?(player.channelAim||lastAim):norm(player.x-actor.x,player.y-actor.y);
    m.vx=aim.x;m.vy=aim.y;actor.face=Math.atan2(m.vy,m.vx);
-   if(m.end)m.age=m.life;
+   if(m.end){
+    if(!actor.flameRecovery){actor.flameRecovery={elapsed:0,duration:.22,start:Math.min(m.age,flameShootTiming(actor.id||roster[actor.kind].id).hold)};}
+    m.age=m.life;
+   }
   }
   if(m.age>=m.life)continue;
   if(m.type==='thunderbolt'){
@@ -1094,7 +1129,7 @@ function advance(dt){
  updateStatus(player,dt);if(player.hp<=0){gameOver();return;}
  player.inv=Math.max(0,player.inv-dt);player.hurt=Math.max(0,(player.hurt||0)-dt);player.cd=player.cd.map(v=>Math.max(0,v-dt));
  if(roster[chosen].type==='fire')updateFuel(player,'player',dt);
- player.actLeft=Math.max(0,player.actLeft-dt);player.animT+=dt;
+ player.actLeft=Math.max(0,player.actLeft-dt);player.animT+=dt;tickFlameRecovery(player,dt);
  let mx=joyVec.x+(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0);
  let my=joyVec.y+(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0);
  let mag=len(mx,my),moving=mag>.05;
@@ -1109,7 +1144,7 @@ function advance(dt){
  // A match always has one and only one enemy. No waves or respawns.
  for(const e of enemies){
   updateStatus(e,dt);if(e.hp<=0){victory();return;}
-  e.actionT+=dt;e.actLeft=Math.max(0,(e.actLeft||0)-dt);e.atk-=dt;e.shoot-=dt;e.extraCd=Math.max(0,(e.extraCd||0)-dt);e.specialCd=Math.max(0,e.specialCd-dt);e.flash=Math.max(0,e.flash-dt);e.hurt=Math.max(0,e.hurt-dt);
+  e.actionT+=dt;e.actLeft=Math.max(0,(e.actLeft||0)-dt);tickFlameRecovery(e,dt);e.atk-=dt;e.shoot-=dt;e.extraCd=Math.max(0,(e.extraCd||0)-dt);e.specialCd=Math.max(0,e.specialCd-dt);e.flash=Math.max(0,e.flash-dt);e.hurt=Math.max(0,e.hurt-dt);
   const data=roster[e.kind];if(data.type==='fire')updateFuel(e,'enemy',dt);
   if(e.tell>0){e.tell-=dt;if(e.tell<=0){if(e.staggerT>0||e.status?.kind==='freeze'){e.tell=0;continue;}e.x+=e.attackVec.x*27;e.y+=e.attackVec.y*27;playAction(e,'Attack',.32);clampToArena(e,ARENA.r-22);if(len(player.x-e.x,player.y-e.y)<74)hurt(arenaDamage(damagePacket(e,player,'basic').damage));applySecondary(player,moveOf(e,'basic'));createRing(e.x,e.y,'#ffa49b',30,.21);}}
   let dx=player.x-e.x,dy=player.y-e.y,d=len(dx,dy)||1;
@@ -1690,7 +1725,7 @@ function drawGround(ox,oy){paintArenaFloor(ox,oy)}
 function draw(){ctx.clearRect(0,0,W,H);if(!player){ctx.fillStyle='#11323d';ctx.fillRect(0,0,W,H);return}const sh=shake?(Math.random()-.5)*shake:0,ox=Math.round(W/2-player.x+sh+cameraKick.x),oy=Math.round(H/2-player.y+sh+cameraKick.y);drawGround(ox,oy);ctx.save();ctx.translate(ox,oy);renderDecals();fxDrawScenes('ground');renderImpactLights();
 drawSpecials('under');
 for(const m of specialEffects){if(m.type==='extra'&&m.move.mode==='charge'&&!m.fired)fxDrawChargeHalo(m.owner==='player'?player:enemies[0]);}
-let render=[];for(const e of enemies)render.push({y:e.y,kind:0,obj:e});render.push({y:player.y,kind:1,obj:player});render.sort((a,b)=>a.y-b.y);for(const it of render){let e=it.obj;if(it.kind===0){const act=combatAnimation(e);spriteDraw(e.id,e.x,e.y-(e.riding?10:0),e.face,act,e.actionT,1.43,e.flash,'enemy');fxDrawActorMotion(e);drawStatusPixels(e);fxDrawStatus(e);if(e.tell>0){ctx.save();ctx.strokeStyle='#ff9079';ctx.lineWidth=2.8;ctx.globalAlpha=.45+.4*Math.sin(time*23)**2;ctx.beginPath();ctx.arc(e.x,e.y,38+10*Math.sin(time*17)**2,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.attackVec.x*65,e.y+e.attackVec.y*65);ctx.stroke();ctx.restore()}ctx.fillStyle='#102837c7';ctx.fillRect(e.x-17,e.y-56,34,5);ctx.fillStyle='#ff737f';ctx.fillRect(e.x-17,e.y-56,34*clamp(e.hp/e.maxHp,0,1),5)}else{spriteDraw(roster[chosen].id,player.x,player.y-(player.riding?10:0),player.face,combatAnimation(player),player.animT,1.43,player.inv>0?.2:0,'player');fxDrawActorMotion(player);drawStatusPixels(player);fxDrawStatus(player)}}
+let render=[];for(const e of enemies)render.push({y:e.y,kind:0,obj:e});render.push({y:player.y,kind:1,obj:player});render.sort((a,b)=>a.y-b.y);for(const it of render){let e=it.obj;if(it.kind===0){const act=combatAnimation(e);spriteDraw(e.id,e.x,e.y-(e.riding?10:0),e.face,act,combatSpriteClock(e,act,e.actionT),1.43,e.flash,'enemy');fxDrawActorMotion(e);drawStatusPixels(e);fxDrawStatus(e);if(e.tell>0){ctx.save();ctx.strokeStyle='#ff9079';ctx.lineWidth=2.8;ctx.globalAlpha=.45+.4*Math.sin(time*23)**2;ctx.beginPath();ctx.arc(e.x,e.y,38+10*Math.sin(time*17)**2,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.attackVec.x*65,e.y+e.attackVec.y*65);ctx.stroke();ctx.restore()}ctx.fillStyle='#102837c7';ctx.fillRect(e.x-17,e.y-56,34,5);ctx.fillStyle='#ff737f';ctx.fillRect(e.x-17,e.y-56,34*clamp(e.hp/e.maxHp,0,1),5)}else{spriteDraw(roster[chosen].id,player.x,player.y-(player.riding?10:0),player.face,combatAnimation(player),combatSpriteClock(player,combatAnimation(player),player.animT),1.43,player.inv>0?.2:0,'player');fxDrawActorMotion(player);drawStatusPixels(player);fxDrawStatus(player)}}
 for(const g of gems){ctx.save();ctx.translate(g.x,g.y+Math.sin(g.t*5)*4);ctx.fillStyle='#4af8ed55';ctx.beginPath();ctx.arc(0,0,10,0,7);ctx.fill();ctx.rotate(Math.PI/4);ctx.fillStyle='#85ffe9';ctx.fillRect(-5,-5,10,10);ctx.fillStyle='#e7fffa';ctx.fillRect(-2,-5,4,4);ctx.restore()}
 for(const s of projectiles)drawProjectileSprite(s)
 drawSpecials('over');fxDrawScenes('over');
@@ -1749,4 +1784,4 @@ document.addEventListener('touchend',e=>{
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});
-</script><script src="./battle-studio.js?v=23"></script></body></html>
+</script><script src="./battle-studio.js?v=24"></script></body></html>
