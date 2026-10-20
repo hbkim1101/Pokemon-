@@ -189,7 +189,7 @@ function render(){
 }
 const originalDraw=draw;
 draw=function(){if(state.open)render();else originalDraw();};
-window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,auto:state.auto,compare:state.compare}),preview:attack,audit};
+window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,auto:state.auto,compare:state.compare}),preview:attack,audit,setCompare(enabled){state.compare=!!enabled;state.auto=false;state.preview=null;meta();}};
  
 // Layered hand-pixel treatments applied on top of existing combat rendering.
 // All colors are procedural pixels, rather than footage-copied artwork.
