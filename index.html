@@ -1815,15 +1815,15 @@ function drawExtraSpecial(m,layer){
 function drawElectricBodyAura(m){
  const actor=m.owner==='player'?player:enemies[0];if(!actor||m.age>.85)return;
  const at=emissionPoint(actor,'thunderbolt'),fade=Math.max(0,1-m.age/.85);
- const pulse=Math.sin(m.age*33),radius=28+7*Math.sin(m.age*21),detail=fxQuality==='low'?8:14;
+ const pulse=Math.sin(m.age*33),radius=19+4*Math.sin(m.age*21),detail=fxQuality==='low'?8:14;
  ctx.save();
- pxRing(at.x,at.y,radius,8,'#ffdd35',.8*fade,8);
- pxRing(at.x,at.y,radius+10,4,'#fff1a0',.6*fade,8);
+ pxRing(at.x,at.y,radius,5,'#ffdd35',.8*fade,5);
+ pxRing(at.x,at.y,radius+7,3,'#fff1a0',.6*fade,5);
  for(let i=0;i<detail;i++){
-  const a=i*Math.PI*2/detail+m.age*10,r=radius+10+(i%3)*6;
+  const a=i*Math.PI*2/detail+m.age*10,r=radius+6+(i%3)*4;
   const ax=at.x+Math.cos(a)*r,ay=at.y+Math.sin(a)*r*.86;
-  const bx=at.x+Math.cos(a)*(r+13+(i%2)*9),by=at.y+Math.sin(a)*(r+13+(i%2)*9)*.86;
-  pxLine(ax,ay,bx,by,4,i%3?'#ffe44d':'#ffffff',fade*(.7+.2*pulse),.85);
+  const bx=at.x+Math.cos(a)*(r+7+(i%2)*5),by=at.y+Math.sin(a)*(r+7+(i%2)*5)*.86;
+  pxLine(ax,ay,bx,by,3,i%3?'#ffe44d':'#ffffff',fade*(.7+.2*pulse),.85);
   if(i%3===0)pxRect(bx-3,by-3,6,6,'#fff8d5',fade);
  }
  ctx.restore();
@@ -1834,8 +1834,8 @@ function drawSurfCannonJets(m){
  ctx.save();
  for(const cannon of m.emitters){
   const dist=Math.min(62,m.distance+15),x=cannon.x+m.vx*dist,y=cannon.y+m.vy*dist;
-  pxLine(cannon.x,cannon.y,x,y,12,'#217bab',fade*.9,.7);
-  pxLine(cannon.x,cannon.y,x,y,7,'#8ae7ff',fade,.7);
+  pxLine(cannon.x,cannon.y,x,y,8,'#217bab',fade*.9,.7);
+  pxLine(cannon.x,cannon.y,x,y,4,'#8ae7ff',fade,.7);
   pxRect(x-4,y-4,8,8,'#f0ffff',fade);
  }
  ctx.restore();
