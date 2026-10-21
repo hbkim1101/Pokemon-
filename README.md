@@ -1,9 +1,16 @@
+## v31 — sprite-pixel skill effects
+
+- Skill effects are stamped again from scratch, using the Big Kid Nation gameplay MP4 on `main` (`YTDown.com_YouTube_..._003_480p.mp4`) as the silhouette reference. Every mark is one character sprite pixel (`PIXEL`, 1.43 world units in battle, the studio sprite scale in the motion studio). A larger shape is more pixels, not a bigger pixel.
+- Flamethrower is a chain of overlapping round lobes: dark outline, orange body, yellow core, growing from the mouth. Thunderbolt is a jagged 1px bolt with short branches. Surf is a crest of water lobes, and the cannon jet is a thick white-core stream. Energy Ball is one green lobe with leaf pixels. Basic fire is a small teardrop with a dotted tail.
+- The later-request brief is in `.cursor/rules/dot-pixel-effects.mdc`. Keywords: 도트, 1픽셀, 스프라이트 픽셀, 겹치는 원형 불덩이, 흰 코어, 포말, 잎.
+- Character motion stays axis-aligned. The extra squash, tilt, and foot bob are gone, so the feet stay on a pixel shadow. Walk cycles advance with distance. A dodge plays through the Attack sheet instead of a short aborted windup plus a smeared afterimage.
+
 ## v30 — combat motion and effects rewrite
 
 - `combat-fx.js` is the shared battle/studio renderer: coherent flame tongues, branching electric trails, foamy surf, rotating energy-ball leaves, smaller projectiles and particles. The studio no longer draws duplicate effect layers.
 - Basic attacks prepare for 120 ms before releasing from the current sprite landmark. Signature attacks have explicit preparation and release phases. Channelled attacks retain their firing stance and recovery.
 - Player and rival movement use time-based acceleration/braking and distance-based walking animation. Casting slows locomotion; dodge velocity eases through its duration.
-- Sprite rendering and emission points share `spritePose`, including the same centre-of-cell rotation pivot. Saved PMD variants and anatomical landmarks are preserved.
+- Sprite rendering and emission points share `spritePose`. Saved PMD variants and anatomical landmarks are preserved. v31 drops the extra rotation and non-uniform scale so sprite pixels stay square.
 - Flame and surf collision widths now follow the new visible shapes. Damage, move selection and the four-character roster remain unchanged.
 - Validation: `node tests/smoke.cjs` covers anatomy, preparation/release, sustained fire, 30/60/120 Hz locomotion and canvas state balance in both quality modes.
 - Reference: the user-supplied 122-second trailer MP4 was inspected with frame sequences. The Charizard/Blastoise duel informed rolling flame lobes, twin bright cannon jets, impact sparks/steam and compact comet projectiles. The small-step attack/recovery animation and stationary ground shadows informed the motion changes. Existing playable moves are retained; trailer-only characters, beam-clash gameplay and arenas are outside this change.

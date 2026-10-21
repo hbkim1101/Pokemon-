@@ -12,7 +12,7 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=30'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=31'), 'Motion Studio not linked');
 assert(html.includes('emitter-anchors.js?v=30'), 'Sprite anchor data not linked');
 
 function fakeContext(){
@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=30'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=31'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -289,3 +289,16 @@ for(const quality of ['high','low'])for(let i=0;i<8;i++){
  for(const fn of ['charge','projectile','flame','thunder','orb','surf','impact']){sandbox.ArenaFX[fn](g,m,quality);assert.equal(depth,0,fn+' leaked canvas state');}
 }
 console.log('PASS: delayed releases, 30/60/120 Hz movement, braking, all effect directions and balanced canvas state');
+sandbox.ArenaFX.setPixel(1.43);
+assert.equal(sandbox.ArenaFX.PIXEL,1.43);
+assert(!renderer.includes('.arc(')&&!renderer.includes('ellipse')&&!renderer.includes('createRadialGradient')&&!renderer.includes('quadraticCurve'),
+ 'Skill pixels must be stamped cells, not smooth geometry');
+sandbox.ArenaFX.setPixel(1.43);
+const flameCells=sandbox.ArenaFX.cells('flame',{x:10,y:20,vx:1,vy:0,age:.4,stream:90,element:'fire'},'high');
+assert(flameCells.length>40,'Flame needs a connected pixel body');
+assert(flameCells.every(([x,y])=>Number.isInteger(x)&&Number.isInteger(y)),'Effect cells must sit on the sprite-pixel grid');
+const shotCells=sandbox.ArenaFX.cells('projectile',{x:0,y:0,vx:1,vy:0,element:'fire',pulse:0,delay:0},'high');
+const shotW=Math.max(...shotCells.map(c=>c[0]))-Math.min(...shotCells.map(c=>c[0]))+1;
+const shotH=Math.max(...shotCells.map(c=>c[1]))-Math.min(...shotCells.map(c=>c[1]))+1;
+assert(shotW<=12&&shotH<=12,'Basic projectile pixels must stay within a few sprite pixels');
+assert(!html.includes('ctx.rotate(tilt)'),'Character sprites must not be rotated off the pixel grid');
