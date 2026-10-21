@@ -1,7 +1,7 @@
-## v31 — sprite-pixel skill effects
+## v32 — denser pixel skill effects
 
 - Skill effects are stamped again from scratch, using the Big Kid Nation gameplay MP4 on `main` (`YTDown.com_YouTube_..._003_480p.mp4`) as the silhouette reference. Every mark is one character sprite pixel (`PIXEL`, 1.43 world units in battle, the studio sprite scale in the motion studio). A larger shape is more pixels, not a bigger pixel.
-- Flamethrower is a chain of overlapping round lobes: dark outline, orange body, yellow core, growing from the mouth. Thunderbolt is a jagged 1px bolt with short branches. Surf is a crest of water lobes, and the cannon jet is a thick white-core stream. Energy Ball is one green lobe with leaf pixels. Basic fire is a small teardrop with a dotted tail.
+- Flamethrower is a dense mass of overlapping bulbs with crescent highlights, not a single row of circles. Thunderbolt is a thick jagged bolt. Surf is a solid foamy wave, and the cannon jet is a wide white-core stream. Energy Ball is a large green bulb with leaf pixels. Basic fire is a small teardrop with a dotted tail.
 - The later-request brief is in `.cursor/rules/dot-pixel-effects.mdc`. Keywords: 도트, 1픽셀, 스프라이트 픽셀, 겹치는 원형 불덩이, 흰 코어, 포말, 잎.
 - Character motion stays axis-aligned. The extra squash, tilt, and foot bob are gone, so the feet stay on a pixel shadow. Walk cycles advance with distance. A dodge plays through the Attack sheet instead of a short aborted windup plus a smeared afterimage.
 
