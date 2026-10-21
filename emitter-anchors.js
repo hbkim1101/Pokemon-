@@ -56,3 +56,42 @@ for(const [id,ports] of Object.entries(storedSourceFrameAnchors)){
   window.PMD_EMISSION_ATLAS[id].ports[name].frames=dirs;
  }
 }
+
+const spritePixelStoreKey='pokemonArena.pmdEmitterFrameOverrides.v27';
+window.setPMDEmitterFramePoint=function(id,port,dir,frame,x,y){
+ const item=window.PMD_EMISSION_ATLAS[id],p=item?.ports?.[port];
+ if(!p?.frames?.[dir]?.[frame])return null;
+ const xy=[Math.max(0,Math.min(item.cell[0],Math.round(x))),Math.max(0,Math.min(item.cell[1],Math.round(y)))];
+ p.frames[dir][frame]=xy;
+ try{
+  const old=JSON.parse(localStorage.getItem(spritePixelStoreKey)||'{}');
+  ((old[id]??={})[port]??={})[dir]??={};
+  old[id][port][dir][frame]=xy;
+  localStorage.setItem(spritePixelStoreKey,JSON.stringify(old));
+ }catch(err){/* storage blocked in private or preview contexts */}
+ return xy;
+};
+window.exportPMDEmitterFramePoints=function(){
+ const result={};
+ for(const [id,item] of Object.entries(window.PMD_EMISSION_ATLAS)){
+  result[id]={variant:item.variant,ports:{}};
+  for(const [key,port] of Object.entries(item.ports))result[id].ports[key]=port.frames;
+ }
+ return JSON.stringify(result,null,2);
+};
+try{
+ const saved=JSON.parse(localStorage.getItem(spritePixelStoreKey)||'{}');
+ for(const [id,ports] of Object.entries(saved)){
+  const atlas=window.PMD_EMISSION_ATLAS[id];if(!atlas)continue;
+  for(const [name,dirs] of Object.entries(ports)){
+   if(!atlas.ports[name]?.frames)continue;
+   for(const [d,frames] of Object.entries(dirs)){
+    for(const [f,xy] of Object.entries(frames)){
+     if(!Array.isArray(xy)||xy.length!==2||!xy.every(Number.isFinite))continue;
+     const cells=atlas.ports[name].frames[Number(d)];
+     if(cells?.[Number(f)])cells[Number(f)]=[Math.max(0,Math.min(atlas.cell[0],xy[0])),Math.max(0,Math.min(atlas.cell[1],xy[1]))];
+    }
+   }
+  }
+ }
+}catch(err){/* no localStorage available in CI mocks or restrictive browsers */}
