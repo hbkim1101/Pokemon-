@@ -45,7 +45,7 @@ studioNode.innerHTML=`
 <button data-dir="5">↖</button><button data-dir="4">↑</button><button data-dir="3">↗</button><button data-dir="6">←</button><button data-dir="2">→</button><button data-dir="7">↙</button><button data-dir="0">↓</button><button data-dir="1">↘</button></div>
 <div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button data-test="dash">돌진 동작 시험</button><button id="studioAnchors" aria-pressed="true">발사 좌표 표시 ON</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button><button id="studioFreeze" aria-pressed="false">프레임 고정 OFF</button><label class="studioSpeed">프레임 <input type="range" id="studioFrame" min="0" max="17" value="0" step="1"><span id="studioFrameLabel">1/18</span></label>
 <label class="studioSpeed">재생 속도 <input type="range" id="studioSpeed" min="0.25" max="2" step=".25" value="1"><span id="studioSpeedLabel">1.0×</span></label></div>
-<p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p><p class="studioMeta" id="studioAudit" aria-live="polite">검사하면 캐릭터별 원본 8방향 모션 누락을 표시합니다.</p>
+<div class="studioGroup" id="studioPointEditor"><span class="sLabel">좌표 보정</span><button id="studioPort">발사점 선택</button><button data-point-move="-1,0" aria-label="발사점 왼쪽 1픽셀">← 1px</button><button data-point-move="1,0" aria-label="발사점 오른쪽 1픽셀">→ 1px</button><button data-point-move="0,-1" aria-label="발사점 위로 1픽셀">↑ 1px</button><button data-point-move="0,1" aria-label="발사점 아래로 1픽셀">↓ 1px</button><button id="studioCopyCoords">전체 좌표 복사</button></div><p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p><p class="studioMeta" id="studioAudit" aria-live="polite">검사하면 캐릭터별 원본 8방향 모션 누락을 표시합니다.</p>
 </div>`;
 document.body.append(studioNode);
 const launcher=document.createElement('button');
@@ -53,7 +53,7 @@ launcher.id='openMotionStudio';
 launcher.type='button';
 launcher.textContent='🎞 캐릭터 모션 · 4종 기술 테스트';
 $('start').insertAdjacentElement('afterend',launcher);
-const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:0,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false,anchors:true,freezeFrame:false,frameIndex:0};
+const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:0,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false,anchors:true,freezeFrame:false,frameIndex:0,portIndex:0};
 // PMD sprite-sheet row order: S, SE, E, NE, N, NW, W, SW.
 const faces=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
 const faceLabels=['↓','↘','→','↗','↑','↖','←','↙'];
@@ -72,6 +72,10 @@ function meta(){
   $('studioFreeze').textContent=state.freezeFrame?'프레임 고정 ON':'프레임 고정 OFF';
   $('studioFreeze').classList.toggle('active',state.freezeFrame);
   $('studioFreeze').setAttribute('aria-pressed',String(state.freezeFrame));
+  const names=window.PMD_EMISSION_ATLAS?.[sp.id]?.channels?.[MOVE_SPECS[sp.type].id]||['body'];
+  state.portIndex%=Math.max(1,names.length);
+  $('studioPort').textContent='발사점: '+names[state.portIndex];
+  $('studioPointEditor').style.display=state.action==='Shoot'?'flex':'none';
  $('studioMeta').textContent=`${sp.name} · ${state.action} · ${faceLabels[state.dir]} · PMD ${atlas} · ${motionExplanations[state.action]} · 기본: ${sp.basic} / 고유: ${special.name}${state.auto?' · 전체 자동 검사 중':''}${state.completed?' · 전체 순회 완료':''}`;
  for(const btn of studioNode.querySelectorAll('[data-actor]'))btn.classList.toggle('active',+btn.dataset.actor===state.kind);
  for(const btn of studioNode.querySelectorAll('[data-action]'))btn.classList.toggle('active',btn.dataset.action===state.action);
@@ -98,7 +102,7 @@ function audit(){
   return {valid,total,missing};
  }
  function select(kind=state.kind,action=state.action,dir=state.dir){
- state.kind=kind;state.action=action;state.dir=dir;state.clock=0;state.frameIndex=0;state.preview=null;meta();
+ state.kind=kind;state.action=action;state.dir=dir;state.clock=0;state.frameIndex=0;state.portIndex=0;state.preview=null;meta();
 }
 function open(){
  if(state.open)return;
@@ -135,6 +139,27 @@ studioNode.addEventListener('click',(e)=>{
  if(btn.id==='studioCycle'){state.auto=true;state.compare=false;state.completed=false;state.autoIndex=0;state.autoTime=0;select(0,'Idle',0);}
  if(btn.id==='studioStop'){state.auto=false;meta();}
  if(btn.id==='studioAuditBtn')audit();
+ if(btn.id==='studioPort'){
+  const sp=roster[state.kind],ports=window.PMD_EMISSION_ATLAS?.[sp.id]?.channels?.[MOVE_SPECS[sp.type].id]||['body'];
+  state.portIndex=(state.portIndex+1)%ports.length;meta();
+ }
+ if(btn.dataset.pointMove){
+  const sp=roster[state.kind],atlas=window.PMD_EMISSION_ATLAS?.[sp.id];
+  const ports=atlas?.channels?.[MOVE_SPECS[sp.type].id]||[];
+  const port=ports[state.portIndex],xy=atlas?.ports?.[port]?.frames?.[state.dir]?.[state.frameIndex];
+  if(!xy)return;
+  const [dx,dy]=btn.dataset.pointMove.split(',').map(Number);
+  window.setPMDEmitterFramePoint?.(sp.id,port,state.dir,state.frameIndex,xy[0]+dx,xy[1]+dy);
+  state.freezeFrame=true;state.preview=null;meta();
+ }
+ if(btn.id==='studioCopyCoords'){
+  const json=window.exportPMDEmitterFramePoints?.()||'{}';
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(json).then(
+   ()=>$('studioAudit').textContent='전체 스프라이트 좌표 JSON을 복사했습니다.',
+   ()=>$('studioAudit').textContent='클립보드 권한이 거부됐습니다. HTTPS 연결에서 다시 시도하세요.'
+  );
+  else $('studioAudit').textContent='브라우저에서 클립보드 복사가 지원되지 않습니다.';
+ }
  if(btn.id==='studioFreeze'){state.freezeFrame=!state.freezeFrame;state.preview=null;state.clock=0;meta();}
 });
 $('studioSpeed').addEventListener('input',e=>{state.speed=Number(e.target.value)||1;$('studioSpeedLabel').textContent=state.speed.toFixed(2)+'×';});
@@ -161,7 +186,7 @@ function studioFrameClock(){
    const p=points[i],color=i%2?'#b5f3ff':'#ffe995';
    pxRing(p.x,p.y,9,3,color,.98,4);
    pxRect(p.x-2,p.y-2,4,4,'#ffffff',1);
-   const label=p.port+' ('+p.cell.x+','+p.cell.y+')';
+   const label=p.port+' F'+(p.frame+1)+' ('+p.cell.x+','+p.cell.y+')'+(p.exact?'':' ~');
    ctx.fillStyle='#062534';ctx.fillRect(p.x+10,p.y-14,Math.max(77,label.length*6+5),16);
    ctx.fillStyle=color;ctx.fillText(label,p.x+13,p.y-3);
  }
