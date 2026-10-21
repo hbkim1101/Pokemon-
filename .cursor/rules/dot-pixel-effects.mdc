@@ -23,7 +23,7 @@ Use this when the user asks for 도트, 픽셀, 도트 그래픽, 기술 이펙�
 - Battle PIXEL is 1.43. The motion studio must call `ArenaFX.setPixel(spriteScale)` before drawing, so studio pixels match the enlarged sprite.
 - Snap sprites and shadows to that same grid. `spritePose` may shift by whole pixels only. No `rotate`, non-uniform scale, or sub-pixel squash on the character.
 - Draw effects as authored cells: 4-color palette per element (outline, body, mid, core), hard edges, animation stepped at about 12–18 Hz.
-- Reference clip on `main`: `YTDown.com_YouTube_Media_J_JhLHfqZXY_Pokemon-Arena-2D-by-Big-Kid-Nation-Fan-Game-95-real-gameplay_003_480p.mp4` (Big Kid Nation Pokémon Arena 2D, about 2:02, 854×480). Read that file before changing silhouettes.
+- Also study https://youtu.be/UGcfjUR-lIU (Pokemon Battlegrounds, Red vs Cynthia). The public 1:56 still shows Air Slash as a white crescent with a blue inner edge and a thin shock ring, and Shadow Ball as small dark-edged diamond spikes. Match that sharp pixel language: small cores, short trails, crescents, not giant coins.
 - Flamethrower, traced from the reference clip around 34–40s: a connected chain of round lobes with a small hot core, not a bullseye. It starts narrow at the mouth, widens into a cloud, and throws a few detached bulbs. A 1px dark edge and a faint orange fringe sit on the outside.
 - Thunderbolt: a jagged bolt of the same pixels, white core, short branches, spark ring on the body.
 - Surf and cannon jets: water lobes and a thick jet (white core, cyan, dark edge), not a hairline. Steam on a fire impact is a column of light pixels.
