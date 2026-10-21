@@ -1,0 +1,33 @@
+---
+description: Dot-graphic skill effects must use the same pixel size as the character sprites.
+globs:
+  - "**/*.{js,html,cjs,md}"
+alwaysApply: true
+---
+
+# Dot pixel effects
+
+Use this when the user asks for 도트, 픽셀, 도트 그래픽, 기술 이펙트, sprite pixels, or a reference clip for move VFX.
+
+## Request that produced this look
+
+- Keep the feel of dot / pixel skill effects. Do not replace them with smooth vectors, soft glows, or anti-aliased strokes.
+- Each effect pixel is the same size as each character sprite pixel. Bigger shapes mean more pixels, not larger pixels.
+- Rebuild the effect from scratch when the reference changes. Do not stack a new layer on the old renderer.
+- Fix awkward character motion in the same pass: feet on the shadow, no squash or rotation of the sprite, attack sheets that finish their lunge.
+- Keywords to keep: 도트, 1픽셀, 스프라이트 픽셀, 픽셀 그리드, nearest-neighbor, 화염방사, 10만볼트, 파도타기, 에너지볼, tongue, branch, foam, leaf, outline, core.
+
+## Rules
+
+- One effect cell is `ArenaFX.PIXEL` world units, blitted with `imageSmoothingEnabled = false` from a 1×1 source pixel.
+- Battle PIXEL is 1.43. The motion studio must call `ArenaFX.setPixel(spriteScale)` before drawing, so studio pixels match the enlarged sprite.
+- Snap sprites and shadows to that same grid. `spritePose` may shift by whole pixels only. No `rotate`, non-uniform scale, or sub-pixel squash on the character.
+- Draw effects as authored cells: 4-color palette per element (outline, body, mid, core), hard edges, animation stepped at about 12–18 Hz.
+- Reference clip on `main`: `YTDown.com_YouTube_Media_J_JhLHfqZXY_Pokemon-Arena-2D-by-Big-Kid-Nation-Fan-Game-95-real-gameplay_003_480p.mp4` (Big Kid Nation Pokémon Arena 2D, about 2:02, 854×480). Read that file before changing silhouettes.
+- Flamethrower: a chain of overlapping round lobes. Each lobe is dark outline, orange body, yellow core, white center. Lobes start small at the mouth and grow toward the tip. Embers are a small teardrop plus a dotted tail.
+- Thunderbolt: a jagged bolt of the same pixels, white core, short branches, spark ring on the body.
+- Surf and cannon jets: water lobes and a thick jet (white core, cyan, dark edge), not a hairline. Steam on a fire impact is a column of light pixels.
+- Energy Ball: one filled green lobe with small leaf pixels around it.
+- Bigger shapes mean more 1×1 cells. Do not scale a pixel up, blur it, or draw it with arcs.
+- Flat oval shadow under the feet. No sprite rotation or squash. Walk steps follow distance. A dodge plays the Attack sheet through the lunge.
+- Do not add per-frame random particle clouds on top of these effects. Damage, cooldowns, and hitboxes stay as they are.

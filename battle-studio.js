@@ -218,8 +218,9 @@ function drawStudioEffects(x,y,a,clock,scale){
    const reach=Math.min(1,age/.57),dist=520*reach,steps=Math.max(2,Math.floor(dist/19)),path=[];
    for(let i=0;i<=steps;i++){let d=dist*i/steps;path.push({x:baseX+vx*d+nx*(i===steps?0:Math.sin(i*2.8+age*19)*15),y:baseY+vy*d+ny*(i===steps?0:Math.sin(i*2.8+age*19)*15)});}
    if(age<.85){
+     if(window.ArenaFX)ArenaFX.setPixel(scale);
      drawThunderbolt({type:'thunderbolt',path,age,life:.9,x:baseX+vx*dist,y:baseY+vy*dist});
-     if(age<.7){pxRing(baseX,baseY,27+Math.sin(age*28)*6,7,'#ffdf55',.85,8);pxRing(baseX,baseY,37,3,'#fffaab',.63,8);}
+     if(age<.7)ArenaFX.aura(ctx,{x:baseX,y:baseY,age,element:'electric'},fxQuality);
    }
    else drawThunderbolt({type:'boltEcho',path,age:age-.85,life:.38,x:baseX+vx*dist,y:baseY+vy*dist});
  }else if(m.type==='flamethrower'){
@@ -227,8 +228,9 @@ function drawStudioEffects(x,y,a,clock,scale){
    drawFlamethrower({type:'flamethrower',x:baseX,y:baseY,vx,vy,age,stream:length});
  }else if(m.type==='surf'){
    const d=Math.min(360,age*330);
+   if(window.ArenaFX)ArenaFX.setPixel(scale);
    drawSurf({type:'surf',x:baseX+vx*(16+d),y:baseY+vy*(16+d),vx,vy,age,life:m.life});
-   if(age<.4)for(const p of points){pxLine(p.x,p.y,p.x+vx*62,p.y+vy*62,8,'#8aefff',.75,.8);}
+   if(age<.4)ArenaFX.jet(ctx,{x:baseX,y:baseY,vx,vy,age,windup:0},points,fxQuality);
  }else if(m.type==='energyball'){
    const d=Math.min(435,age*410),cx=baseX+vx*d,cy=baseY+vy*d;
    if(age<1.03)drawEnergyball({type:'energyball',x:cx,y:cy,vx,vy,age,life:m.life});
@@ -255,6 +257,7 @@ function render(){
  ctx.strokeStyle='#355c55';ctx.lineWidth=1;for(let yy=horizon;yy<H;yy+=32){ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(W,yy);ctx.stroke();}
  for(let xx=0;xx<W;xx+=32){ctx.beginPath();ctx.moveTo(xx,horizon);ctx.lineTo(xx,H);ctx.stroke();}
  const scale=W<520?1.75:2.2;
+ if(window.ArenaFX)ArenaFX.setPixel(scale);
  pxRing(cx,cy+1,49,2,'#b6f9e1',.43,5);pxRing(cx,cy+1,64,2,sp.color,.28,6);
  if(state.compare){
    const top=studioNode.querySelector('.studioPanel').getBoundingClientRect().top;
