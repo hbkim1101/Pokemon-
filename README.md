@@ -12,6 +12,24 @@
 
 비상업용 팬 프로젝트입니다. Pokémon 및 관련 캐릭터의 권리는 각 원저작자에게 있습니다.
 
+## 원본 게임플레이 참고 영상 추가 방법
+
+사용자가 제공한 Big Kid Nation의 Pokémon Arena 2D 참고 MP4는 약 74.4MB이므로 GitHub 웹의 일반 파일 업로드 제한(25MiB)을 초과합니다. 파일을 변환하거나 분할하지 않고 Git 명령줄로 원본 그대로 업로드합니다.
+
+**목표 경로:** `assets/reference-video/Pokemon_Arena_2D_Big_Kid_Nation_Original.mp4`
+
+**원본 확인값:** 74,415,401바이트 / SHA-256 `a261c86ff3c7b57fd8c5b1bd8baab201ccb95a17cab82d315dbd089cd57ccafd`
+
+로컬 저장소에서 다음 명령을 실행하세요.
+
+```bash
+git switch main
+git pull --ff-only
+bash scripts/upload-reference-video.sh "/path/to/Pokemon Arena 2D by Big Kid Nation (Fan Game, 95% real gameplay)(2).mp4"
+```
+
+스크립트는 업로드 전 SHA-256을 검사하고 지정 경로로 원본을 복사해 `main` 브랜치에 커밋 후 푸시합니다. **스크립트만 저장소에 추가한 상태에서는 영상 파일이 자동으로 업로드되지 않습니다.** 파일을 업로드하려면 원본 MP4가 있는 컴퓨터에서 위 명령을 실행해야 합니다.
+
 ## 기술 스프라이트 스튜디오
 
 `studio.html`에서 화염방사 · 10만볼트 · 파도타기 · 에너지볼의 PMD `Shoot` 프레임과 발사점을 다듬을 수 있다. 포켓몬·기술·방향을 고르고, 오른쪽 확대 프레임을 클릭하거나 화살표 키로 1px씩 보정한다. 보정값은 브라우저에 저장되며 JSON으로 복사할 수 있다. 아레나 메뉴의 링크에서도 들어간다.
