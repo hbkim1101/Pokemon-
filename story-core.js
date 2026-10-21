@@ -192,7 +192,7 @@
   };
 
   const WILD_BANDS = [
-    { minX: 40, maxX: 57, table: [['pidgey', 3, 5], ['rattata', 3, 5], ['caterpie', 2, 4], ['oddish', 4, 6], ['poliwag', 4, 6]] },
+    { minX: 40, maxX: 57, table: [['pidgey', 2, 4], ['rattata', 2, 4], ['caterpie', 2, 3], ['oddish', 3, 4], ['poliwag', 3, 4]] },
     { minX: 58, maxX: 81, table: [['poliwag', 10, 14], ['sandshrew', 11, 14], ['machop', 12, 15], ['psyduck', 12, 16], ['pidgey', 10, 13]] },
     { minX: 82, maxX: 105, table: [['voltorb', 18, 22], ['pikachu', 17, 21], ['gloom', 20, 24], ['geodude', 18, 22], ['poliwhirl', 20, 23]] },
     { minX: 106, maxX: 121, table: [['gastly', 26, 30], ['machop', 28, 32], ['pidgeotto', 26, 30], ['graveler', 30, 34], ['haunter', 28, 32]] },
@@ -504,7 +504,7 @@ function josa(name, withBatchim, withoutBatchim) {
     return { levels: levels, learned: learned, evo: levels > 0 ? evolutionTarget(mon) : null };
   }
   function expGain(foe, victor, trainer) {
-    let amount = Math.floor(SPECIES[foe.speciesId].yield * foe.level / 7);
+    let amount = Math.floor(SPECIES[foe.speciesId].yield * foe.level / 5);
     if (trainer) amount = Math.floor(amount * 1.5);
     if (foe.speciesId === 'mewtwo') amount = Math.min(amount, expToNext(victor.level));
     return Math.max(10, amount);

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>민트 리그</title>
+<link rel="icon" href="data:,">
 <style>
 :root{--ink:#24180f;--cream:#f6e7c4;--line:#6e5436;--good:#67c56a;--warn:#e2b143;--bad:#e15b4c}
 *{box-sizing:border-box}
@@ -20,9 +21,9 @@ button{cursor:pointer}
 .pip i{position:absolute;left:0;right:0;bottom:0;background:var(--good)}
 .pip.faint i{background:var(--bad);height:100%!important;opacity:.45}
 #goal{position:fixed;left:10px;right:10px;top:62px;color:#f8efd4;font-size:12px;font-weight:800;text-shadow:0 2px 0 #000,0 0 6px #000;pointer-events:none}
-#message{position:fixed;left:10px;right:10px;bottom:118px;min-height:74px;background:var(--cream);color:var(--ink);border:4px solid #2a2118;border-radius:14px;padding:12px 14px;font-weight:750;line-height:1.45;box-shadow:0 10px 0 #0006;display:none}
+#message{position:fixed;left:10px;right:10px;bottom:176px;min-height:74px;background:var(--cream);color:var(--ink);border:4px solid #2a2118;border-radius:14px;padding:12px 14px;font-weight:750;line-height:1.45;box-shadow:0 10px 0 #0006;display:none;z-index:5}
 #message.show{display:block}
-#choices{position:fixed;right:14px;bottom:204px;display:none;flex-direction:column;gap:6px;width:min(280px,70vw)}
+#choices{position:fixed;right:14px;bottom:268px;display:none;flex-direction:column;gap:6px;width:min(280px,70vw);z-index:6}
 #choices.show{display:flex}
 #choices button,.menu button,.shop button,.battleActs button{background:#234233;color:#f4ffe8;border:2px solid #d9efc2;border-radius:10px;padding:10px 12px;font-weight:800;text-align:left}
 #choices button.on,.battleActs button:focus{outline:2px solid #ffe08a}
@@ -51,7 +52,7 @@ button{cursor:pointer}
 .fighter{display:flex;align-items:center;gap:12px}
 .fighter.foe{align-self:flex-end}
 .fighter.mine{align-self:flex-start;flex-direction:row-reverse}
-.fighter img{width:min(168px,34vw);height:min(168px,34vw);image-rendering:pixelated;object-fit:contain;filter:drop-shadow(0 8px 0 #0004)}
+.fighter img{width:min(168px,34vw);height:min(168px,34vw);image-rendering:pixelated;object-fit:contain;filter:drop-shadow(0 8px 0 #0004);background:#ffffff55;border-radius:16px}
 .plate{background:#f7f0da;color:#24180f;border:3px solid #2c2418;border-radius:12px;min-width:min(240px,46vw);padding:8px 10px}
 .plate .top{display:flex;justify-content:space-between;font-weight:900}
 .battleBottom{background:#f6e7c4;color:#24180f;min-height:168px;border-top:4px solid #2a2118;display:grid;grid-template-columns:1.3fr .8fr}
@@ -79,10 +80,10 @@ button{cursor:pointer}
 <div id="message"></div>
 <div id="choices"></div>
 <div id="pad" aria-label="이동">
-  <button type="button" class="up" data-dir="up">↑</button>
-  <button type="button" class="left" data-dir="left">←</button>
-  <button type="button" class="down" data-dir="down">↓</button>
-  <button type="button" class="right" data-dir="right">→</button>
+  <button type="button" class="up" data-dir="up">▲</button>
+  <button type="button" class="left" data-dir="left">◀</button>
+  <button type="button" class="down" data-dir="down">▼</button>
+  <button type="button" class="right" data-dir="right">▶</button>
 </div>
 <div id="actions">
   <button type="button" id="btnB">B</button>

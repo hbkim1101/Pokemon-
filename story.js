@@ -7,6 +7,7 @@
   const SAVE_KEY = 'mint-league-v1';
   const TILE = 32;
   const TYPE_COLOR = { normal:'#c8c0b4', grass:'#78c850', fire:'#f08030', water:'#6890f0', electric:'#f8d030', poison:'#a040a0', bug:'#a8b820', flying:'#a890f0', rock:'#b8a038', ground:'#e0c068', fighting:'#c03028', ghost:'#705898', psychic:'#f85888', dragon:'#7038f8', dark:'#705848' };
+  const TYPE_NAME = { normal:'노말', grass:'풀', fire:'불꽃', water:'물', electric:'전기', poison:'독', bug:'벌레', flying:'비행', rock:'바위', ground:'땅', fighting:'격투', ghost:'고스트', psychic:'에스퍼', dragon:'드래곤', dark:'악' };
   const ROOF = { house:'#c45c4a', lab:'#4d6f9a', center:'#ef7f9b', mart:'#3f9a5a', gym1:'#9a7b52', gym2:'#3d7ec4', gym3:'#e2b423', gym4:'#4caf63', gym5:'#7a4ea3', gym6:'#c4553a', gym7:'#c2a15a', gym8:'#73b7e6', raid:'#6a46a8', league:'#e6c85a' };
   let state = null;
   let mode = 'title';
@@ -157,7 +158,8 @@
     const height = innerHeight;
     const originX = state.x * TILE + TILE / 2 - width / 2;
     const originY = state.y * TILE + TILE / 2 - height / 2;
-    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = state.mapId === 'overworld' ? '#143322' : '#6a4632';
+    ctx.fillRect(0, 0, width, height);
     const x0 = Math.max(0, Math.floor(originX / TILE) - 1);
     const y0 = Math.max(0, Math.floor(originY / TILE) - 1);
     const grid = state.mapId === 'overworld' ? core.OVERWORLD : core.INTERIORS[state.mapId].grid;
@@ -271,11 +273,12 @@
   }
   function closeSheet() {
     $('overlay').classList.remove('show');
+    $('sheet').innerHTML = '';
     if (mode === 'menu') mode = 'play';
   }
   function typeTags(types) {
     return types.map(function (type) {
-      return '<span class="type" style="background:' + (TYPE_COLOR[type] || '#ddd') + '">' + type + '</span>';
+      return '<span class="type" style="background:' + (TYPE_COLOR[type] || '#ddd') + '">' + (TYPE_NAME[type] || type) + '</span>';
     }).join('');
   }
   function monCard(mon, index, action) {
@@ -305,7 +308,7 @@
   function openSummary(index) {
     const mon = state.party[index];
     const info = core.summary(mon);
-    openSheet('<h2>' + info.name + '</h2><p>Lv.' + info.level + ' · ' + typeTags(info.types) + '</p><p>HP ' + info.hp + '/' + info.maxHp + ' · 다음 레벨까지 ' + (info.expNext - info.exp) + '</p><p>공격 ' + info.stats.atk + ' · 방어 ' + info.stats.def + ' · 특공 ' + info.stats.spa + ' · 특방 ' + info.stats.spd + ' · 스피드 ' + info.stats.spe + '</p><p>' + info.moves.map(function (move) { return move.name + ' (' + move.type + ' ' + move.power + ')'; }).join('<br>') + '</p><div class="row"><button class="primary" id="toFront">선두로</button><button class="ghost" id="backParty">뒤로</button></div>');
+    openSheet('<h2>' + info.name + '</h2><p>Lv.' + info.level + ' · ' + typeTags(info.types) + '</p><p>HP ' + info.hp + '/' + info.maxHp + ' · 다음 레벨까지 ' + (info.expNext - info.exp) + '</p><p>공격 ' + info.stats.atk + ' · 방어 ' + info.stats.def + ' · 특공 ' + info.stats.spa + ' · 특방 ' + info.stats.spd + ' · 스피드 ' + info.stats.spe + '</p><p>' + info.moves.map(function (move) { return move.name + ' (' + (TYPE_NAME[move.type] || move.type) + ' ' + move.power + ')'; }).join('<br>') + '</p><div class="row"><button class="primary" id="toFront">선두로</button><button class="ghost" id="backParty">뒤로</button></div>');
     $('toFront').onclick = function () {
       if (index > 0) state.party.unshift(state.party.splice(index, 1)[0]);
       openParty();
@@ -625,6 +628,7 @@
     pressA: pressA,
     pressB: pressB,
     tryStep: tryStep,
-    get mode() { return mode; }
+    get mode() { return mode; },
+    get battle() { return battle; }
   };
 })();
