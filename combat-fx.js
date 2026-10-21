@@ -33,58 +33,60 @@ function paintBitmap(cells,ox,oy,vx,vy,shift,bitmap,pal){
   along(cells,ox,oy,vx,vy,shift+x,y-oy0,pal[ch.charCodeAt(0)-49]||pal[1]);
  }
 }
-function bulb(cells,gx,gy,r,pal,dirx,diry){
+function bulb(cells,gx,gy,r,pal){
  r=Math.max(2,r|0);
- let dx=dirx||1,dy=diry||0;const mag=Math.hypot(dx,dy)||1;dx/=mag;dy/=mag;
- const rx=r,ry=Math.max(2,Math.round(r*.84)),pad=r+2;
- for(let y=-pad;y<=pad;y++)for(let x=-pad;x<=pad;x++){
-  const along=x*dx+y*dy,side=-x*dy+y*dx;
-  const e=(along*along)/(rx*rx)+(side*side)/(ry*ry);
-  if(e>1.16)continue;
-  if(e>0.82){place(cells,gx+x,gy+y,pal[0]);continue;}
-  const back=-along;
-  const crescent=back>rx*.1&&back<rx*.92&&Math.abs(side)<ry*.72;
-  let color=back>0?pal[2]:pal[1];
-  if(crescent&&back>rx*.5&&Math.abs(side)<ry*.32)color=pal[4];
-  else if(crescent&&back>rx*.22)color=pal[3];
-  place(cells,gx+x,gy+y,color);
+ const edge=r*r,hot=(r*.18)*(r*.18),warm=(r*.36)*(r*.36),body=(r*.68)*(r*.68);
+ for(let y=-r-1;y<=r+1;y++)for(let x=-r-1;x<=r+1;x++){
+  const d2=x*x+y*y;
+  if(d2>(r+.45)*(r+.45))continue;
+  if(d2>=edge){place(cells,gx+x,gy+y,pal[0]);continue;}
+  place(cells,gx+x,gy+y,d2<=hot?pal[4]:d2<=warm?pal[3]:d2<=body?pal[2]:pal[1]);
+ }
+}
+function fringe(cells,rgba){
+ const keys=[...cells.keys()];
+ for(const k of keys){
+  const [x,y]=k.split(',').map(Number);
+  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const nk=(x+dx)+','+(y+dy);
+   if(!cells.has(nk))cells.set(nk,rgba);
+  }
  }
 }
 function at(ox,oy,v,alongPx,sidePx){
  return [ox+Math.round(alongPx*v.x-sidePx*v.y),oy+Math.round(alongPx*v.y+sidePx*v.x)];
 }
+const FIRE_NUDGE=[0,2,-1,3,-2,1,-3,2,0,-2,1,4,-1];
 function flame(cells,m,quality){
  const L=m.renderStream??m.stream??0;
  const len=Math.max(0,Math.round(L/PIXEL));
  if(len<1)return;
- const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,11);
+ const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,9);
  const pal=PAL.fire,[ox,oy]=grid(m.x,m.y);
- const maxR=quality==='low'?9:16;
- let d=2,i=0;
- while(d<len&&i<90){
-  const u=d/Math.max(1,len);
-  const base=3+Math.round(Math.pow(u,.72)*maxR);
-  const rows=u<.16?1:u<.38?2:(quality==='low'?2:2+(nse(i*3+step)>.42?1:0));
+ const maxR=quality==='low'?7:12;
+ let d=1,i=0;
+ while(d<len&&i<80){
+  const u=d/len;
+  const base=3+Math.round(u*u*maxR)+(i%4===0?1:0);
+  const rows=u<.18?1:u<.42?2:(quality==='low'?2:3);
   for(let row=0;row<rows;row++){
-   const j=i*11+row*17+step*5;
-   const rad=Math.max(3,base+Math.round((nse(j)-.4)*base*.7));
-   const alongPx=d+Math.round((nse(j+3)-.5)*rad*.9);
-   const side=Math.round((row-(rows-1)/2)*rad*1.05+(nse(j+6)-.5)*rad*.65);
-   if(alongPx<1)continue;
-   const [gx,gy]=at(ox,oy,v,alongPx,side);
-   bulb(cells,gx,gy,rad,pal,v.x,v.y);
+   const side=Math.round((row-(rows-1)/2)*(base*.62)+FIRE_NUDGE[(i+row+step)%FIRE_NUDGE.length]);
+   const rad=Math.max(2,base+(row===1?-1:row===2?1:0));
+   const [gx,gy]=at(ox,oy,v,d,side);
+   bulb(cells,gx,gy,rad,pal);
   }
-  if(quality!=='low'&&nse(i+step*2)>.62){
-   const spark=2+Math.round(nse(i+4)*2);
-   const [sx,sy]=at(ox,oy,v,d+Math.round(nse(i+8)*8),Math.round((nse(i+1)-.5)*(base+8)));
-   bulb(cells,sx,sy,spark,pal,v.x,v.y);
+  if(u>.28&&(i+step)%3===0){
+   const off=FIRE_NUDGE[(i+step)%FIRE_NUDGE.length]*2+(base>6?base:4);
+   const [bx,by]=at(ox,oy,v,d+2,off);
+   bulb(cells,bx,by,Math.max(2,Math.round(base*.55)),pal);
   }
-  d+=Math.max(5,Math.round(base*(quality==='low'?.7:.48)));
+  d+=Math.max(3,Math.round(base*(quality==='low'?.8:.5)));
   i++;
  }
+ fringe(cells,'rgba(255,120,32,.42)');
  if(m.contact){
   const c=m.contact,[cx,cy]=grid(c.x,c.y),p=c.steam?PAL.water:pal;
-  bulb(cells,cx,cy,quality==='low'?6:9,p,v.x,v.y);
+  bulb(cells,cx,cy,quality==='low'?5:8,p);
   for(let k=0;k<6;k++){
    const puff=2+(step+k)%7;
    place(cells,cx+((k%3)-1),cy-puff,c.steam?p[4]:pal[4]);
@@ -116,7 +118,7 @@ function linePoints(x0,y0,x1,y1){
 }
 function bolt(cells,m,quality){
  const pts=m.path||[];if(pts.length<2)return;
- const pal=PAL.electric,step=tickOf(m.age,14),wide=quality==='low'?2:3;
+ const pal=PAL.electric,step=tickOf(m.age,14),wide=quality==='low'?1:2;
  const gpts=pts.map(p=>grid(p.x,p.y));
  const drawn=[];
  for(let i=1;i<gpts.length;i++){
