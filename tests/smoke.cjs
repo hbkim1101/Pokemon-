@@ -79,7 +79,7 @@ const exposed = [
   ' anchorPoints:(actor,move,options)=>emissionWorldPoints(actor,move,options),',
   ' anchorPoint:(actor,move,options)=>emissionPoint(actor,move,options),',
   ' atlas:()=>window.PMD_EMISSION_ATLAS,',
-  ' visualRatio:(move)=>{const widths={thunderbolt:85,flamethrower:105,surf:185,energyball:86,energyburst:225};return skillVisualRatio({owner:"player",type:move},widths[move]);},',
+  ' visualRatio:(move)=>window.motionStudio.getVisualRatio(move),',
   ' tuneSourceSheet:(id)=>{const atlas=window.PMD_EMISSION_ATLAS[id],sheet=sprites[id].anims.Shoot;const len=atlas.ports[Object.keys(atlas.ports)[0]].frames[0].length;sheet.frames=len;sheet.dur=Array(len).fill(4);sheet.w=atlas.cell[0];sheet.h=atlas.cell[1];sheet.feet=Array.from({length:8},()=>Array(len).fill(atlas.cell[1]*.79));sprites[id].variant=atlas.variant},',
   ' actionOf:(actor)=>combatAnimation(actor),',
   ' state:()=>({gameState,player,enemies,specialEffects,projectiles,extras:EXTRA_SKILLS_ENABLED}),',
