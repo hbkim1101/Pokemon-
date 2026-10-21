@@ -43,7 +43,7 @@ studioNode.innerHTML=`
 <button data-action="Idle">대기</button><button data-action="Walk">이동</button><button data-action="Attack">몸통 공격 · 돌진</button><button data-action="Shoot">원거리 공격 · 발사</button><button data-action="Charge">기 모으기</button><button data-action="Hurt">피격</button></div>
 <div class="studioGroup" id="studioDirections"><span class="sLabel">방향</span>
 <button data-dir="5">↖</button><button data-dir="4">↑</button><button data-dir="3">↗</button><button data-dir="6">←</button><button data-dir="2">→</button><button data-dir="7">↙</button><button data-dir="0">↓</button><button data-dir="1">↘</button></div>
-<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button data-test="dash">돌진 동작 시험</button><button id="studioAnchors" aria-pressed="true">발사 좌표 표시 ON</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button><button id="studioFreeze" aria-pressed="false">프레임 고정 OFF</button><label class="studioSpeed">프레임 <input type="range" id="studioFrame" min="0" max="17" value="0" step="1"><span id="studioFrameLabel">1/18</span></label>
+<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button data-test="dash">돌진 동작 시험</button><button id="studioAnchors" aria-pressed="true">발사점 표시 ON</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button><button id="studioFreeze" aria-pressed="false">프레임 고정 OFF</button><label class="studioSpeed">프레임 <input type="range" id="studioFrame" min="0" max="17" value="0" step="1"><span id="studioFrameLabel">1/18</span></label>
 <label class="studioSpeed">재생 속도 <input type="range" id="studioSpeed" min="0.25" max="2" step=".25" value="1"><span id="studioSpeedLabel">1.0×</span></label></div>
 <div class="studioGroup" id="studioPointEditor"><span class="sLabel">좌표 보정</span><button id="studioPort">발사점 선택</button><button data-point-move="-1,0" aria-label="발사점 왼쪽 1픽셀">← 1px</button><button data-point-move="1,0" aria-label="발사점 오른쪽 1픽셀">→ 1px</button><button data-point-move="0,-1" aria-label="발사점 위로 1픽셀">↑ 1px</button><button data-point-move="0,1" aria-label="발사점 아래로 1픽셀">↓ 1px</button><button id="studioCopyCoords">전체 좌표 복사</button></div><p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p><p class="studioMeta" id="studioAudit" aria-live="polite">검사하면 캐릭터별 원본 8방향 모션 누락을 표시합니다.</p>
 </div>`;
@@ -81,7 +81,7 @@ function meta(){
  for(const btn of studioNode.querySelectorAll('[data-action]'))btn.classList.toggle('active',btn.dataset.action===state.action);
  for(const btn of studioNode.querySelectorAll('[data-dir]'))btn.classList.toggle('active',+btn.dataset.dir===state.dir);
  $('studioAnchors').classList.toggle('active',state.anchors);
- $('studioAnchors').textContent=state.anchors?'발사 좌표 표시 ON':'발사 좌표 표시 OFF';
+ $('studioAnchors').textContent=state.anchors?'발사 좌표 표시 ON':'발사점 표시 OFF';
  $('studioAnchors').setAttribute('aria-pressed',String(state.anchors));
  $('studioCompare').classList.toggle('active',state.compare);
  $('studioCompare').setAttribute('aria-pressed',String(state.compare));
@@ -180,15 +180,18 @@ function studioFrameClock(){
  }
  function drawStudioAnchors(x,y,a,clock,scale){
  if(!state.anchors||state.action!=='Shoot')return;
- const sp=roster[state.kind],points=studioEmitters(x,y,a,clock,scale);
- ctx.save();ctx.font='bold 10px system-ui';ctx.textAlign='left';
- for(let i=0;i<points.length;i++){
-   const p=points[i],color=i%2?'#b5f3ff':'#ffe995';
-   pxRing(p.x,p.y,9,3,color,.98,4);
-   pxRect(p.x-2,p.y-2,4,4,'#ffffff',1);
-   const label=p.port+' F'+(p.frame+1)+' ('+p.cell.x+','+p.cell.y+')'+(p.exact?'':' ~');
-   ctx.fillStyle='#062534';ctx.fillRect(p.x+10,p.y-14,Math.max(77,label.length*6+5),16);
-   ctx.fillStyle=color;ctx.fillText(label,p.x+13,p.y-3);
+ const points=studioEmitters(x,y,a,clock,scale);
+ // A single pixel-sized DOT at each saved anatomical emitter point.
+ // No halo, ring, pointer, or coordinate label obscures the actual mouth.
+ ctx.save();
+ ctx.imageSmoothingEnabled=false;
+ for(const p of points){
+  const size=Math.max(3,Math.min(5,Math.round(scale*1.8)));
+  const sx=Math.round(p.x),sy=Math.round(p.y);
+  ctx.fillStyle='#071723';
+  ctx.fillRect(sx-Math.floor(size/2)-1,sy-Math.floor(size/2)-1,size+2,size+2);
+  ctx.fillStyle=p.exact?'#2bf6fa':'#ffe09c';
+  ctx.fillRect(sx-Math.floor(size/2),sy-Math.floor(size/2),size,size);
  }
  ctx.restore();
 }
