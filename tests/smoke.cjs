@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v28.
+// Dependency-free regression tests for Pokemon Arena v29.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -11,8 +11,8 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=28'), 'Motion Studio not linked');
-assert(html.includes('emitter-anchors.js?v=28'), 'Sprite anchor data not linked');
+assert(html.includes('battle-studio.js?v=29'), 'Motion Studio not linked');
+assert(html.includes('emitter-anchors.js?v=29'), 'Sprite anchor data not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -79,6 +79,7 @@ const exposed = [
   ' anchorPoints:(actor,move,options)=>emissionWorldPoints(actor,move,options),',
   ' anchorPoint:(actor,move,options)=>emissionPoint(actor,move,options),',
   ' atlas:()=>window.PMD_EMISSION_ATLAS,',
+  ' visualRatio:(move)=>{const widths={thunderbolt:85,flamethrower:105,surf:185,energyball:86,energyburst:225};return skillVisualRatio({owner:"player",type:move},widths[move]);},',
   ' tuneSourceSheet:(id)=>{const atlas=window.PMD_EMISSION_ATLAS[id],sheet=sprites[id].anims.Shoot;const len=atlas.ports[Object.keys(atlas.ports)[0]].frames[0].length;sheet.frames=len;sheet.dur=Array(len).fill(4);sheet.w=atlas.cell[0];sheet.h=atlas.cell[1];sheet.feet=Array.from({length:8},()=>Array(len).fill(atlas.cell[1]*.79));sprites[id].variant=atlas.variant},',
   ' actionOf:(actor)=>combatAnimation(actor),',
   ' state:()=>({gameState,player,enemies,specialEffects,projectiles,extras:EXTRA_SKILLS_ENABLED}),',
@@ -125,18 +126,24 @@ for(let k=0;k<4;k++){
       assert(Number.isFinite(p.x)&&Number.isFinite(p.y),'Emitter coordinates must be finite');
       assert(p.cell.x>=0&&p.cell.y>=0,'Emitter pixel coordinates must not be negative');
       assert(p.cell.x<=profile.cell[0]&&p.cell.y<=profile.cell[1],'Emitter position exceeds sprite cell');
+      const expected=(p.port==='mouth'?3:p.port.startsWith('cannon')?2:0)*1.43;
+      assert(Math.abs(p.offset-expected)<.0001,'Incorrect species muzzle forward offset');
+      assert(Math.abs(p.x-p.anchorX-Math.cos(pmdAngles[direction])*expected)<.001,'Emitter X must be ahead of muzzle');
+      assert(Math.abs(p.y-p.anchorY-Math.sin(pmdAngles[direction])*expected)<.001,'Emitter Y must be ahead of muzzle');
     }
   }
   api.activate(0);
   assert.equal(api.state().player.action,'Shoot','Basic ranged move should use Shoot');
   const emitted=api.state().projectiles.at(-1),origin=api.anchorPoint(me,'basic',
     {angle:me.face,action:'Shoot',clock:.12,index:0});
-  assert(Math.abs(emitted.x-origin.x-Math.cos(me.face)*4)<.01,'Basic projectile X did not originate at port');
-  assert(Math.abs(emitted.y-origin.y-Math.sin(me.face)*4)<.01,'Basic projectile Y did not originate at port');
+  assert(Math.abs(emitted.x-origin.x)<.01,'Basic projectile X did not originate at its forward offset port');
+  assert(Math.abs(emitted.y-origin.y)<.01,'Basic projectile Y did not originate at its forward offset port');
   api.activate(1);
   assert(api.state().specialEffects.length>0,'Signature move did not cast');
   assert.equal(api.state().player.action,'Shoot','Signature move action role mismatch');
   assert.equal(api.actionOf(api.state().player),'Shoot','Rendered signature motion mismatched');
+  const ratio=api.visualRatio(k===0?'thunderbolt':k===1?'flamethrower':k===2?'surf':'energyball');
+  assert(ratio>=.35&&ratio<=.73,'Skill pixels must render at reduced character-proportional size');
   const specialMove=api.state().specialEffects.find(m=>['thunderbolt','flamethrower','surf','energyball'].includes(m.type));
   assert(specialMove,'Signature effect not spawned');
   if(k===0){
@@ -150,8 +157,7 @@ for(let k=0;k<4;k++){
   if(k===1 || k===3){
     const start=api.anchorPoint(me,k===1?'flamethrower':'energyball',
       {angle:me.face,action:'Shoot',clock:.12});
-    const offset=k===3?14:0;
-    assert(Math.abs(specialMove.x-start.x-Math.cos(me.face)*offset)<.01,'Projectile not emitted from mouth');
+    assert(Math.abs(specialMove.x-start.x)<.01,'Projectile did not originate slightly ahead of mouth');
   }
   api.activate(2);
   assert.equal(api.state().player.action,'Attack','Dash must use Attack instead of Walk');
@@ -240,6 +246,12 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
+assert(addon.includes('scaleSkillBeamWidth(m,skillVisualRatio(m,105'),
+ 'Flamethrower width must use sprite-proportional VFX scaling');
+assert(addon.includes('scaleSkillAround(m,skillVisualRatio(m,185'),
+ 'Surf art must be scaled independently from its collision box');
+assert(addon.includes('scaleSkillAround(m,skillVisualRatio(m,86'),
+ 'Energy Ball pixels must be scaled independently from its collision box');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
 
@@ -250,4 +262,4 @@ assert.equal(api.signature('electric'),'Shoot');
 assert.equal(api.signature('fire'),'Shoot');
 assert.equal(api.signature('water'),'Shoot');
 assert.equal(api.signature('grass'),'Shoot');
-console.log('PASS: 4 Pokemon, 192 motion cells, 8-way sprite-local emitter anchors, sustained Shoot, Raichu body, Blastoise cannons, mouth attacks, Flamethrower hold');
+console.log('PASS: character-proportional skill pixels, forward muzzle offsets, 192 sprite cells, 8-way anatomy, sustained Shoot and Flamethrower recovery');
