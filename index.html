@@ -1795,13 +1795,42 @@ function drawExtraSpecial(m,layer){
  fxDrawExtraSignature(m,layer);
 }
 
+function drawElectricBodyAura(m){
+ const actor=m.owner==='player'?player:enemies[0];if(!actor||m.age>.85)return;
+ const at=emissionPoint(actor,'thunderbolt'),fade=Math.max(0,1-m.age/.85);
+ const pulse=Math.sin(m.age*33),radius=28+7*Math.sin(m.age*21),detail=fxQuality==='low'?8:14;
+ ctx.save();
+ pxRing(at.x,at.y,radius,8,'#ffdd35',.8*fade,8);
+ pxRing(at.x,at.y,radius+10,4,'#fff1a0',.6*fade,8);
+ for(let i=0;i<detail;i++){
+  const a=i*Math.PI*2/detail+m.age*10,r=radius+10+(i%3)*6;
+  const ax=at.x+Math.cos(a)*r,ay=at.y+Math.sin(a)*r*.86;
+  const bx=at.x+Math.cos(a)*(r+13+(i%2)*9),by=at.y+Math.sin(a)*(r+13+(i%2)*9)*.86;
+  pxLine(ax,ay,bx,by,4,i%3?'#ffe44d':'#ffffff',fade*(.7+.2*pulse),.85);
+  if(i%3===0)pxRect(bx-3,by-3,6,6,'#fff8d5',fade);
+ }
+ ctx.restore();
+}
+function drawSurfCannonJets(m){
+ if(m.age>.39||!m.emitters?.length)return;
+ const fade=Math.max(0,1-m.age/.39);
+ ctx.save();
+ for(const cannon of m.emitters){
+  const dist=Math.min(62,m.distance+15),x=cannon.x+m.vx*dist,y=cannon.y+m.vy*dist;
+  pxLine(cannon.x,cannon.y,x,y,12,'#217bab',fade*.9,.7);
+  pxLine(cannon.x,cannon.y,x,y,7,'#8ae7ff',fade,.7);
+  pxRect(x-4,y-4,8,8,'#f0ffff',fade);
+ }
+ ctx.restore();
+}
 function drawSpecials(layer){
  for(const m of specialEffects){
   if(m.type==='extra'){drawExtraSpecial(m,layer);continue;}
   if(layer==='under' && m.type==='surf')drawSurf(m);
   if(layer!=='over')continue;
-  if(m.type==='thunderbolt'||m.type==='boltEcho')drawThunderbolt(m);
+  if(m.type==='thunderbolt'||m.type==='boltEcho'){drawThunderbolt(m);if(m.type==='thunderbolt')drawElectricBodyAura(m);}
   if(m.type==='flamethrower')drawFlamethrower(m);
+  if(m.type==='surf')drawSurfCannonJets(m);
   if(m.type==='energyball')drawEnergyball(m);
   if(m.type==='energyburst')drawEnergyBurst(m);
  }
