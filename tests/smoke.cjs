@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v27.
+// Dependency-free regression tests for Pokemon Arena v28.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -11,8 +11,8 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=27'), 'Motion Studio not linked');
-assert(html.includes('emitter-anchors.js?v=27'), 'Sprite anchor data not linked');
+assert(html.includes('battle-studio.js?v=28'), 'Motion Studio not linked');
+assert(html.includes('emitter-anchors.js?v=28'), 'Sprite anchor data not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -230,6 +230,18 @@ for(const id of ['0026','0006','0009','0003']){
   assert(port.frames[2].some(([x,y])=>x!==first[0]||y!==first[1]),id+' emitter does not follow animation');
  }
 }
+
+const heldFacePoints=[[32,36],[52,41],[56,33],[51,30],[32,27],[10,28],[6,35],[13,39]];
+const charizardPorts=api.atlas()['0006'].ports.mouth.frames;
+assert.equal(charizardPorts.length,8,'Charizard must have 8 facing rows');
+for(let direction=0;direction<8;direction++){
+ assert.equal(charizardPorts[direction].length,18,'Charizard must have all 18 animation frames');
+ assert.equal(charizardPorts[direction][13][0],heldFacePoints[direction][0],'Incorrect 13th held-fire mouth X coordinate');
+ assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
+}
+assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
+assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
+ 'Studio mouth marker must not use a ring');
 
 const pmdAngles=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
 for(let direction=0;direction<8;direction++)assert.equal(api.direction(pmdAngles[direction]),direction,'PMD row is mapped to the wrong angle');
