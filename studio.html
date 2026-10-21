@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ARENA · 기술 스프라이트 스튜디오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+KR:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#e8fff6;--mute:#8fb8ad;--line:#3d7a6e;--panel:#0d2430ee;--panel2:#163842;
+  --accent:#d8f06a;--fire:#ff8a4a;--volt:#ffe56b;--water:#79d7ff;--leaf:#9be37a;
+  --void:#08161c;--floor:#1a4a3d;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--void);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;overflow:hidden}
+body{background:
+  radial-gradient(1200px 600px at 15% -10%,#1b4a3f55,transparent 55%),
+  radial-gradient(900px 500px at 90% 0%,#3a2a1855,transparent 50%),
+  linear-gradient(180deg,#0b1c24,#122a28 45%,#0a1816)}
+#app{display:grid;grid-template-rows:auto 1fr auto;height:100%;min-height:100dvh}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px 10px;border-bottom:1px solid #2a5a5233}
+header .brand{font-family:Syne,sans-serif;font-weight:800;font-size:clamp(22px,3.4vw,34px);letter-spacing:.04em;line-height:1}
+header .brand em{font-style:normal;color:var(--accent)}
+header .sub{color:var(--mute);font-size:12px;margin-top:4px;font-weight:700}
+header .nav{display:flex;gap:8px;flex-wrap:wrap}
+header a,header button.ghost{appearance:none;border:1px solid var(--line);background:#12343a;color:var(--ink);text-decoration:none;padding:9px 12px;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer}
+main{display:grid;grid-template-columns:minmax(220px,280px) 1fr minmax(240px,320px);gap:0;min-height:0}
+@media(max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}}
+.rail,.sheetRail{background:var(--panel);border-right:1px solid #2a5a5233;padding:12px;overflow:auto;min-height:0}
+.sheetRail{border-right:0;border-left:1px solid #2a5a5233}
+.rail h2,.sheetRail h2{margin:0 0 8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-family:Syne,sans-serif}
+.group{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+button.chip{border:1px solid #3c6f66;background:var(--panel2);color:var(--ink);border-radius:9px;padding:9px 11px;font-weight:800;font-size:12px;cursor:pointer}
+button.chip.active{background:var(--accent);color:#173028;border-color:#f4ffb0}
+button.chip.fire.active{background:var(--fire);color:#2a1208;border-color:#ffd0ad}
+button.chip.volt.active{background:var(--volt);color:#2a2308;border-color:#fff3ad}
+button.chip.water.active{background:var(--water);color:#082232;border-color:#c8f0ff}
+button.chip.leaf.active{background:var(--leaf);color:#163014;border-color:#d8ffb8}
+.stageWrap{position:relative;min-height:0;display:grid;place-items:center;padding:10px}
+#stage{width:min(100%,920px);height:min(70dvh,620px);max-height:100%;background:
+  linear-gradient(180deg,#163744,#214f48 55%,#1a4038);border:1px solid #3d7a6e66;border-radius:16px;image-rendering:pixelated;cursor:crosshair;box-shadow:0 20px 50px #0007}
+.hud{position:absolute;left:18px;top:14px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:#d7ffe9;background:#061820aa;padding:8px 10px;border-radius:8px;line-height:1.55;pointer-events:none}
+.hint{position:absolute;right:18px;bottom:14px;font-size:11px;color:var(--mute);background:#061820aa;padding:7px 10px;border-radius:8px;max-width:260px}
+#strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.frameCell{flex:0 0 auto;border:2px solid #355f57;background:#0b1f27;border-radius:8px;padding:4px;cursor:pointer}
+.frameCell.active{border-color:var(--accent)}
+.frameCell canvas{display:block;image-rendering:pixelated;width:56px;height:56px}
+.frameCell small{display:block;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--mute);margin-top:3px}
+.meta{font-family:"IBM Plex Mono",monospace;font-size:11px;color:#c8e8dc;line-height:1.55;white-space:pre-wrap}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tools button{border:1px solid #477c73;background:#1a3d44;color:#e8fff6;border-radius:8px;padding:8px 10px;font-weight:800;font-size:11px;cursor:pointer}
+.tools button.active{background:#dff2a8;color:#1c3328}
+footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 16px 14px;border-top:1px solid #2a5a5233;background:#0a1c22cc;font-size:11px;color:var(--mute)}
+#status{color:#b8efd6;font-weight:700}
+textarea#jsonOut{width:100%;min-height:110px;margin-top:8px;background:#07151b;color:#d8ffe8;border:1px solid #355f57;border-radius:8px;font-family:"IBM Plex Mono",monospace;font-size:10px;padding:8px;resize:vertical}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div>
+      <div class="brand">ARENA <em>STUDIO</em></div>
+      <div class="sub">화염방사 · 10만볼트 · 파도타기 · 에너지볼 스프라이트와 발사점을 다듬는 공간</div>
+    </div>
+    <div class="nav">
+      <a href="./index.html">아레나로</a>
+      <button class="ghost" type="button" id="btnReplay">기술 재생</button>
+      <button class="ghost" type="button" id="btnCopy">좌표 JSON 복사</button>
+    </div>
+  </header>
+  <main>
+    <aside class="rail">
+      <h2>포켓몬</h2>
+      <div class="group" id="pokemonGroup"></div>
+      <h2>기술</h2>
+      <div class="group" id="moveGroup"></div>
+      <h2>방향</h2>
+      <div class="group" id="dirGroup"></div>
+      <h2>도구</h2>
+      <div class="tools">
+        <button type="button" id="btnPlay" class="active">미리보기 ON</button>
+        <button type="button" id="btnMarker" class="active">발사점 ON</button>
+        <button type="button" id="btnNudgeL" aria-label="왼쪽">←1</button>
+        <button type="button" id="btnNudgeR" aria-label="오른쪽">→1</button>
+        <button type="button" id="btnNudgeU" aria-label="위">↑1</button>
+        <button type="button" id="btnNudgeD" aria-label="아래">↓1</button>
+        <button type="button" id="btnResetPort">이 프레임 리셋</button>
+      </div>
+      <p class="meta" id="info">스프라이트 로딩 중…</p>
+    </aside>
+    <section class="stageWrap">
+      <canvas id="stage" width="920" height="620" aria-label="기술 미리보기 캔버스"></canvas>
+      <div class="hud" id="hud">—</div>
+      <div class="hint">확대된 Shoot 프레임을 클릭하면 발사점이 이동합니다. 화살표 키로 1px씩 보정할 수 있습니다.</div>
+    </section>
+    <aside class="sheetRail">
+      <h2>Shoot 프레임 스트립</h2>
+      <div id="strip"></div>
+      <h2 style="margin-top:14px">현재 좌표</h2>
+      <p class="meta" id="coordMeta">—</p>
+      <h2 style="margin-top:14px">내보내기</h2>
+      <textarea id="jsonOut" readonly aria-label="발사점 JSON"></textarea>
+      <p class="meta" id="status" style="margin-top:8px">대기</p>
+    </aside>
+  </main>
+  <footer>
+    <span>PMDCollab 원본 Shoot 시트 + 발사점 보정 · 비상업용 팬 도구</span>
+    <span>보정값은 이 브라우저에 저장됩니다</span>
+  </footer>
+</div>
+<script src="./emitter-anchors.js?v=30"></script>
+<script src="./move-studio.js?v=30"></script>
+</body>
+</html>

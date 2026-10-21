@@ -51,8 +51,13 @@ document.body.append(studioNode);
 const launcher=document.createElement('button');
 launcher.id='openMotionStudio';
 launcher.type='button';
-launcher.textContent='🎞 캐릭터 모션 · 4종 기술 테스트';
+launcher.textContent='🎞 인게임 모션 테스트';
 $('start').insertAdjacentElement('afterend',launcher);
+const studioPageLink=document.createElement('a');
+studioPageLink.className='studioLink';
+studioPageLink.href='./studio.html';
+studioPageLink.textContent='기술 스프라이트 스튜디오 · 발사점 다듬기';
+launcher.insertAdjacentElement('afterend',studioPageLink);
 const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:0,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false,anchors:true,freezeFrame:false,frameIndex:0,portIndex:0};
 // PMD sprite-sheet row order: S, SE, E, NE, N, NW, W, SW.
 const faces=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
@@ -127,6 +132,7 @@ function attack(which){
 }
 launcher.addEventListener('click',open);
 $('studioExit').addEventListener('click',close);
+try{if(String(location.search||'').indexOf('studio')>=0)addEventListener('load',()=>setTimeout(open,80))}catch(err){}
 studioNode.addEventListener('click',(e)=>{
  const btn=e.target.closest('button');if(!btn)return;
  if(btn.dataset.actor!==undefined){state.auto=false;state.completed=false;select(+btn.dataset.actor);return;}

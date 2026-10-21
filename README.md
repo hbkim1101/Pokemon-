@@ -1,14 +1,10 @@
-# Pokémon Arena — Four Moves & Motion Studio (v29)
-
-## 민트 리그 스토리 모드
-
-`story.html`은 아레나와 같은 실시간 전투가 들어 있는 여행이다. 집에서 엄마와 민 박사를 만나 스타터를 고르고, 풀숲에서 움직이며 쏘고 회피해서 경험치를 얻는다. 진화, 상처약, 몬스터볼 포획, 가방·박스·포켓몬센터, 체육관 8곳, 레이드 제단의 뮤츠, 챔피언까지 이어진다.
-
-필드: 방향키 이동, A/Enter/Z 대화, B/Esc/X 메뉴. 배틀: WASD 이동, 1 기본 공격, 2 특수 기술, Space 회피, 3 몬스터볼, 4 상처약, 필드 아래쪽 끝까지 이동하면 도망. 기록은 브라우저에 저장된다. 규칙은 `node tests/story-smoke.cjs`, 실시간 전투는 `node tests/story-arena.cjs`로 검사한다.
-
-도트는 두 곳에서 불러온다. 배틀 포켓몬은 아레나와 같은 PMDCollab 8방향 시트(`Walk`/`Idle`/`Attack`/`Shoot`)다. 필드 트레이너와 NPC, 도감 앞모습, 몬스터볼, 타일은 Pokémon Workshop PSDK Technical Demo의 `graphics/characters`, `graphics/pokedex/pokefront`, `graphics/icons`, `graphics/tilesets`다. 플레이에는 인터넷 연결이 필요하다.
+# Pokémon Arena — Four Moves & Motion Studio (v30)
 
 비상업용 팬 프로젝트입니다. Pokémon 및 관련 캐릭터의 권리는 각 원저작자에게 있습니다.
+
+## 기술 스프라이트 스튜디오
+
+`studio.html`에서 화염방사 · 10만볼트 · 파도타기 · 에너지볼의 PMD `Shoot` 프레임과 발사점을 다듬을 수 있다. 포켓몬·기술·방향을 고르고, 오른쪽 확대 프레임을 클릭하거나 화살표 키로 1px씩 보정한다. 보정값은 브라우저에 저장되며 JSON으로 복사할 수 있다. 아레나 메뉴의 링크에서도 들어간다.
 
 ## 플레이 규칙
 
@@ -98,10 +94,11 @@ PMDCollab 원본 리자몽 `0006/0005/Shoot-Anim.png`를 4배 확대해 8방향�
 ## 파일 구조
 
 - `index.html`: 게임, 캐릭터, 전투·AI, 스프라이트-좌표 변환, 기본 이펙트
+- `studio.html` / `move-studio.js`: 기술 스프라이트·발사점 다듬기 전용 공간
 - `emitter-anchors.js`: 포켓몬별 입·몸·캐논의 8방향 × `Shoot` 프레임별 원본 픽셀 발사 좌표 데이터
-- `battle-studio.js`: 모션 테스트 화면, PMD 프레임 진단, 고유 기술의 추가 이펙트 레이어
+- `battle-studio.js`: 인게임 모션 테스트, PMD 프레임 진단, 고유 기술의 추가 이펙트 레이어
 
-GitHub Pages 등 정적 호스팅에서 `index.html`을 열면 됩니다. 이펙트 추가 모듈은 HTML 하단에서 로드됩니다. 스프라이트는 외부 호스트를 사용하므로 네트워크 연결이 필요합니다.
+GitHub Pages 등 정적 호스팅에서 `index.html` 또는 `studio.html`을 열면 됩니다. 스프라이트는 외부 호스트를 사용하므로 네트워크 연결이 필요합니다.
 
 ## 자동 회귀 테스트
 
