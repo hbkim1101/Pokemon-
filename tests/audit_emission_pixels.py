@@ -66,7 +66,17 @@ def main():
                             if not (f*cw<=x<(f+1)*cw):continue
                             if bpp!=4 or row[x*bpp+3]>48:
                                 nearest=min(nearest,(dx*dx+dy*dy)**.5)
-                    if nearest>9:bad.append((name,direction,f,round(nearest,1)))
+                    if nearest>9:
+                        candidates=[]
+                        for local_y in range(ch):
+                            scan=pixels[direction*ch+local_y]
+                            for local_x in range(cw):
+                                xx=f*cw+local_x
+                                if bpp!=4 or scan[xx*bpp+3]>90:
+                                    gap=((cx-local_x)**2+(cy-local_y)**2)**.5
+                                    candidates.append((round(gap,2),local_x,local_y))
+                        closest=min(candidates) if candidates else ('none',cx,cy)
+                        bad.append((name,direction,f,round(nearest,1),'closest',closest))
         all_bad+=len(bad)
         print('  Anchors farther than 9px from opaque sprite:',len(bad))
         for issue in bad[:24]:print(' ',issue)
