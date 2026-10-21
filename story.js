@@ -23,17 +23,37 @@
   let lastTick = performance.now();
   const images = {};
 
-  function spriteUrl(dex, back) {
-    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + (back ? 'back/' : '') + dex + '.png';
+  const tileset = new Image();
+  tileset.src = './psdk/graphics/tilesets/mint.png';
+  const TILE_ART = { grass: [0, 1], path: [2, 3], water: [4, 4], tree: [5, 5], floor: [6, 6], wall: [7, 7], door: [8, 8], exit: [8, 8], sign: [9, 9] };
+  const battleInput = { up: false, down: false, left: false, right: false, basic: false, special: false, dash: false, ball: false, potion: false };
+  let arena = null;
+  let arenaClock = 0;
+  let choiceKey = '';
+  function spriteUrl(id, kind) {
+    if (kind === 'character') return './psdk/graphics/characters/' + id + '.png';
+    if (kind === 'anim') return './psdk/graphics/animations/' + id + '.png';
+    if (kind === 'icon') return './psdk/graphics/pokedex/icon/' + id + '.png';
+    return './psdk/graphics/pokedex/front/' + id + '.png';
   }
-  function imageFor(dex, back) {
-    const key = (back ? 'b' : 'f') + dex;
+  function imageFor(id, kind) {
+    const key = (kind || 'front') + ':' + id;
     if (!images[key]) {
       const img = new Image();
-      img.src = spriteUrl(dex, back);
+      img.src = spriteUrl(id, kind);
       images[key] = img;
     }
     return images[key];
+  }
+  function drawCharset(id, sx, sy, dir, moving, size) {
+    const img = imageFor(id, 'character');
+    if (!img.complete || !img.naturalWidth) return false;
+    const row = { down: 0, left: 1, right: 2, up: 3 }[dir] || 0;
+    const frame = moving ? [0, 1, 2, 1][Math.floor(performance.now() / 140) % 4] : 1;
+    const cell = img.width / 4;
+    const drawSize = size || TILE;
+    ctx.drawImage(img, frame * cell, row * cell, cell, cell, sx, sy, drawSize, drawSize);
+    return true;
   }
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -169,20 +189,29 @@
       const cell = grid[y][x];
       const sx = x * TILE - originX;
       const sy = y * TILE - originY;
-      ctx.fillStyle = tileColor(cell, x, y);
-      ctx.fillRect(sx, sy, TILE, TILE);
-      if (cell.k === 'tree') {
-        ctx.fillStyle = '#2f8d45';
-        ctx.beginPath();
-        ctx.arc(sx + 16, sy + 14, 10, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (cell.k === 'door') {
-        ctx.fillStyle = '#f2d56b';
-        ctx.fillRect(sx + 13, sy + 12, 6, 8);
-      } else if (cell.k === 'sign') {
-        ctx.fillStyle = '#efe6cf';
-        ctx.fillRect(sx + 8, sy + 8, 16, 12);
-      } else if (cell.k === 'roof') {
+      const art = TILE_ART[cell.k];
+      if (cell.k !== 'roof' && art && tileset.complete && tileset.naturalWidth) {
+        const index = art[(x + y) % art.length];
+        ctx.drawImage(tileset, index * 32, 0, 32, 32, sx, sy, TILE, TILE);
+      } else {
+        ctx.fillStyle = tileColor(cell, x, y);
+        ctx.fillRect(sx, sy, TILE, TILE);
+      }
+      if (!(tileset.complete && tileset.naturalWidth)) {
+        if (cell.k === 'tree') {
+          ctx.fillStyle = '#2f8d45';
+          ctx.beginPath();
+          ctx.arc(sx + 16, sy + 14, 10, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (cell.k === 'door') {
+          ctx.fillStyle = '#f2d56b';
+          ctx.fillRect(sx + 13, sy + 12, 6, 8);
+        } else if (cell.k === 'sign') {
+          ctx.fillStyle = '#efe6cf';
+          ctx.fillRect(sx + 8, sy + 8, 16, 12);
+        }
+      }
+      if (cell.k === 'roof') {
         ctx.fillStyle = '#0003';
         ctx.fillRect(sx, sy + 26, TILE, 6);
       }
@@ -191,16 +220,27 @@
     if (room) room.objects.forEach(function (obj) {
       const sx = obj.x * TILE - originX;
       const sy = obj.y * TILE - originY;
-      ctx.fillStyle = obj.kind === 'pc' ? '#9fd0ff' : '#f05a52';
-      ctx.fillRect(sx + 8, sy + 10, 16, 14);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(sx + 13, sy + 14, 6, 6);
+      if (obj.kind === 'starter') {
+        const ball = imageFor('ball', 'anim');
+        if (ball.complete && ball.naturalWidth) ctx.drawImage(ball, sx + 8, sy + 8, 16, 16);
+        else { ctx.fillStyle = '#f05a52'; ctx.fillRect(sx + 10, sy + 10, 12, 12); }
+      } else {
+        ctx.fillStyle = obj.kind === 'pc' ? '#9fd0ff' : '#f05a52';
+        ctx.fillRect(sx + 8, sy + 10, 16, 14);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(sx + 13, sy + 14, 6, 6);
+      }
     });
     core.npcsOn(state, state.mapId).forEach(function (npc) {
-      drawPerson(npc.x * TILE - originX, npc.y * TILE - originY, npc.color, 'down', 0);
+      const id = npc.id === 'prof' ? 'prof' : npc.id === 'champion' ? 'champion' : npc.id === 'raid' ? 'raid' : npc.trainerId ? 'leader' : npc.id;
+      const sx = npc.x * TILE - originX;
+      const sy = npc.y * TILE - originY;
+      if (!drawCharset(id, sx, sy, 'down', false)) drawPerson(sx, sy, npc.color, 'down', 0);
     });
     const bob = Math.sin(performance.now() / 160) * 1.2;
-    drawPerson(state.x * TILE - originX, state.y * TILE - originY, '#f25d5d', state.dir, bob);
+    const psx = state.x * TILE - originX;
+    const psy = state.y * TILE - originY;
+    if (!drawCharset('player', psx, psy + bob, state.dir, !!moveHold)) drawPerson(psx, psy, '#f25d5d', state.dir, bob);
     ctx.fillStyle = '#1f6dff';
     const px = state.x * TILE - originX + 11;
     const py = state.y * TILE - originY + 16 + bob;
@@ -229,7 +269,7 @@
   }
   function pressA() {
     if (mode === 'text') return advanceText();
-    if (mode === 'battle') return advanceBattle();
+    if (mode === 'battle') return;
     if (mode !== 'play' || !state) return;
     const result = core.interact(state);
     if (result.type === 'text') say(result.lines);
@@ -283,7 +323,7 @@
   }
   function monCard(mon, index, action) {
     const info = core.summary(mon);
-    const img = imageFor(info.dex, false);
+    const img = imageFor(mon.speciesId, 'front');
     return '<button class="mon" data-act="' + action + '" data-i="' + index + '"><img alt="" src="' + img.src + '"><div><b>' + info.name + ' Lv.' + info.level + '</b><div>' + typeTags(info.types) + '</div><div class="bar"><i style="width:' + Math.round(info.hp / info.maxHp * 100) + '%"></i></div><small>' + info.hp + '/' + info.maxHp + (info.status ? ' · ' + info.status : '') + '</small></div></button>';
   }
   function openMenu() {
@@ -325,7 +365,7 @@
     document.querySelectorAll('[data-item]').forEach(function (button) {
       button.onclick = function () { pickItemTarget(button.dataset.item, inBattle); };
     });
-    $('bagBack').onclick = inBattle ? function () { closeSheet(); mode = 'battle'; renderBattle(); } : openMenu;
+    $('bagBack').onclick = inBattle ? function () { closeSheet(); mode = 'battle'; } : openMenu;
   }
   function pickItemTarget(itemId, inBattle) {
     const item = core.ITEMS[itemId];
@@ -402,122 +442,102 @@
 
   function startBattle(next) {
     battle = next;
-    battleEvents = battle.events.slice();
-    battleAt = 0;
-    hpSnap = snapshot();
+    arena = window.StoryArena.create(battle);
+    arenaClock = performance.now();
+    choiceKey = '';
     mode = 'battle';
     hideChoices();
+    Object.keys(battleInput).forEach(function (key) { battleInput[key] = false; });
     $('battle').classList.add('show');
     $('message').classList.remove('show');
-    renderBattle();
   }
-  function snapshot() {
-    const mine = battle.state.party[battle.playerIndex];
-    const foe = battle.foe[battle.foeIndex];
-    return { playerHp: mine ? mine.hp : 0, playerMax: mine ? mine.maxHp : 1, foeHp: foe ? foe.hp : 0, foeMax: foe ? foe.maxHp : 1, foeIndex: battle.foeIndex, playerIndex: battle.playerIndex };
-  }
-  function shownHp() {
-    let playerHp = hpSnap.playerHp;
-    let foeHp = hpSnap.foeHp;
-    for (let i = 0; i <= battleAt && i < battleEvents.length; i++) {
-      const event = battleEvents[i];
-      if (!event.amount) continue;
-      if (event.side === 'foe') foeHp = Math.max(0, foeHp - event.amount);
-      else playerHp = Math.max(0, playerHp - event.amount);
-    }
-    return { playerHp: playerHp, foeHp: foeHp };
-  }
-  function renderBattle() {
-    if (!battle) return;
-    const doneReading = battleAt >= battleEvents.length - 1;
-    const foe = battle.foe[Math.min(doneReading ? battle.foeIndex : hpSnap.foeIndex, battle.foe.length - 1)];
-    const mine = battle.state.party[doneReading ? battle.playerIndex : hpSnap.playerIndex] || battle.state.party[battle.playerIndex];
-    const hp = doneReading ? { playerHp: mine.hp, foeHp: foe.hp, foeMax: foe.maxHp, playerMax: mine.maxHp } : { playerHp: shownHp().playerHp, foeHp: shownHp().foeHp, foeMax: hpSnap.foeMax, playerMax: hpSnap.playerMax };
-    const foeSp = core.SPECIES[foe.speciesId];
-    const mySp = core.SPECIES[mine.speciesId];
-    $('foeSprite').src = imageFor(foeSp.dex, false).src;
-    $('mySprite').src = imageFor(mySp.dex, true).src;
-    $('foeName').textContent = core.monName(foe);
-    $('foeLv').textContent = 'Lv.' + foe.level;
-    $('myName').textContent = core.monName(mine);
-    $('myLv').textContent = 'Lv.' + mine.level;
-    $('foeHp').style.width = Math.round(hp.foeHp / hp.foeMax * 100) + '%';
-    $('myHp').style.width = Math.round(hp.playerHp / hp.playerMax * 100) + '%';
-    $('myExp').style.width = Math.round(mine.exp / core.expToNext(mine.level) * 100) + '%';
-    $('battleText').textContent = battleEvents[battleAt] ? battleEvents[battleAt].text : '';
-    const acts = $('battleActs');
-    acts.innerHTML = '';
-    if (!doneReading) {
-      acts.appendChild(actionButton('다음', advanceBattle));
-      return;
-    }
-    if (battle.over) {
-      acts.appendChild(actionButton('계속', finishBattle));
-      return;
-    }
-    if (battle.pending && battle.pending.type === 'learn') {
-      const moveName = core.MOVES[battle.pending.moveId].name;
-      $('battleText').textContent = moveName + '를 배우려면 어떤 기술을 잊겠나?';
-      mine.moves.forEach(function (id, index) {
-        acts.appendChild(actionButton(core.MOVES[id].name + ' 잊기', function () { command({ type: 'learn', replace: index }); }));
+  function openBattleChoice() {
+    const pending = battle.pending;
+    if (pending.type === 'learn') {
+      const mine = battle.state.party[battle.playerIndex];
+      const moveName = core.MOVES[pending.moveId].name;
+      const buttons = mine.moves.map(function (id, index) {
+        return { label: core.MOVES[id].name + ' 잊기', on: function () { resolveChoice({ type: 'learn', replace: index }); } };
       });
-      acts.appendChild(actionButton(moveName + '는 포기', function () { command({ type: 'learn', replace: null }); }));
+      buttons.push({ label: moveName + '는 포기', on: function () { resolveChoice({ type: 'learn', replace: null }); } });
+      showChoices(buttons);
       return;
     }
-    if (battle.pending && battle.pending.type === 'switch') {
-      $('battleText').textContent = '다음 포켓몬을 골라라.';
-      battle.state.party.forEach(function (mon, index) {
-        if (mon.hp <= 0) return;
-        acts.appendChild(actionButton(core.monName(mon) + ' Lv.' + mon.level, function () { command({ type: 'switch', index: index }); }));
-      });
-      return;
-    }
-    acts.appendChild(actionButton('싸운다', showMoves));
-    acts.appendChild(actionButton('가방', function () { openBag(true); }));
-    acts.appendChild(actionButton('포켓몬', showSwitch));
-    if (battle.canRun) acts.appendChild(actionButton('도망', function () { command({ type: 'run' }); }));
-  }
-  function actionButton(label, on) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.onclick = on;
-    return button;
-  }
-  function showMoves() {
-    const acts = $('battleActs');
-    acts.innerHTML = '';
-    const mine = battle.state.party[battle.playerIndex];
-    const foe = battle.foe[battle.foeIndex];
-    mine.moves.forEach(function (id, index) {
-      const move = core.MOVES[id];
-      const eff = core.effectiveness(move.type, core.SPECIES[foe.speciesId].types);
-      acts.appendChild(actionButton(move.name + ' · ' + move.power + (eff >= 2 ? ' 강함' : eff === 0 ? ' 무효' : eff < 1 ? ' 약함' : ''), function () {
-        command({ type: 'fight', slot: index });
-      }));
-    });
-    acts.appendChild(actionButton('뒤로', renderBattle));
-  }
-  function showSwitch() {
-    const acts = $('battleActs');
-    acts.innerHTML = '';
+    const buttons = [];
     battle.state.party.forEach(function (mon, index) {
-      if (index === battle.playerIndex || mon.hp <= 0) return;
-      acts.appendChild(actionButton(core.monName(mon) + ' Lv.' + mon.level, function () { command({ type: 'switch', index: index }); }));
+      if (mon.hp <= 0) return;
+      buttons.push({ label: core.monName(mon) + ' Lv.' + mon.level, on: function () { resolveChoice({ type: 'switch', index: index }); } });
     });
-    acts.appendChild(actionButton('뒤로', renderBattle));
+    showChoices(buttons);
   }
-  function advanceBattle() {
-    if (!battle) return;
-    if (battleAt < battleEvents.length - 1) { battleAt += 1; renderBattle(); return; }
+  function resolveChoice(cmd) {
+    hideChoices();
+    choiceKey = '';
+    core.battleCommand(battle, cmd);
     if (battle.over) finishBattle();
   }
-  function command(cmd) {
-    hpSnap = snapshot();
-    core.battleCommand(battle, cmd);
-    battleEvents = battle.events.slice();
-    battleAt = 0;
-    renderBattle();
+  function watchBattle() {
+    if (!battle) return;
+    if (battle.pending) {
+      const key = battle.pending.type + ':' + (battle.pending.moveId || '') + ':' + battle.playerIndex + ':' + battle.foeIndex;
+      if (choiceKey !== key) { choiceKey = key; openBattleChoice(); }
+      return;
+    }
+    if (choiceKey) { choiceKey = ''; hideChoices(); }
+    if (battle.over) finishBattle();
+  }
+  function drawArena() {
+    if (!arena) return;
+    const width = innerWidth;
+    const height = innerHeight;
+    ctx.fillStyle = '#163222';
+    ctx.fillRect(0, 0, width, height);
+    const scale = Math.min(width / arena.W, (height - 150) / arena.H);
+    const ox = (width - arena.W * scale) / 2;
+    const oy = 64;
+    const floor = imageFor('shot', 'anim');
+    ctx.fillStyle = arena.battle.kind === 'wild' ? '#3eae4d' : '#6a4632';
+    ctx.fillRect(ox, oy, arena.W * scale, arena.H * scale);
+    ctx.strokeStyle = '#24180f';
+    ctx.strokeRect(ox, oy, arena.W * scale, arena.H * scale);
+    function place(x, y) { return [ox + x * scale, oy + y * scale]; }
+    arena.shots.forEach(function (shot) {
+      const at = place(shot.x, shot.y);
+      const img = floor;
+      if (img.complete && img.naturalWidth) ctx.drawImage(img, at[0] - 6, at[1] - 6, 12, 12);
+      else { ctx.fillStyle = TYPE_COLOR[shot.type] || '#fff'; ctx.fillRect(at[0] - 4, at[1] - 4, 8, 8); }
+    });
+    const ballImg = imageFor('ball', 'anim');
+    arena.balls.forEach(function (ball) {
+      const at = place(ball.x, ball.y);
+      if (ballImg.complete && ballImg.naturalWidth) ctx.drawImage(ballImg, at[0] - 8, at[1] - 8, 16, 16);
+    });
+    [arena.foe, arena.player].forEach(function (actor) {
+      if (!actor || !actor.mon || actor.mon.hp <= 0) return;
+      const at = place(actor.x, actor.y);
+      const size = 42 * (scale / 1.2);
+      const shooting = actor.basicCd > 0.2 || actor.specialCd > 0.9;
+      const frameImg = imageFor(actor.mon.speciesId, 'character');
+      if (frameImg.complete && frameImg.naturalWidth) {
+        const row = { down: 0, left: 1, right: 2, up: 3 }[actor.face] || 0;
+        const frame = shooting ? 3 : (actor.moving ? [0, 1, 2, 1][Math.floor(performance.now() / 140) % 4] : 1);
+        const cell = frameImg.width / 4;
+        ctx.drawImage(frameImg, frame * cell, row * cell, cell, cell, at[0] - size / 2, at[1] - size + 8, size, size);
+      }
+    });
+    const mine = battle.state.party[battle.playerIndex];
+    const foe = battle.foe[Math.min(battle.foeIndex, battle.foe.length - 1)];
+    const moves = mine ? window.StoryArena.pickMoves(mine) : null;
+    $('battleToast').textContent = (arena.toastT > 0 ? arena.toast + '  ' : '') + (moves ? core.MOVES[moves.basic].name + ' · ' + core.MOVES[moves.special].name : '');
+    $('foeName').textContent = foe ? core.monName(foe) : '';
+    $('foeLv').textContent = foe ? 'Lv.' + foe.level : '';
+    $('myName').textContent = mine ? core.monName(mine) : '';
+    $('myLv').textContent = mine ? 'Lv.' + mine.level : '';
+    if (foe) $('foeHp').style.width = Math.round(foe.hp / foe.maxHp * 100) + '%';
+    if (mine) {
+      $('myHp').style.width = Math.round(mine.hp / mine.maxHp * 100) + '%';
+      $('myExp').style.width = Math.round(mine.exp / core.expToNext(mine.level) * 100) + '%';
+    }
   }
   function finishBattle() {
     const result = core.concludeBattle(state, battle);
@@ -525,6 +545,8 @@
     state.party.forEach(function (mon) { if (mon.uid && mon.uid === battle.pendingEvo) pending.push(mon); });
     const finished = battle;
     battle = null;
+    arena = null;
+    choiceKey = '';
     $('battle').classList.remove('show');
     mode = 'play';
     save();
@@ -579,42 +601,80 @@
   function heldDir() { return moveHold; }
   $('pad').querySelectorAll('button').forEach(function (button) {
     const dir = button.dataset.dir;
-    const start = function (event) { event.preventDefault(); moveHold = dir; tryStep(dir); };
-    const stop = function () { if (moveHold === dir) moveHold = null; };
+    const start = function (event) {
+      event.preventDefault();
+      moveHold = dir;
+      if (mode === 'battle') battleInput[dir] = true;
+      else tryStep(dir);
+    };
+    const stop = function () {
+      if (moveHold === dir) moveHold = null;
+      battleInput[dir] = false;
+    };
     button.addEventListener('pointerdown', start);
     button.addEventListener('pointerup', stop);
     button.addEventListener('pointerleave', stop);
   });
   $('btnA').onclick = pressA;
   $('btnB').onclick = pressB;
+  $('fight').querySelectorAll('button').forEach(function (button) {
+    const act = button.dataset.act;
+    button.addEventListener('pointerdown', function (event) {
+      event.preventDefault();
+      battleInput[act] = true;
+    });
+    const release = function () { if (act === 'basic' || act === 'special') battleInput[act] = false; };
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointerleave', release);
+  });
   const keyDir = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', a: 'left', s: 'down', d: 'right' };
   addEventListener('keydown', function (event) {
     if (event.target && event.target.id === 'nameInput') return;
     const dir = keyDir[event.key];
-    if (dir) { event.preventDefault(); if (!event.repeat) tryStep(dir); moveHold = dir; }
-    else if (mode === 'battle' && /^[1-4]$/.test(event.key)) {
-      const buttons = $('battleActs').querySelectorAll('button');
-      const picked = buttons[Number(event.key) - 1];
-      if (picked) picked.click();
+    if (mode === 'battle' && battle && !battle.pending) {
+      if (dir) { event.preventDefault(); battleInput[dir] = true; return; }
+      if (event.key === '1') { battleInput.basic = true; return; }
+      if (event.key === '2') { battleInput.special = true; return; }
+      if (event.key === '3') { battleInput.ball = true; return; }
+      if (event.key === '4') { battleInput.potion = true; return; }
+      if (event.key === ' ' || event.key === '5') { event.preventDefault(); battleInput.dash = true; return; }
     }
+    if (dir) { event.preventDefault(); if (!event.repeat) tryStep(dir); moveHold = dir; }
     else if (event.key === 'Enter' || event.key === 'z' || event.key === 'Z' || event.key === ' ') { event.preventDefault(); pressA(); }
     else if (event.key === 'Escape' || event.key === 'x' || event.key === 'X' || event.key === 'Backspace') { event.preventDefault(); pressB(); }
   });
   addEventListener('keyup', function (event) {
     const dir = keyDir[event.key];
     if (dir && moveHold === dir) moveHold = null;
+    if (dir) battleInput[dir] = false;
+    if (event.key === '1') battleInput.basic = false;
+    if (event.key === '2') battleInput.special = false;
   });
   setInterval(function () { if (heldDir() && mode === 'play') tryStep(heldDir()); }, 150);
 
   function frame(now) {
     if (state && mode !== 'title') state.playMs += Math.min(1000, now - lastTick);
     lastTick = now;
-    const walking = mode === 'play' || mode === 'text' || mode === 'choice';
+    const walking = mode === 'play' || mode === 'text' || mode === 'choice' || mode === 'battle';
     $('pad').classList.toggle('hidden', !walking);
-    $('actions').classList.toggle('hidden', !walking);
-    $('hud').classList.toggle('hidden', mode === 'title' || mode === 'battle');
+    $('fight').classList.toggle('hidden', mode !== 'battle' || !!(battle && battle.pending));
+    $('actions').classList.toggle('hidden', mode === 'battle' || mode === 'title' || mode === 'menu');
+    $('hud').classList.toggle('hidden', mode === 'title');
     $('goal').classList.toggle('hidden', mode !== 'play' && mode !== 'text');
-    drawWorld();
+    if (mode === 'battle' && arena && battle) {
+      const dt = Math.min(0.05, arenaClock ? (now - arenaClock) / 1000 : 0.016);
+      arenaClock = now;
+      window.StoryArena.step(arena, battleInput, dt, function () { return Math.random(); });
+      battleInput.dash = false;
+      battleInput.ball = false;
+      battleInput.potion = false;
+      watchBattle();
+      if (mode === 'battle') drawArena();
+      else drawWorld();
+    } else {
+      arenaClock = now;
+      drawWorld();
+    }
     renderHud();
     requestAnimationFrame(frame);
   }

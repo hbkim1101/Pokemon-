@@ -20,6 +20,8 @@ jobs:
         run: node tests/smoke.cjs
       - name: Validate the Mint League story rules
         run: node tests/story-smoke.cjs
+      - name: Validate real-time story battles
+        run: node tests/story-arena.cjs
       - name: Inspect source sprite alpha around all emitter points
         continue-on-error: true
         run: python3 tests/audit_emission_pixels.py

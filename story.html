@@ -47,7 +47,12 @@ button{cursor:pointer}
 .bar{height:8px;background:#102018;border-radius:99px;overflow:hidden;margin-top:4px}
 .bar i{display:block;height:100%;background:var(--good)}
 .bar.exp{height:5px}.bar.exp i{background:#73c7ef}
-#battle{flex-direction:column;background:linear-gradient(#87c4e8,#d9f0c8 55%,#6ea85a)}
+#battle{flex-direction:column;background:transparent;pointer-events:none}
+#battle.show{display:block;background:transparent}
+#battleToast{position:fixed;left:12px;right:12px;top:108px;text-align:center;font-weight:800;color:#f8efd4;text-shadow:0 2px 0 #000;pointer-events:none}
+#fight{position:fixed;right:12px;bottom:calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;z-index:4}
+#fight.hidden{display:none}
+#fight button{background:#234233;color:#f4ffe8;border:2px solid #d9efc2;border-radius:10px;padding:10px 12px;font-weight:800}
 .battleTop{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:18px 8vw}
 .fighter{display:flex;align-items:center;gap:12px}
 .fighter.foe{align-self:flex-end}
@@ -92,7 +97,7 @@ button{cursor:pointer}
 <section id="title" class="show">
   <div class="card">
     <h1>민트 리그</h1>
-    <p>집에서 시작해 박사에게 포켓몬을 받고, 야생과 싸우고, 진화와 포획, 가방과 박스, 포켓몬센터, 체육관 여덟 곳, 레이드, 그리고 챔피언까지 가는 여행입니다.</p>
+    <p>집에서 시작해 박사에게 포켓몬을 받고, 아레나와 같은 실시간 배틀로 경험치·진화·포획을 합니다. 가방, 박스, 포켓몬센터, 체육관 여덟 곳, 레이드, 챔피언까지 이어집니다. 배틀 중 WASD 이동, 1 기본, 2 특수, Space 회피, 3 볼, 4 상처약. 아래쪽으로 나가면 도망입니다.</p>
     <div class="row" id="titleButtons">
       <button class="primary" id="newGame" type="button">새 게임</button>
       <button class="ghost" id="continueGame" type="button">이어하기</button>
@@ -102,18 +107,26 @@ button{cursor:pointer}
       <input id="nameInput" maxlength="8" placeholder="트레이너 이름" aria-label="트레이너 이름">
       <div class="row" style="margin-top:8px"><button class="primary" id="begin" type="button">여행 시작</button></div>
     </div>
-    <p class="footer">비상업용 팬 게임입니다. Pokémon 및 관련 명칭의 권리는 각 권리자에게 있으며, 이 게임은 공식 작품이 아닙니다. 그래픽은 네트워크가 되면 PokéAPI 스프라이트를 쓰고, 실패하면 색 도트로 대신합니다.</p>
+    <p class="footer">비상업용 팬 게임입니다. Pokémon 및 관련 명칭의 권리는 각 권리자에게 있으며, 이 게임은 공식 작품이 아닙니다. 스프라이트는 PSDK Sprite_Character 규격(4방향×4프레임)의 오리지널 도트입니다.</p>
   </div>
 </section>
 <section id="overlay"><div class="sheet" id="sheet"></div></section>
 <section id="battle">
   <div class="battleTop">
-    <div class="fighter foe"><img id="foeSprite" alt=""><div class="plate"><div class="top"><span id="foeName">야생</span><span id="foeLv"></span></div><div class="bar"><i id="foeHp"></i></div></div></div>
-    <div class="fighter mine"><img id="mySprite" alt=""><div class="plate"><div class="top"><span id="myName"></span><span id="myLv"></span></div><div class="bar"><i id="myHp"></i></div><div class="bar exp"><i id="myExp"></i></div></div></div>
+    <div class="fighter foe"><div class="plate"><div class="top"><span id="foeName">야생</span><span id="foeLv"></span></div><div class="bar"><i id="foeHp"></i></div></div></div>
+    <div class="fighter mine"><div class="plate"><div class="top"><span id="myName"></span><span id="myLv"></span></div><div class="bar"><i id="myHp"></i></div><div class="bar exp"><i id="myExp"></i></div></div></div>
   </div>
-  <div class="battleBottom"><p id="battleText"></p><div class="battleActs" id="battleActs"></div></div>
+  <p id="battleToast"></p>
 </section>
+<div id="fight" class="hidden">
+  <button type="button" data-act="basic">1 기본</button>
+  <button type="button" data-act="special">2 특수</button>
+  <button type="button" data-act="dash">회피</button>
+  <button type="button" data-act="ball">볼</button>
+  <button type="button" data-act="potion">약</button>
+</div>
 <script src="./story-core.js"></script>
+<script src="./story-arena.js"></script>
 <script src="./story.js"></script>
 </body>
 </html>

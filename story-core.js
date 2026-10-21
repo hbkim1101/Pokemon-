@@ -808,7 +808,7 @@ function josa(name, withBatchim, withoutBatchim) {
     return slot;
   }
   function speedOf(mon) { return battleStats(mon).spe; }
-  function performMove(battle, actor, target, moveId, roll, actorSide) {
+  function performMove(battle, actor, target, moveId, roll, actorSide, scale) {
     const data = MOVES[moveId];
     if (actor.status === 'paralysis' && roll() < 0.25) {
       say(battle, josa(monName(actor), '은', '는') + ' 마비되어 움직일 수 없다.');
@@ -834,7 +834,7 @@ function josa(name, withBatchim, withoutBatchim) {
     const crit = roll() < 1 / 16 ? 1.5 : 1;
     const vary = 0.85 + roll() * 0.15;
     let damage = Math.floor(((2 * actor.level / 5 + 2) * data.power * attack / Math.max(1, defense)) / 50 + 2);
-    damage = Math.max(1, Math.floor(damage * stab * eff * crit * vary));
+    damage = Math.max(1, Math.floor(damage * stab * eff * crit * vary * (scale == null ? 1 : scale)));
     target.hp = Math.max(0, target.hp - damage);
     say(battle, monName(target) + '에게 ' + damage + '의 데미지.', { eff: eff, crit: crit > 1, amount: damage, side: actorSide === 'player' ? 'foe' : 'player' });
     if (eff >= 2) say(battle, '효과가 굉장했다.');
@@ -1050,6 +1050,62 @@ function josa(name, withBatchim, withoutBatchim) {
     say(battle, '그 행동은 할 수 없다.');
     return battle;
   }
+  function arenaCheck(battle) {
+    if (battle.over || battle.pending) return { over: battle.over, pending: battle.pending, events: battle.events.slice() };
+    const foe = activeFoe(battle);
+    const player = activeMon(battle);
+    if (foe && foe.hp <= 0 && player && player.hp > 0) awardFoe(battle);
+    else if (player && player.hp <= 0) playerFainted(battle);
+    return { over: battle.over, pending: battle.pending, events: battle.events.slice() };
+  }
+  function arenaHit(battle, side, moveId, roll, scale) {
+    roll = roll || function () { return rng(battle.state); };
+    battle.events = [];
+    if (battle.over || battle.pending) return { ok: false, events: [] };
+    const actor = side === 'player' ? activeMon(battle) : activeFoe(battle);
+    const target = side === 'player' ? activeFoe(battle) : activeMon(battle);
+    if (!actor || !target || actor.hp <= 0 || target.hp <= 0) return { ok: false, events: [] };
+    performMove(battle, actor, target, moveId, roll, side, scale == null ? 1 : scale);
+    if (actor.hp <= 0 || target.hp <= 0) arenaCheck(battle);
+    return { ok: true, over: battle.over, pending: battle.pending, events: battle.events.slice() };
+  }
+  function arenaThrow(battle, itemId, roll) {
+    roll = roll || function () { return rng(battle.state); };
+    battle.events = [];
+    if (!battle.canCatch) { say(battle, '여기서는 잡을 수 없다.'); return { ok: false, over: battle.over, events: battle.events.slice() }; }
+    const ok = throwBall(battle, itemId, roll);
+    return { ok: ok, over: battle.over, events: battle.events.slice() };
+  }
+  function arenaHeal(battle, itemId, index) {
+    battle.events = [];
+    const item = ITEMS[itemId];
+    const target = battle.state.party[index == null ? battle.playerIndex : index];
+    if (!item || !(battle.state.bag[itemId] > 0) || !target) { say(battle, '사용할 도구가 없다.'); return { ok: false, events: battle.events.slice() }; }
+    let result;
+    if (item.kind === 'revive') {
+      if (target.hp > 0) result = { ok: false, message: '아직 쓰러지지 않았다.' };
+      else {
+        target.hp = Math.max(1, Math.floor(target.maxHp / 2));
+        target.status = null;
+        result = { ok: true, message: josa(monName(target), '이', '가') + ' 일어났다.' };
+      }
+    } else if (item.kind === 'heal') result = healAmount(target, item.amount);
+    else { say(battle, '배틀 중에는 쓸 수 없다.'); return { ok: false, events: battle.events.slice() }; }
+    if (!result.ok) { say(battle, result.message); return { ok: false, events: battle.events.slice() }; }
+    battle.state.bag[itemId] -= 1;
+    battle.state.flags.usedHeal = true;
+    say(battle, result.message);
+    return { ok: true, events: battle.events.slice() };
+  }
+  function arenaRun(battle, roll) {
+    roll = roll || function () { return rng(battle.state); };
+    battle.events = [];
+    if (!battle.canRun) { say(battle, '여기서는 도망칠 수 없다.'); return { ok: false, events: battle.events.slice() }; }
+    const chance = speedOf(activeMon(battle)) >= speedOf(activeFoe(battle)) ? 0.85 : 0.45;
+    if (roll() < chance) { battle.over = 'run'; say(battle, '무사히 도망쳤다.'); return { ok: true, over: 'run', events: battle.events.slice() }; }
+    say(battle, '도망치지 못했다.');
+    return { ok: false, events: battle.events.slice() };
+  }
   function concludeBattle(state, battle) {
     if (!battle || battle.settled) return {};
     battle.settled = true;
@@ -1172,6 +1228,7 @@ function josa(name, withBatchim, withoutBatchim) {
     buyItem: buyItem, martStock: martStock, blackout: blackout, makeMon: makeMon, gainExp: gainExp,
     evolutionTarget: evolutionTarget, applyEvolution: applyEvolution, commitEvolution: commitEvolution,
     catchChance: catchChance, battleCommand: battleCommand, concludeBattle: concludeBattle,
+    arenaHit: arenaHit, arenaThrow: arenaThrow, arenaHeal: arenaHeal, arenaRun: arenaRun, arenaCheck: arenaCheck,
     startWildBattle: startWildBattle, startTrainerBattle: startTrainerBattle, startRaidBattle: startRaidBattle,
     bestMoveSlot: bestMoveSlot, summary: summary, goals: goals, areaName: areaName, findPath: findPath,
     tile: tile, npcsOn: npcsOn, hasHealthy: hasHealthy, expToNext: expToNext, monName: monName,
