@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Produce contact strips for visually checking PMD Charizard mouth coordinates."""
-import base64,json,struct,subprocess,zlib
+import base64,json,os,struct,subprocess,zlib
 from audit_emission_pixels import png_rgba
-FRAMES=[0,3,6,8,11,13,17]
+FRAMES=[int(f) for f in os.environ.get('PMD_CONTACT_FRAMES','0,3,6,8,11,13,17').split(',')]
 ATLAS=json.loads(subprocess.check_output(['node','-e',"global.window={};require('./emitter-anchors.js');console.log(JSON.stringify(window.PMD_EMISSION_ATLAS['0006']))"],text=True))
 W,H,bpp,image=png_rgba("https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/"+ATLAS['source'])
 def chunk(name,content):
@@ -11,8 +11,9 @@ def chunk(name,content):
 def encode(w,h,rgba):
     raw=b''.join(b'\x00'+rgba[y*w*4:(y+1)*w*4] for y in range(h))
     return b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack(">IIBBBBB",w,h,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(raw,9))+chunk(b'IEND',b'')
-scale=2
-for pair in [(0,1),(2,3),(4,5),(6,7)]:
+scale=int(os.environ.get('PMD_CONTACT_SCALE','2'))
+pairs=[tuple(map(int,pair.split(','))) for pair in os.environ.get('PMD_CONTACT_PAIRS','0,1;2,3;4,5;6,7').split(';')]
+for pair in pairs:
     width=len(FRAMES)*64*scale;height=2*88*scale;buf=bytearray(width*height*4)
     for Y in range(height):
         direction=pair[Y//(88*scale)]
