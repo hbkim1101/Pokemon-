@@ -24,7 +24,7 @@ Use this when the user asks for 도트, 픽셀, 도트 그래픽, 기술 이펙�
 - Snap sprites and shadows to that same grid. `spritePose` may shift by whole pixels only. No `rotate`, non-uniform scale, or sub-pixel squash on the character.
 - Draw effects as authored cells: 4-color palette per element (outline, body, mid, core), hard edges, animation stepped at about 12–18 Hz.
 - Reference clip on `main`: `YTDown.com_YouTube_Media_J_JhLHfqZXY_Pokemon-Arena-2D-by-Big-Kid-Nation-Fan-Game-95-real-gameplay_003_480p.mp4` (Big Kid Nation Pokémon Arena 2D, about 2:02, 854×480). Read that file before changing silhouettes.
-- Flamethrower: a dense turbulent mass of overlapping bulbs, several across, not one file of coins. Each bulb has a 1px dark-red edge and a crescent highlight shifted back toward the mouth. The mass starts narrow and becomes taller than the caster. Embers are a small teardrop plus a dotted tail.
+- Flamethrower, traced from the reference clip around 34–40s: a connected chain of round lobes with a small hot core, not a bullseye. It starts narrow at the mouth, widens into a cloud, and throws a few detached bulbs. A 1px dark edge and a faint orange fringe sit on the outside.
 - Thunderbolt: a jagged bolt of the same pixels, white core, short branches, spark ring on the body.
 - Surf and cannon jets: water lobes and a thick jet (white core, cyan, dark edge), not a hairline. Steam on a fire impact is a column of light pixels.
 - Energy Ball: one filled green lobe with small leaf pixels around it.
