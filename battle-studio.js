@@ -186,11 +186,9 @@ function studioFrameClock(){
  ctx.save();
  ctx.imageSmoothingEnabled=false;
  for(const p of points){
-  const size=Math.max(3,Math.min(5,Math.round(scale*1.8)));
+  const size=Math.max(2,Math.min(3,Math.round(scale)));
   const sx=Math.round(p.x),sy=Math.round(p.y);
-  ctx.fillStyle='#071723';
-  ctx.fillRect(sx-Math.floor(size/2)-1,sy-Math.floor(size/2)-1,size+2,size+2);
-  ctx.fillStyle=p.exact?'#2bf6fa':'#ffe09c';
+  ctx.fillStyle=p.exact?'#22eeff':'#ffcb53';
   ctx.fillRect(sx-Math.floor(size/2),sy-Math.floor(size/2),size,size);
  }
  ctx.restore();
