@@ -1,4 +1,4 @@
-## v32 — denser pixel skill effects
+## v33 — frame-traced pixel skill effects
 
 - Skill effects are stamped again from scratch, using the Big Kid Nation gameplay MP4 on `main` (`YTDown.com_YouTube_..._003_480p.mp4`) as the silhouette reference. Every mark is one character sprite pixel (`PIXEL`, 1.43 world units in battle, the studio sprite scale in the motion studio). A larger shape is more pixels, not a bigger pixel.
 - Flamethrower is a dense mass of overlapping bulbs with crescent highlights, not a single row of circles. Thunderbolt is a thick jagged bolt. Surf is a solid foamy wave, and the cannon jet is a wide white-core stream. Energy Ball is a large green bulb with leaf pixels. Basic fire is a small teardrop with a dotted tail.
