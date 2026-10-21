@@ -56,34 +56,63 @@ function fringe(cells,rgba){
 function at(ox,oy,v,alongPx,sidePx){
  return [ox+Math.round(alongPx*v.x-sidePx*v.y),oy+Math.round(alongPx*v.y+sidePx*v.x)];
 }
-const FIRE_NUDGE=[0,2,-1,3,-2,1,-3,2,0,-2,1,4,-1];
+const FIRE_NUDGE=[0,1,-1,2,-2,1,0,-1,2];
+const SPIKE=[
+ '....1....',
+ '...121...',
+ '..12321..',
+ '.1234321.',
+ '123454321',
+ '.1234321.',
+ '..12321..',
+ '...121...',
+ '....1....'
+];
+const CRESCENT=[
+ '.11111111.',
+ '1222222221',
+ '12333333321',
+ '12334444321',
+ '12345...321',
+ '12345...321',
+ '12334444321',
+ '12333333321',
+ '1222222221',
+ '.11111111.'
+];
+function stampArt(cells,gx,gy,vx,vy,bitmap,pal){
+ const oy=bitmap.length>>1;
+ for(let y=0;y<bitmap.length;y++){
+  const row=bitmap[y];
+  for(let x=0;x<row.length;x++){
+   const ch=row[x];
+   if(ch==='.')continue;
+   const iy=y-oy;
+   place(cells,gx+Math.round(x*vx-iy*vy),gy+Math.round(x*vy+iy*vx),pal[ch.charCodeAt(0)-49]);
+  }
+ }
+}
 function flame(cells,m,quality){
  const L=m.renderStream??m.stream??0;
  const len=Math.max(0,Math.round(L/PIXEL));
  if(len<1)return;
- const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,9);
+ const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,10);
  const pal=PAL.fire,[ox,oy]=grid(m.x,m.y);
- const maxR=quality==='low'?7:12;
- let d=1,i=0;
- while(d<len&&i<80){
-  const u=d/len;
-  const base=3+Math.round(u*u*maxR)+(i%4===0?1:0);
-  const rows=u<.18?1:u<.42?2:(quality==='low'?2:3);
+ let d=0,i=0;
+ while(d<len&&i<70){
+  const u=d/Math.max(1,len);
+  const rows=u<.25?1:u<.6?2:(quality==='low'?2:3);
   for(let row=0;row<rows;row++){
-   const side=Math.round((row-(rows-1)/2)*(base*.62)+FIRE_NUDGE[(i+row+step)%FIRE_NUDGE.length]);
-   const rad=Math.max(2,base+(row===1?-1:row===2?1:0));
+   const side=(row-(rows-1)/2)*(quality==='low'?4:5)+FIRE_NUDGE[(i+row+step)%FIRE_NUDGE.length];
    const [gx,gy]=at(ox,oy,v,d,side);
-   bulb(cells,gx,gy,rad,pal);
+   stampArt(cells,gx,gy,v.x,v.y,SPIKE,pal);
   }
-  if(u>.28&&(i+step)%3===0){
-   const off=FIRE_NUDGE[(i+step)%FIRE_NUDGE.length]*2+(base>6?base:4);
-   const [bx,by]=at(ox,oy,v,d+2,off);
-   bulb(cells,bx,by,Math.max(2,Math.round(base*.55)),pal);
-  }
-  d+=Math.max(3,Math.round(base*(quality==='low'?.8:.5)));
+  d+=quality==='low'?7:5;
   i++;
  }
- fringe(cells,'rgba(255,120,32,.42)');
+ const [tx,ty]=at(ox,oy,v,Math.max(0,len-6),0);
+ stampArt(cells,tx,ty,v.x,v.y,CRESCENT,pal);
+ fringe(cells,'rgba(255,150,48,.4)');
  if(m.contact){
   const c=m.contact,[cx,cy]=grid(c.x,c.y),p=c.steam?PAL.water:pal;
   bulb(cells,cx,cy,quality==='low'?5:8,p);
@@ -167,10 +196,11 @@ function projectile(cells,m){
   });
   return;
  }
- bulb(cells,gx,gy,2,pal,v.x,v.y);
- for(let i=1;i<=3;i++){
-  const side=((step+i)%3)-1;
-  place(cells,gx+Math.round((-2-i)*v.x-side*v.y),gy+Math.round((-2-i)*v.y+side*v.x),i===1?pal[3]:pal[1]);
+ const DART=['..1..','.121.','12341','.121.','..1..'];
+ stampArt(cells,gx,gy,v.x,v.y,DART,pal);
+ for(let i=1;i<=2;i++){
+  const [tx,ty]=at(gx,gy,v,-2-i,((step+i)%3)-1);
+  place(cells,tx,ty,i===1?pal[3]:pal[1]);
  }
 }
 function charge(cells,m){
@@ -203,12 +233,13 @@ function jet(cells,m,ports,quality){
 }
 function surf(cells,m,quality){
  const v=unit(m),pal=PAL.water,step=tickOf(m.age,8);
- const half=quality==='low'?16:28,[ox,oy]=grid(m.x,m.y);
+ const half=quality==='low'?12:18,[ox,oy]=grid(m.x,m.y);
+ stampArt(cells,ox,oy,v.x,v.y,CRESCENT,pal);
  for(let s=-half;s<=half;s++){
   const n=Math.abs(s)/half;
-  const lump=Math.round(Math.sin(s*.55+step)*.9);
-  const crest=Math.round((1-n*n)*12)+lump;
-  const tail=Math.round((1-n*n)*16);
+  const lump=((s+step)%5===0)?1:0;
+  const crest=Math.round((1-n*n)*8)+lump;
+  const tail=Math.round((1-n*n)*6);
   for(let a=-tail;a<=crest;a++){
    let color=pal[1];
    if(a>=crest-1&&(s+step)%2===0)color=pal[4];
@@ -219,19 +250,17 @@ function surf(cells,m,quality){
    place(cells,gx,gy,color);
   }
  }
- const gap=quality==='low'?9:6;
- for(let s=-half+3;s<half;s+=gap){
-  const n=Math.abs(s)/half,crest=Math.round((1-n*n)*10);
-  const r=Math.max(4,Math.round((quality==='low'?5:8)*(1-n*.35)));
-  const [gx,gy]=at(ox,oy,v,crest-1,s);
-  bulb(cells,gx,gy,r,pal,v.x,v.y);
+ for(let s=-half+4;s<half;s+=quality==='low'?10:8){
+  const [gx,gy]=at(ox,oy,v,6,s);
+  stampArt(cells,gx,gy,v.x,v.y,SPIKE,pal);
  }
 }
 const LEAF=['.3.','121','232','.1.'];
 function orb(cells,m,quality){
- const pal=PAL.grass,v=unit(m),step=tickOf(m.age,9),r=quality==='low'?8:12;
+ const pal=PAL.grass,v=unit(m),step=tickOf(m.age,9),r=quality==='low'?6:8;
  const [cx,cy]=grid(m.x,m.y);
- bulb(cells,cx,cy,r,pal,v.x,v.y);
+ stampArt(cells,cx-4,cy,v.x,v.y,SPIKE,pal);
+ stampArt(cells,cx,cy,v.x,v.y,CRESCENT,pal);
  const count=quality==='low'?5:8;
  for(let i=0;i<count;i++){
   const a=(i+step*.2)/count*TAU,rad=r+4;
@@ -249,8 +278,8 @@ function orb(cells,m,quality){
 function impact(cells,m){
  const u=clamp((m.age||0)/(m.life||.4),0,1),pal=palOf(m.element);
  const [cx,cy]=grid(m.x,m.y),r=Math.max(2,Math.round((1-u)*4+u*12));
- if(u<.45)bulb(cells,cx,cy,Math.max(3,Math.round((1-u/.45)*7)),pal,0,-1);
- ring(cells,m.x,m.y,r,pal[3]);
+ if(u<.55)stampArt(cells,cx-5,cy,1,0,CRESCENT,pal);
+ ring(cells,m.x,m.y,Math.max(3,Math.round(6+u*8)),pal[4]);
  for(let i=0;i<8;i++){
   const a=i/8*TAU+(m.seed||0),len=r+(i%3);
   for(let k=Math.max(0,r-3);k<=len;k++){
