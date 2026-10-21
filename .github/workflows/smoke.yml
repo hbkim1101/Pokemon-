@@ -21,3 +21,5 @@ jobs:
       - name: Inspect source sprite alpha around all emitter points
         continue-on-error: true
         run: python3 tests/audit_emission_pixels.py
+      - name: Render source sprite mouth contact strips
+        run: PYTHONPATH=tests python3 tests/preview_mouth.py
