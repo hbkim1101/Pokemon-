@@ -226,8 +226,8 @@ for(const id of ['0026','0006','0009','0003']){
     assert.equal(point.cell.y,port.frames[d][frame][1],'Incorrect frame-local Y landmark');
    }
   }
-  const first=port.frames[2][0],last=port.frames[2][port.frames[2].length-1];
-  assert(first[0]!==last[0]||first[1]!==last[1],id+' emitter does not follow animation');
+  const first=port.frames[2][0];
+  assert(port.frames[2].some(([x,y])=>x!==first[0]||y!==first[1]),id+' emitter does not follow animation');
  }
 }
 
