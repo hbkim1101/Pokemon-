@@ -100,17 +100,17 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #toast{font-family:system-ui,sans-serif;font-weight:1000;letter-spacing:.5px;filter:drop-shadow(0 2px #0b2637)}
 </style></head><body>
 <canvas id="stage"></canvas><div class="vignette"></div><div id="impactFlash"></div><div id="roundBadge">ANCIENT GROVE · ROUND 01</div><div id="comboBadge"></div><div id="hud"><div class="stats glass"><div class="name"><span id="playerName">⚡ 라이츄</span><span id="healthText">120/120</span></div><div class="track hp"><i id="hpBar"></i></div><div class="condition" id="playerCondition"></div><div class="fuelHud" id="fuelHud" hidden><div class="fuelHeading"><span>🔥 화염방사 에너지</span><span id="fuelValue">100%</span></div><div class="fuelGauge"><i id="fuelFill"></i></div></div></div><div class="versus">VS</div><div class="stats glass enemyStats"><div class="name"><span id="enemyName">상대 포켓몬</span><span id="enemyHealthText">—</span></div><div class="track hp"><i id="enemyHpBar"></i></div><div class="condition" id="enemyCondition"></div></div><button class="pause glass" id="pause" aria-label="일시정지">Ⅱ</button></div>
-<div id="floating"></div><div id="toast"></div><div id="aimHelp">PIXEL STUDIO v25 · 화염방사 피격 유사 프레임 수정</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
+<div id="floating"></div><div id="toast"></div><div id="aimHelp">PIXEL STUDIO v26 · 발사점 추적 / 원거리 공격 유지</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
 <div class="controls" id="controls"><div class="joyShell"><div id="joy" aria-label="이동 조이스틱"><div class="nub" id="nub"></div></div></div><div class="buttons"><div class="skill" data-n="3" style="--c:#b7d6ff"><span class="glyph" id="extraGlyph3">✦</span><small id="extraLabel3">추가 1</small><span class="cooldown"></span></div><div class="skill" data-n="1" style="--c:#fa9d6a"><span class="glyph" id="bigSkill">✹</span><small id="bigLabel">강화 기술</small><span class="fuelButton" id="fuelButton" hidden><i id="fuelButtonFill"></i></span><span class="cooldown"></span></div><div class="skill dash" data-n="2" style="--c:#96deff"><span class="glyph">➤</span><small>회피</small><span class="cooldown"></span></div><div class="skill main" data-n="0" style="--c:#ffdd6c"><span class="glyph" id="basicSkill">⚡</span><small id="basicLabel">기본 기술</small><span class="cooldown"></span></div><div class="skill" data-n="4" style="--c:#b7ffd6"><span class="glyph" id="extraGlyph4">✧</span><small id="extraLabel4">추가 2</small><span class="cooldown"></span></div></div></div>
-<div class="screen" id="menu"><div class="panel"><div class="eyebrow">PMD 8-WAY · MOTION STUDIO v25</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 기본 공격 + 포켓몬별 고유 기술 1개 · 8방향 모션 테스트 · HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
+<div class="screen" id="menu"><div class="panel"><div class="eyebrow">PMD 8-WAY · MOTION STUDIO v26</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 기본 공격 + 포켓몬별 고유 기술 1개 · 8방향 모션 테스트 · HP 2배 · PvP 피해 80%</p><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
   <div class="ivTop"><strong>포켓몬 능력치 · Lv.50</strong><button type="button" id="ivReroll">IV 랜덤</button><button type="button" id="ivPerfect">6V (전부 31)</button></div>
   <label class="naturePicker">성격 <select id="natureSelect" aria-label="성격 선택"></select></label>
   <div class="ivGrid" id="ivGrid"></div>
   <p class="ivNote">최종 진화형 종족값·IV·성격은 원작 기준 · EV 0 · PvP HP 2배 · 기술 피해 80% · 상대 IV는 무작위</p>
 </section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 기본 공격 + 고유 기술 + 회피 · 4가지 고유 기술(포켓몬별 1개) · 터치/드래그 조준 · 모션 스튜디오에서 8방향 프레임 테스트<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">HGSS 4방향 animated overworld sprites + PokéAPI/PMDCollab fallback<br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 4방향 포켓몬 스프라이트는 인터넷 연결이 필요하며, 실패 시 대체 스프라이트로 계속 플레이할 수 있습니다.<br><a href="https://github.com/teobz/pkmn-hgss-animated-overworld-sprites" target="_blank" rel="noopener">HGSS directional sprite source</a> · <a href="https://pokeapi.github.io/sprites/" target="_blank" rel="noopener">PokéAPI</a> · <a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">PMDCollab fallback</a></div></div></div>
-<script>
+<script src="./emitter-anchors.js?v=26"></script><script>
 'use strict';
-const BUILD_VERSION='v25-flamethrower-forward-pose';
+const BUILD_VERSION='v26-sprite-emitters';
 const EXTRA_SKILLS_ENABLED=false; // Advanced moves remain archived in the database but cannot be used in this build.
 const $=id=>document.getElementById(id),CV=$('stage'),ctx=CV.getContext('2d');let W=innerWidth,H=innerHeight,dpr=1;
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);CV.width=Math.round(W*dpr);CV.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false}addEventListener('resize',resize);resize();
@@ -775,7 +775,7 @@ function spawnEnemy(){
 function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let best=null,dis=Infinity;for(let e of enemies){let d=len(e.x-player.x,e.y-player.y);if(d<dis){dis=d;best=e}}return best?norm(best.x-player.x,best.y-player.y):{...lastAim}}
 // PMD action-role mapping verified against original frame sheets:
  // Shoot = ranged skill casting, Attack = forward/melee lunge, Charge = stationary power-up.
- function signatureAnimation(type){return type==='water'?'Attack':'Shoot'}
+ function signatureAnimation(type){return 'Shoot'}
  // PMD Shoot HitFrame is the attack IMPACT cue, not necessarily a firing stance.
  // In Charizard 0006/0005 it is a head-back, recoil-like pose resembling Hurt.
  // Play the initial windup once, skip that recoil segment, then hold a forward
@@ -803,11 +803,17 @@ function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let
  function activeFlameChannel(actor){
   return specialEffects.find(m=>m.type==='flamethrower'&&m.controlled&&m.owner===(actor===player?'player':'enemy')&&m.age<m.life&&!m.end);
  }
+ function activeRangedAttack(actor){
+  const owner=actor===player?'player':'enemy';
+  return specialEffects.find(m=>m.owner===owner&&
+   ['thunderbolt','flamethrower','surf','energyball'].includes(m.type)&&
+   m.age<m.life&&!m.end);
+ }
  function combatAnimation(actor){
   if(!actor)return 'Idle';
   if((actor.hurt||0)>0)return 'Hurt';
-  if((actor.dashTime||0)>0||actor.riding)return 'Attack';
-  if(activeFlameChannel(actor)||actor.flameRecovery)return 'Shoot';
+  if((actor.dashTime||0)>0)return 'Attack';
+  if(activeRangedAttack(actor)||actor.flameRecovery||actor.riding)return 'Shoot';
   return actor.action||'Idle';
  }
  function combatSpriteClock(actor,action,normalClock){
@@ -818,6 +824,8 @@ function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let
    const rec=actor.flameRecovery,u=Math.min(1,rec.elapsed/rec.duration);
    return Math.min(timing.end,rec.start+(timing.end-rec.start)*u);
   }
+  const ranged=activeRangedAttack(actor);
+  if(ranged)return flameChannelClock(ranged.age,timing);
   return normalClock;
  }
  function tickFlameRecovery(actor,dt){
@@ -829,16 +837,67 @@ function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let
   }
  }
  function playAction(o,action,d=.23){o.action=action;o.animT=0;o.actLeft=d;if(o!==player)o.actionT=0}
+// Sprite-space emission anchors: saved in emitter-anchors.js.
+function spriteFrameAt(sheet,timeSeconds){
+ const frames=Math.max(1,Math.min(sheet.frames,sheet.dur?.length||sheet.frames));
+ const durations=Array.from({length:frames},(_,i)=>sheet.dur?.[i]||8);
+ const total=durations.reduce((a,b)=>a+b,0)||1;
+ let clock=(((timeSeconds||0)*60)%total+total)%total;
+ for(let i=0;i<frames;i++){if(clock<durations[i])return i;clock-=durations[i];}
+ return frames-1;
+}
+function emissionWorldPoints(actor,moveId='basic',options={}){
+ if(!actor)return [];
+ const id=actor.id||roster[actor.kind]?.id||roster[chosen]?.id;
+ const config=window.PMD_EMISSION_ATLAS?.[id];
+ const direction=faceFromAngle(options.angle??actor.face??Math.PI/2);
+ const names=config?.channels?.[moveId]||config?.channels?.basic||['body'];
+ const action=options.action||combatAnimation(actor);
+ const clock=options.clock??combatSpriteClock(actor,action,actor===player?actor.animT:(actor.actionT||0));
+ const sheet=sprites[id]?.anims?.[action]||sprites[id]?.anims?.Shoot||sprites[id]?.anims?.Idle||sprites[id]?.anims?.Walk;
+ const visualAction=sprites[id]?.anims?.[action]?action:(sprites[id]?.anims?.Shoot?'Shoot':action);
+ const frame=sheet?spriteFrameAt(sheet,clock):0;
+ const scale=options.scale||1.43,ground=actor.y-(actor.riding?10:0);
+ const w=sheet?.w||config?.cell?.[0]||48,h=sheet?.h||config?.cell?.[1]||56;
+ const foot=sheet?footOffset(sheet,direction%sheet.dirs,frame):h*.79;
+ const mainW=config?.cell?.[0]||w,mainH=config?.cell?.[1]||h;
+ let dx=0,dy=0,sx=1,sy=1,rot=0;
+ if(visualAction==='Shoot'){
+  const p=Math.sin(Math.min(clock,.28)/.28*Math.PI);
+  const angle=options.angle??actor.face??0;
+  dx+=Math.cos(angle)*3*p;dy+=Math.sin(angle)*2*p-1.2*p;
+  sx=1+.03*p;sy=1-.02*p;rot=.025*Math.sin(angle)*p;
+ }
+ return (Array.isArray(names)?names:[names]).map(name=>{
+  const port=config?.ports?.[name];
+  const phase=options.phase||(moveId==='flamethrower'&&clock>=flameShootTiming(id).windup?'hold':'cast');
+  const pos=port?.[phase]?.[direction]||port?.cast?.[direction]||[mainW/2,mainH*.40];
+  const lx=((pos[0]/mainW)*w-w/2)*scale,ly=((pos[1]/mainH)*h-foot)*scale;
+  const rx=lx*Math.cos(rot)-ly*Math.sin(rot),ry=lx*Math.sin(rot)+ly*Math.cos(rot);
+  return {x:actor.x+dx+rx*sx,y:ground+dy+ry*sy,port:name,direction,frame,
+   source:config?.source||'fallback',cell:{x:pos[0],y:pos[1]},action:visualAction};
+ });
+}
+function emissionPoint(actor,moveId='basic',options={}){
+ const points=emissionWorldPoints(actor,moveId,options);
+ if(!points.length)return {x:actor.x,y:actor.y-14};
+ if(options.all)return points;
+ if(options.index!==undefined)return points[((options.index%points.length)+points.length)%points.length];
+ return {x:points.reduce((v,p)=>v+p.x,0)/points.length,
+  y:points.reduce((v,p)=>v+p.y,0)/points.length,port:points.map(p=>p.port).join('+')};
+}
 function shoot(kind,ang){
  const p=roster[chosen],v={x:Math.cos(ang),y:Math.sin(ang)};
  const packet=damagePacket(player,enemies[0],'basic'),speed=p.type==='grass'?500:560,move=moveOf(player,'basic');
- projectiles.push({x:player.x+v.x*20,y:player.y+v.y*20,vx:v.x*speed,vy:v.y*speed,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'player',kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
- fx(player.x+v.x*20,player.y+v.y*20,p.color,7,140);playAction(player,'Shoot',.34);
+ const origin=emissionPoint(player,'basic',{angle:ang,index:(player.basicShotCount=(player.basicShotCount||0)+1)-1,action:'Shoot',clock:.12});
+ projectiles.push({x:origin.x+v.x*4,y:origin.y+v.y*4,vx:v.x*speed,vy:v.y*speed,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'player',kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
+ fx(origin.x,origin.y,p.color,7,140);playAction(player,'Shoot',.34);
 }
 function enemyShoot(e,ang){
  const p=roster[e.kind],v={x:Math.cos(ang),y:Math.sin(ang)},packet=damagePacket(e,player,'basic'),move=moveOf(e,'basic');
- projectiles.push({x:e.x+v.x*18,y:e.y+v.y*18-10,vx:v.x*440,vy:v.y*440,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'enemy',kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
- fx(e.x+v.x*18,e.y+v.y*18-10,p.color,5,100);playAction(e,'Shoot',.34);
+ const origin=emissionPoint(e,'basic',{angle:ang,index:(e.basicShotCount=(e.basicShotCount||0)+1)-1,action:'Shoot',clock:.12});
+ projectiles.push({x:origin.x+v.x*4,y:origin.y+v.y*4,vx:v.x*440,vy:v.y*440,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'enemy',kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
+ fx(origin.x,origin.y,p.color,5,100);playAction(e,'Shoot',.34);
 }
 const MOVE_SPECS={
  electric:{id:'thunderbolt',name:'10만볼트',cooldown:5.2,power:90,range:565},
@@ -964,7 +1023,9 @@ function castSpecial(v,owner='player',opts={}){
  const actor=owner==='player'?player:enemies[0];
  if(!actor)return null;
  const profile=owner==='player'?roster[chosen]:roster[actor.kind],spec=MOVE_SPECS[profile.type];
- const x=actor.x+v.x*19,y=actor.y+v.y*19-11,packet=damagePacket(actor,owner==='player'?enemies[0]:player,'special');
+ actor.face=Math.atan2(v.y,v.x);
+ const emission=emissionPoint(actor,spec.id,{angle:actor.face,action:'Shoot',clock:.12});
+ const x=emission.x,y=emission.y,packet=damagePacket(actor,owner==='player'?enemies[0]:player,'special');
  const move={type:spec.id,element:profile.type,x,y,vx:v.x,vy:v.y,age:0,
   life:spec.id==='thunderbolt'?1.25:spec.id==='flamethrower'?(opts.controlled?999:1.4):spec.id==='surf'?1.12:1.65,
   range:spec.range,damage:arenaDamage(packet.damage),info:packet,hit:new Set(),tick:0,pulse:0,seed:rand(0,1000),owner,controlled:!!opts.controlled,end:false};
@@ -985,7 +1046,9 @@ function castSpecial(v,owner='player',opts={}){
  }else if(move.type==='surf'){
   move.distance=0;move.decalTick=.08;
   move.origin={x:actor.x,y:actor.y-5};
-  move.x=move.origin.x+v.x*34;move.y=move.origin.y+v.y*34;
+  move.emitters=emissionWorldPoints(actor,'surf',{angle:actor.face,action:'Shoot',clock:.12});
+  move.waveOrigin={x,y};
+  move.x=x+v.x*16;move.y=y+v.y*16;
   actor.riding=true; // TAP starts riding immediately, without needing a drag.
   emitParticle({x:move.x,y:move.y,life:.35,size:24,color:'#abecff',shape:'ring',grow:95,line:4});sfx(115,340,.4);
  }
@@ -1053,7 +1116,9 @@ function updateSpecials(dt){
      m.age=m.life;
    }
   }else if(m.type==='flamethrower'){
-   const length=Math.min(m.range,m.age*710+24); m.x=actor.x+m.vx*18; m.y=actor.y+m.vy*18-10; m.stream=length;
+   const length=Math.min(m.range,m.age*710+24);
+   const port=emissionPoint(actor,'flamethrower',{angle:actor.face,phase:m.age>flameShootTiming(actor.id||roster[actor.kind].id).windup?'hold':'cast'});
+   m.x=port.x;m.y=port.y;m.stream=length;
    m.decalTick-=dt; if(m.decalTick<=0){m.decalTick+=.14; impactMark(m.x+m.vx*(length*.65),m.y+m.vy*(length*.65),'fire',.72)}
    const amount=Math.min(10,Math.round(3+dt*190)); const perpX=-m.vy,perpY=m.vx;
    for(let i=0;i<amount;i++){const u=rand(.05,1),dist=rand(10,Math.max(15,length))*u,spread=(10+dist*.24)*rand(-1,1); emitParticle({x:m.x+m.vx*dist+perpX*spread,y:m.y+m.vy*dist+perpY*spread,vx:m.vx*rand(50,135)+perpX*rand(-30,30),vy:m.vy*rand(50,135)+perpY*rand(-30,30)-rand(0,20),life:rand(.12,.25),size:rand(5,12),shape:'flame',color:Math.random()<.4?'#ffe69c':Math.random()<.6?'#ffb14b':'#ff6332',rot:Math.atan2(m.vy,m.vx)});}
@@ -1072,7 +1137,7 @@ function updateSpecials(dt){
     let collided=false; if(len(m.x-target.x,m.y-(target.y-11))<target.r+20){ collided=true; if(m.owner==='player') hitOpponent(target,m.damage,m.x,m.y,'grass',1.6,m.info); else hurt(m.damage); applySecondary(target,moveOf(actor,'special')); }
     if(collided||len(m.x-m.origin.x,m.y-m.origin.y)>=m.range){ const ex=m.x,ey=m.y; elementalBurst(ex,ey,'grass',1.7);fxSpawnScene('impact',ex,ey,{element:'grass',power:1.3,range:76,life:.48});impactMark(ex,ey,'grass',1.55);createRing(ex,ey,'#b9ff9a',50,.5); specialEffects.push({type:'energyburst',element:'grass',x:ex,y:ey,age:0,life:.52,pulse:0,owner:m.owner}); if(!collided&&len(target.x-ex,target.y-11-ey)<72){ if(m.owner==='player') hitOpponent(target,m.damage*.55,target.x,target.y-11,'grass',.8,m.info); else hurt(m.damage*.55);applySecondary(target,moveOf(actor,'special'));} m.age=m.life; }
   }else if(m.type==='surf'){
-   m.distance=Math.min(m.range,m.distance+395*dt); m.x=m.origin.x+m.vx*(30+m.distance); m.y=m.origin.y+m.vy*(30+m.distance); const perpX=-m.vy,perpY=m.vx; const radius=85;
+   m.distance=Math.min(m.range,m.distance+395*dt); m.x=m.waveOrigin.x+m.vx*(16+m.distance); m.y=m.waveOrigin.y+m.vy*(16+m.distance); const perpX=-m.vy,perpY=m.vx; const radius=85;
    const rideDist=Math.min(m.distance*.92,m.range-10); actor.x=m.origin.x+m.vx*(10+rideDist)-perpX*4; actor.y=m.origin.y+m.vy*(10+rideDist)-perpY*4; actor.face=Math.atan2(m.vy,m.vx); clampToArena(actor,m.owner==='player'?ARENA.r-26:ARENA.r-22); if(m.owner==='player'){player.inv=Math.max(player.inv,.06)}
    m.decalTick-=dt; if(m.decalTick<=0){m.decalTick+=.13;impactMark(m.x,m.y,'water',1.25)}
    for(let i=0;i<4;i++){const spread=rand(-radius*.72,radius*.72),dist=rand(-45,20); emitParticle({x:m.x+perpX*spread+m.vx*dist,y:m.y+perpY*spread+m.vy*dist,vx:m.vx*rand(20,90)+perpX*rand(-25,25),vy:m.vy*rand(20,90)+perpY*rand(-25,25),life:rand(.16,.33),size:rand(4,9),shape:Math.random()<.6?'drop':'dot',color:Math.random()<.3?'#efffff':'#69d3ff',gravity:26});}
@@ -1804,4 +1869,4 @@ document.addEventListener('touchend',e=>{
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});
-</script><script src="./battle-studio.js?v=25"></script></body></html>
+</script><script src="./battle-studio.js?v=26"></script></body></html>
