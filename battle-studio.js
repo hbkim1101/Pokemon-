@@ -291,8 +291,30 @@ window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.acti
  
 // Layered hand-pixel treatments applied on top of existing combat rendering.
 // All colors are procedural pixels, rather than footage-copied artwork.
+// Skill PIXEL scale is relative to the visible PMD sprite sheet width,
+// not to arena collision radii. Preserve projectile travel and hit detection.
+function skillSpriteWidth(m){
+ const actor=m?.owner==='player'?player:m?.owner==='enemy'?enemies[0]:null;
+ const id=actor?.id||roster[state.kind]?.id;
+ return (sprites[id]?.anims?.Shoot?.w||window.PMD_EMISSION_ATLAS?.[id]?.cell?.[0]||48)*1.43;
+}
+function skillVisualRatio(m,originalWidth,min=.40,max=.72){
+ return Math.max(min,Math.min(max,skillSpriteWidth(m)*.72/originalWidth));
+}
+function scaleSkillAround(m,f){
+ ctx.translate(m.x,m.y);ctx.scale(f,f);ctx.translate(-m.x,-m.y);
+}
+function scaleSkillBeamWidth(m,f,origin){
+ const vx=m.vx??(m.path?.length>1?(m.path.at(-1).x-m.path[0].x):1);
+ const vy=m.vy??(m.path?.length>1?(m.path.at(-1).y-m.path[0].y):0);
+ const angle=Math.atan2(vy,vx);
+ const x=origin?.x??m.x,y=origin?.y??m.y;
+ ctx.translate(x,y);ctx.rotate(angle);ctx.scale(1,f);ctx.rotate(-angle);ctx.translate(-x,-y);
+}
 const originalThunder=drawThunderbolt,originalFlame=drawFlamethrower,originalSurf=drawSurf,originalOrb=drawEnergyball,originalBurst=drawEnergyBurst;
 drawThunderbolt=function(m){
+ ctx.save();
+ scaleSkillBeamWidth(m,skillVisualRatio(m,85,.52,.73),m.path?.[0]);
  originalThunder(m);
  const pts=m.path||[];if(pts.length<2)return;
  const fade=m.type==='boltEcho'?Math.max(0,1-m.age/(m.life||.3)):1;
@@ -306,10 +328,13 @@ drawThunderbolt=function(m){
  }
  const last=pts[pts.length-1];for(let i=0;i<6;i++){const a=i*Math.PI/3+m.age*23,rr=12+Math.sin(i*3+m.age*28)*5;pxLine(last.x+Math.cos(a)*rr,last.y+Math.sin(a)*rr,last.x+Math.cos(a)*(rr+11),last.y+Math.sin(a)*(rr+11),3,'#fff8d0',.73,.7);}
  ctx.restore();
+ ctx.restore();
 };
 drawFlamethrower=function(m){
+ ctx.save();
+ scaleSkillBeamWidth(m,skillVisualRatio(m,105,.48,.68));
  originalFlame(m);
- const L=m.stream||0;if(L<12)return;
+ const L=m.stream||0;if(L<12){ctx.restore();return;}
  const dx=m.vx,dy=m.vy,nx=-dy,ny=dx,quality=fxQuality==='low'?12:23;
  ctx.save();
  for(let layer=0;layer<3;layer++){
@@ -327,8 +352,11 @@ drawFlamethrower=function(m){
   fxStamp('ember',x,y,5+u*8,9+u*8,i,.82,(i%2?1:-1)*.2);
  }
  ctx.restore();
+ ctx.restore();
 };
 drawSurf=function(m){
+ ctx.save();
+ scaleSkillAround(m,skillVisualRatio(m,185,.39,.53));
  originalSurf(m);
  const dx=m.vx,dy=m.vy,nx=-dy,ny=dx,phase=m.age*19,q=fxQuality==='low'?12:20;
  ctx.save();
@@ -342,8 +370,11 @@ drawSurf=function(m){
  }
  for(let i=0;i<9;i++){const u=i/8*2-1,s=u*76,h=22+Math.sin(phase+i)*12;fxStamp('water',m.x+nx*s+dx*(27+h*.4),m.y+ny*s+dy*(27+h*.4),9,20+h,i,.67,-Math.PI/2+Math.atan2(dy,dx));}
  ctx.restore();
+ ctx.restore();
 };
 drawEnergyball=function(m){
+ ctx.save();
+ scaleSkillAround(m,skillVisualRatio(m,86,.40,.63));
  originalOrb(m);
  const t=m.age,cx=m.x,cy=m.y,rot=t*9,quality=fxQuality==='low'?8:16;
  ctx.save();
@@ -355,8 +386,11 @@ drawEnergyball=function(m){
  }
  for(let i=1;i<=5;i++){const d=i*13,x=cx-(m.vx||1)*d,y=cy-(m.vy||0)*d;pxDiamond(x+Math.sin(t*19+i)*7,y+Math.cos(t*14+i)*7,4+(5-i)*.7,i%2?'#7bea77':'#d8ffa2',.47,4);}
  ctx.restore();
+ ctx.restore();
 };
 drawEnergyBurst=function(m){
+ ctx.save();
+ scaleSkillAround(m,skillVisualRatio(m,225,.35,.55));
  originalBurst(m);
  const k=Math.min(1,m.age/(m.life||.4)),a=Math.max(0,1-k),r=23+k*91,n=fxQuality==='low'?10:20;
  ctx.save();
@@ -365,6 +399,7 @@ drawEnergyBurst=function(m){
   pxDiamond(x,y,5+5*(1-k),i%3?'#bdfc81':'#ffffff',a*.93,4);
   if(i%2===0)pxLine(m.x+Math.cos(an)*r*.4,m.y+Math.sin(an)*r*.4,m.x+Math.cos(an)*r*.7,m.y+Math.sin(an)*r*.7,4,'#8de96b',a*.67,.9);
  }
+ ctx.restore();
  ctx.restore();
 };
 })();
