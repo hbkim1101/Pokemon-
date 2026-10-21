@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v25.
+// Dependency-free regression tests for Pokemon Arena v26.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -8,9 +8,11 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
+const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=25'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=26'), 'Motion Studio not linked');
+assert(html.includes('emitter-anchors.js?v=26'), 'Sprite anchor data not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -74,12 +76,15 @@ const exposed = [
   ' spriteClock:(actor)=>combatSpriteClock(actor,combatAnimation(actor),actor.animT||0),',
   ' stopFlame:()=>stopPlayerChannel(),',
   ' signature:(type)=>signatureAnimation(type),',
+  ' anchorPoints:(actor,move,options)=>emissionWorldPoints(actor,move,options),',
+  ' anchorPoint:(actor,move,options)=>emissionPoint(actor,move,options),',
+  ' atlas:()=>window.PMD_EMISSION_ATLAS,',
   ' actionOf:(actor)=>combatAnimation(actor),',
-  ' state:()=>({gameState,player,enemies,specialEffects,extras:EXTRA_SKILLS_ENABLED}),',
+  ' state:()=>({gameState,player,enemies,specialEffects,projectiles,extras:EXTRA_SKILLS_ENABLED}),',
   ' injectSheets:()=>{for(const actor of roster){const anims={};for(const key of ACTIONS){anims[key]={image:{width:240,height:448},w:60,h:56,frames:4,dirs:8,dur:[8,8,8,8]}}sprites[actor.id]={anims,variant:"mock",loaded:true}}}',
   '};'
 ].join('\n');
-vm.runInNewContext(main+'\n'+addon+'\n'+exposed, sandbox, {timeout:20000,filename:'arena+studio.js'});
+vm.runInNewContext(anchors+'\n'+main+'\n'+addon+'\n'+exposed, sandbox, {timeout:20000,filename:'arena+studio.js'});
 const api = sandbox.__smoke;
 assert.equal(api.state().gameState,'menu');
 assert.equal(api.state().extras,false);
@@ -106,12 +111,47 @@ for(let k=0;k<4;k++){
   api.activate(3);api.activate(4);
   assert.equal(api.state().player.cd[3],0,'Old skill 3 activated');
   assert.equal(api.state().player.cd[4],0,'Old skill 4 activated');
+  const me=api.state().player;
+  const profile=api.atlas()[['0026','0006','0009','0003'][k]];
+  assert(profile,'Missing PMD sprite port config for '+k);
+  for(let direction=0;direction<8;direction++){
+    const pmdAngles=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
+    const coords=api.anchorPoints(me,profile===api.atlas()['0026']?'thunderbolt':k===1?'flamethrower':k===2?'surf':'energyball',
+      {angle:pmdAngles[direction],action:'Shoot',clock:.12});
+    assert.equal(coords.length,k===2?2:1,'Wrong emission port count');
+    for(const p of coords){
+      assert.equal(p.direction,direction,'Wrong directional port row');
+      assert(Number.isFinite(p.x)&&Number.isFinite(p.y),'Emitter coordinates must be finite');
+      assert(p.cell.x>=0&&p.cell.y>=0,'Emitter pixel coordinates must not be negative');
+      assert(p.cell.x<=profile.cell[0]&&p.cell.y<=profile.cell[1],'Emitter position exceeds sprite cell');
+    }
+  }
   api.activate(0);
   assert.equal(api.state().player.action,'Shoot','Basic ranged move should use Shoot');
+  const emitted=api.state().projectiles.at(-1),origin=api.anchorPoint(me,'basic',
+    {angle:me.face,action:'Shoot',clock:.12,index:0});
+  assert(Math.abs(emitted.x-origin.x-Math.cos(me.face)*4)<.01,'Basic projectile X did not originate at port');
+  assert(Math.abs(emitted.y-origin.y-Math.sin(me.face)*4)<.01,'Basic projectile Y did not originate at port');
   api.activate(1);
   assert(api.state().specialEffects.length>0,'Signature move did not cast');
-  assert.equal(api.state().player.action,k===2?'Attack':'Shoot','Signature move action role mismatch');
-  assert.equal(api.actionOf(api.state().player),k===2?'Attack':'Shoot','Rendered signature motion mismatched');
+  assert.equal(api.state().player.action,'Shoot','Signature move action role mismatch');
+  assert.equal(api.actionOf(api.state().player),'Shoot','Rendered signature motion mismatched');
+  const specialMove=api.state().specialEffects.find(m=>['thunderbolt','flamethrower','surf','energyball'].includes(m.type));
+  assert(specialMove,'Signature effect not spawned');
+  if(k===0){
+    const start=api.anchorPoint(me,'thunderbolt',{angle:me.face,action:'Shoot',clock:.12});
+    assert(Math.abs(start.x-specialMove.x)<.01,'10만볼트 must emerge at Raichu body');
+  }
+  if(k===2){
+    assert.equal(specialMove.emitters.length,2,'Surf must originate from both Blastoise cannons');
+    assert(specialMove.waveOrigin,'Surf needs cannon-root waveOrigin');
+  }
+  if(k===1 || k===3){
+    const start=api.anchorPoint(me,k===1?'flamethrower':'energyball',
+      {angle:me.face,action:'Shoot',clock:.12});
+    const offset=k===3?14:0;
+    assert(Math.abs(specialMove.x-start.x-Math.cos(me.face)*offset)<.01,'Projectile not emitted from mouth');
+  }
   api.activate(2);
   assert.equal(api.state().player.action,'Attack','Dash must use Attack instead of Walk');
   assert.equal(api.actionOf(api.state().player),'Attack','Rendered dash must use Attack');
@@ -168,6 +208,6 @@ for(let direction=0;direction<8;direction++)assert.equal(api.direction(pmdAngles
 assert(!html.includes('let didExtra=false;'), 'AI legacy move block still enabled');
 assert.equal(api.signature('electric'),'Shoot');
 assert.equal(api.signature('fire'),'Shoot');
-assert.equal(api.signature('water'),'Attack');
+assert.equal(api.signature('water'),'Shoot');
 assert.equal(api.signature('grass'),'Shoot');
-console.log('PASS: 4 Pokemon, 192 motion cells, Flamethrower forward-frame hold (recoil skipped), clean release, dash & signature rendering');
+console.log('PASS: 4 Pokemon, 192 motion cells, 8-way sprite-local emitter anchors, sustained Shoot, Raichu body, Blastoise cannons, mouth attacks, Flamethrower hold');
