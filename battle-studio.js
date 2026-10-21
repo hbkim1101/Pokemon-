@@ -43,7 +43,7 @@ studioNode.innerHTML=`
 <button data-action="Idle">대기</button><button data-action="Walk">이동</button><button data-action="Attack">몸통 공격 · 돌진</button><button data-action="Shoot">원거리 공격 · 발사</button><button data-action="Charge">기 모으기</button><button data-action="Hurt">피격</button></div>
 <div class="studioGroup" id="studioDirections"><span class="sLabel">방향</span>
 <button data-dir="5">↖</button><button data-dir="4">↑</button><button data-dir="3">↗</button><button data-dir="6">←</button><button data-dir="2">→</button><button data-dir="7">↙</button><button data-dir="0">↓</button><button data-dir="1">↘</button></div>
-<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button data-test="dash">돌진 동작 시험</button><button id="studioAnchors" aria-pressed="true">발사 좌표 표시 ON</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button>
+<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button data-test="dash">돌진 동작 시험</button><button id="studioAnchors" aria-pressed="true">발사 좌표 표시 ON</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button><button id="studioFreeze" aria-pressed="false">프레임 고정 OFF</button><label class="studioSpeed">프레임 <input type="range" id="studioFrame" min="0" max="17" value="0" step="1"><span id="studioFrameLabel">1/18</span></label>
 <label class="studioSpeed">재생 속도 <input type="range" id="studioSpeed" min="0.25" max="2" step=".25" value="1"><span id="studioSpeedLabel">1.0×</span></label></div>
 <p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p><p class="studioMeta" id="studioAudit" aria-live="polite">검사하면 캐릭터별 원본 8방향 모션 누락을 표시합니다.</p>
 </div>`;
@@ -53,7 +53,7 @@ launcher.id='openMotionStudio';
 launcher.type='button';
 launcher.textContent='🎞 캐릭터 모션 · 4종 기술 테스트';
 $('start').insertAdjacentElement('afterend',launcher);
-const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:0,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false,anchors:true};
+const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:0,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false,anchors:true,freezeFrame:false,frameIndex:0};
 // PMD sprite-sheet row order: S, SE, E, NE, N, NW, W, SW.
 const faces=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
 const faceLabels=['↓','↘','→','↗','↑','↖','←','↙'];
@@ -65,6 +65,13 @@ function meta(){
  const active=sheet||fallback;
  const atlas=sheet?`${sheet.frames}프레임 · ${sheet.dirs}방향 · ${pack.variant||'기본 버전'}`:active?`해당 액션 원본 없음 (대체 모션 ${active.frames}프레임)`:'원본 로딩 대기 / 대체 이미지';
  const special=MOVE_SPECS[sp.type];
+  const frameSheet=pack?.anims?.[state.action],count=frameSheet?Math.max(1,Math.min(frameSheet.frames,frameSheet.dur?.length||frameSheet.frames)):1;
+  state.frameIndex=Math.min(state.frameIndex,count-1);
+  $('studioFrame').max=String(count-1);$('studioFrame').value=String(state.frameIndex);
+  $('studioFrameLabel').textContent=(state.frameIndex+1)+'/'+count;
+  $('studioFreeze').textContent=state.freezeFrame?'프레임 고정 ON':'프레임 고정 OFF';
+  $('studioFreeze').classList.toggle('active',state.freezeFrame);
+  $('studioFreeze').setAttribute('aria-pressed',String(state.freezeFrame));
  $('studioMeta').textContent=`${sp.name} · ${state.action} · ${faceLabels[state.dir]} · PMD ${atlas} · ${motionExplanations[state.action]} · 기본: ${sp.basic} / 고유: ${special.name}${state.auto?' · 전체 자동 검사 중':''}${state.completed?' · 전체 순회 완료':''}`;
  for(const btn of studioNode.querySelectorAll('[data-actor]'))btn.classList.toggle('active',+btn.dataset.actor===state.kind);
  for(const btn of studioNode.querySelectorAll('[data-action]'))btn.classList.toggle('active',btn.dataset.action===state.action);
@@ -91,7 +98,7 @@ function audit(){
   return {valid,total,missing};
  }
  function select(kind=state.kind,action=state.action,dir=state.dir){
- state.kind=kind;state.action=action;state.dir=dir;state.clock=0;state.preview=null;meta();
+ state.kind=kind;state.action=action;state.dir=dir;state.clock=0;state.frameIndex=0;state.preview=null;meta();
 }
 function open(){
  if(state.open)return;
@@ -128,15 +135,25 @@ studioNode.addEventListener('click',(e)=>{
  if(btn.id==='studioCycle'){state.auto=true;state.compare=false;state.completed=false;state.autoIndex=0;state.autoTime=0;select(0,'Idle',0);}
  if(btn.id==='studioStop'){state.auto=false;meta();}
  if(btn.id==='studioAuditBtn')audit();
+ if(btn.id==='studioFreeze'){state.freezeFrame=!state.freezeFrame;state.preview=null;state.clock=0;meta();}
 });
 $('studioSpeed').addEventListener('input',e=>{state.speed=Number(e.target.value)||1;$('studioSpeedLabel').textContent=state.speed.toFixed(2)+'×';});
+ $('studioFrame').addEventListener('input',e=>{state.frameIndex=Number(e.target.value)||0;state.freezeFrame=true;state.preview=null;state.clock=0;meta();});
 addEventListener('keydown',e=>{if(state.open && (e.key==='Escape'||e.key.toLowerCase()==='p')){e.preventDefault();close();} });
 function studioEmitters(x,y,a,clock,scale,move){
  const sp=roster[state.kind],avatar={x,y,kind:state.kind,id:sp.id,type:sp.type,face:a,action:'Shoot',animT:clock,actionT:clock};
  return emissionWorldPoints(avatar,move||MOVE_SPECS[sp.type].id,{action:'Shoot',clock,angle:a,scale,
    phase:move==='flamethrower'&&clock>=flameShootTiming(sp.id).windup?'hold':'cast'});
 }
-function drawStudioAnchors(x,y,a,clock,scale){
+function studioFrameClock(){
+  if(!state.freezeFrame)return state.clock;
+  const id=roster[state.kind].id,s=sprites[id]?.anims?.[state.action];
+  if(!s)return state.clock;
+  const frame=Math.max(0,Math.min(state.frameIndex,s.frames-1));
+  const start=s.dur.slice(0,frame).reduce((a,b)=>a+b,0)/60;
+  return start+Math.min(.005,(s.dur[frame]||8)/120);
+ }
+ function drawStudioAnchors(x,y,a,clock,scale){
  if(!state.anchors||state.action!=='Shoot')return;
  const sp=roster[state.kind],points=studioEmitters(x,y,a,clock,scale);
  ctx.save();ctx.font='bold 10px system-ui';ctx.textAlign='left';
@@ -217,8 +234,8 @@ function render(){
      const xx=(i%4+.5)*cw,yy=y0+Math.floor(i/4)*ch+ch*.72,d=dirs[i],angle=faces[d];
      ctx.globalAlpha=state.dir===d?1:.93;
      pxRing(xx,yy+1,Math.max(17,scale*27),2,sp.color,.28,4);
-     spriteDraw(sp.id,xx,yy,angle,state.action,state.clock,scale,state.action==='Hurt'?.35:0,'player');
-     drawStudioAnchors(xx,yy,angle,state.clock,scale);
+     spriteDraw(sp.id,xx,yy,angle,state.action,studioFrameClock(),scale,state.action==='Hurt'?.35:0,'player');
+     drawStudioAnchors(xx,yy,angle,studioFrameClock(),scale);
      ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillStyle='#eafff7';
      ctx.fillText(faceLabels[d],xx,yy-Math.max(48,scale*(active?.h||80)+8));
    }
@@ -228,7 +245,7 @@ function render(){
   if(state.action==='Walk'){const ox=Math.sin(state.clock*7)*12;for(let i=0;i<3;i++)pxRect(cx-ox*(i+1)*1.2-5,cy+12+i*5,10,4,'#d8edbe',.2);}
  const dashPreview=state.preview?.type==='dash',dk=dashPreview?Math.min(1,state.preview.age/state.preview.life):0;
   const offset=dashPreview?Math.min(74,W*.14)*(dk<.55?dk/.55:1-(dk-.55)/.45):0;
-  let spriteClock=state.clock;
+  let spriteClock=studioFrameClock();
   if(state.preview?.type==='flamethrower'){
    const timing=flameShootTiming(sp.id),p=state.preview,releaseStart=p.life-.22;
    spriteClock=p.age<releaseStart?flameChannelClock(p.age,timing):
@@ -244,7 +261,7 @@ function render(){
 }
 const originalDraw=draw;
 draw=function(){if(state.open)render();else originalDraw();};
-window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,face:faceLabels[state.dir],auto:state.auto,compare:state.compare,anchors:state.anchors}),preview:attack,audit,setCompare(enabled){state.compare=!!enabled;state.auto=false;state.preview=null;meta();}};
+window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,face:faceLabels[state.dir],auto:state.auto,compare:state.compare,anchors:state.anchors,freezeFrame:state.freezeFrame,frameIndex:state.frameIndex}),preview:attack,audit,setCompare(enabled){state.compare=!!enabled;state.auto=false;state.preview=null;meta();}};
  
 // Layered hand-pixel treatments applied on top of existing combat rendering.
 // All colors are procedural pixels, rather than footage-copied artwork.
