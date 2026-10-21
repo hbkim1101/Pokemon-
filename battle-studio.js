@@ -402,4 +402,8 @@ drawEnergyBurst=function(m){
  ctx.restore();
  ctx.restore();
 };
+window.motionStudio.getVisualRatio=(type)=>{
+ const widths={thunderbolt:85,flamethrower:105,surf:185,energyball:86,energyburst:225};
+ return skillVisualRatio({owner:'player',type},widths[type]||86);
+};
 })();
