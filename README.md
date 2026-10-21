@@ -6,7 +6,7 @@
 
 필드: 방향키 이동, A/Enter/Z 대화, B/Esc/X 메뉴. 배틀: WASD 이동, 1 기본 공격, 2 특수 기술, Space 회피, 3 몬스터볼, 4 상처약, 필드 아래쪽 끝까지 이동하면 도망. 기록은 브라우저에 저장된다. 규칙은 `node tests/story-smoke.cjs`, 실시간 전투는 `node tests/story-arena.cjs`로 검사한다.
 
-스프라이트는 `psdk/graphics`에 있다. PSDK `Sprite_Character`와 같이 가로 4프레임·세로 4방향(아래, 왼쪽, 오른쪽, 위)이고, 앞/뒤 배틀러와 아이콘은 Pokémon Studio 도감 리소스 경로(`graphics/pokedex/front`, `back`, `icon`)에 둔다. 도트는 그 규격에 맞춘 오리지널이며 공식 스프라이트를 복제하지 않았다. `python3 tools/build-psdk-sprites.py`로 다시 만들 수 있다.
+도트는 두 곳에서 불러온다. 배틀 포켓몬은 아레나와 같은 PMDCollab 8방향 시트(`Walk`/`Idle`/`Attack`/`Shoot`)다. 필드 트레이너와 NPC, 도감 앞모습, 몬스터볼, 타일은 Pokémon Workshop PSDK Technical Demo의 `graphics/characters`, `graphics/pokedex/pokefront`, `graphics/icons`, `graphics/tilesets`다. 플레이에는 인터넷 연결이 필요하다.
 
 비상업용 팬 프로젝트입니다. Pokémon 및 관련 캐릭터의 권리는 각 원저작자에게 있습니다.
 

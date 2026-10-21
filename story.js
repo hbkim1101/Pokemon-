@@ -21,39 +21,175 @@
   let moveHold = null;
   let lastArea = '';
   let lastTick = performance.now();
-  const images = {};
-
-  const tileset = new Image();
-  tileset.src = './psdk/graphics/tilesets/mint.png';
-  const TILE_ART = { grass: [0, 1], path: [2, 3], water: [4, 4], tree: [5, 5], floor: [6, 6], wall: [7, 7], door: [8, 8], exit: [8, 8], sign: [9, 9] };
+  const PSDK = 'https://raw.githubusercontent.com/PokemonWorkshop/PSDKTechnicalDemo/main/graphics/';
+  const PMD = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/';
+  const HUMANS = {
+    player: 'characters/player_m_walk.png',
+    mom: 'characters/npc_mom-01.png',
+    prof: 'characters/npc_prof-oak.png',
+    nurse: 'characters/npc_nurse-01.png',
+    clerk: 'characters/npc_clerk.png',
+    leader: 'characters/npc_ace-trainer-m-01.png',
+    champion: 'characters/npc_red.png',
+    raid: 'characters/npc_scientist-m.png',
+    gym1: 'characters/npc_boy.png',
+    gym2: 'characters/npc_girl-01.png',
+    gym3: 'characters/npc_scientist-m.png',
+    gym4: 'characters/npc_girl-02.png',
+    gym5: 'characters/npc_scientist-f.png',
+    gym6: 'characters/npc_ace-trainer-m-01.png',
+    gym7: 'characters/npc_rich-boy.png',
+    gym8: 'characters/npc_ace-trainer-f-01.png'
+  };
+  const TILE_SRC = {
+    grass: { cells: [[0, 0], [1, 0]] },
+    path: { cells: [[4, 10], [6, 10]] },
+    water: { cells: [[6, 27]] },
+    tree: { cells: [[2, 1]] },
+    floor: { indoor: true, cells: [[0, 3]] },
+    wall: { indoor: true, cells: [[0, 4]] },
+    door: { cells: [[4, 34]] },
+    exit: { cells: [[4, 34]] },
+    sign: { cells: [[4, 33]] }
+  };
+  const humanImages = {};
+  const pmdPacks = {};
+  const tileBasic = new Image();
+  const tileIndoor = new Image();
+  const ballImage = new Image();
+  tileBasic.src = PSDK + 'tilesets/basic.png';
+  tileIndoor.src = PSDK + 'tilesets/' + encodeURIComponent('4g tileset_interieur.png');
+  ballImage.src = PSDK + 'icons/004.png';
   const battleInput = { up: false, down: false, left: false, right: false, basic: false, special: false, dash: false, ball: false, potion: false };
   let arena = null;
   let arenaClock = 0;
   let choiceKey = '';
-  function spriteUrl(id, kind) {
-    if (kind === 'character') return './psdk/graphics/characters/' + id + '.png';
-    if (kind === 'anim') return './psdk/graphics/animations/' + id + '.png';
-    if (kind === 'icon') return './psdk/graphics/pokedex/icon/' + id + '.png';
-    return './psdk/graphics/pokedex/front/' + id + '.png';
-  }
-  function imageFor(id, kind) {
-    const key = (kind || 'front') + ':' + id;
-    if (!images[key]) {
+  function humanImage(id) {
+    const file = HUMANS[id];
+    if (!file) return null;
+    if (!humanImages[id]) {
       const img = new Image();
-      img.src = spriteUrl(id, kind);
-      images[key] = img;
+      img.src = PSDK + file;
+      humanImages[id] = img;
     }
-    return images[key];
+    return humanImages[id];
+  }
+  function dexPad(speciesId) {
+    const species = core.SPECIES[speciesId];
+    return species ? String(species.dex).padStart(4, '0') : '0000';
+  }
+  function frontUrl(speciesId) {
+    return PSDK + 'pokedex/pokefront/' + dexPad(speciesId) + '.png';
+  }
+  function applyPmdSize(pack, name) {
+    const anim = pack.anims[name];
+    if (!anim || !anim.img.naturalWidth) return;
+    const meta = pack.meta[name];
+    let w = meta && meta.w;
+    let h = meta && meta.h;
+    if (!w || !h) {
+      h = Math.max(1, Math.floor(anim.img.naturalHeight / 8));
+      w = h;
+    }
+    if (anim.img.naturalWidth < w || anim.img.naturalHeight < h) {
+      h = Math.max(1, Math.floor(anim.img.naturalHeight / 8));
+      w = h;
+    }
+    anim.w = w;
+    anim.h = h;
+    anim.frames = Math.max(1, Math.floor(anim.img.naturalWidth / w));
+    anim.dirs = Math.max(1, Math.floor(anim.img.naturalHeight / h));
+  }
+  function ensurePmd(speciesId) {
+    const dex = dexPad(speciesId);
+    if (dex === '0000') return null;
+    if (pmdPacks[dex]) return pmdPacks[dex];
+    const pack = { dex: dex, meta: {}, anims: {} };
+    pmdPacks[dex] = pack;
+    const actions = ['Walk', 'Idle', 'Attack', 'Shoot'];
+    actions.forEach(function (name) {
+      const img = new Image();
+      pack.anims[name] = { img: img, w: 0, h: 0, frames: 1, dirs: 8 };
+      img.onload = function () { applyPmdSize(pack, name); };
+      img.src = PMD + dex + '/' + name + '-Anim.png';
+    });
+    fetch(PMD + dex + '/AnimData.xml').then(function (res) {
+      return res.ok ? res.text() : '';
+    }).then(function (text) {
+      if (!text) return;
+      const doc = new DOMParser().parseFromString(text, 'application/xml');
+      const nodes = doc.getElementsByTagName('Anim');
+      for (let i = 0; i < nodes.length; i++) {
+        const nameNode = nodes[i].getElementsByTagName('Name')[0];
+        if (!nameNode) continue;
+        const w = Number((nodes[i].getElementsByTagName('FrameWidth')[0] || {}).textContent || 0);
+        const h = Number((nodes[i].getElementsByTagName('FrameHeight')[0] || {}).textContent || 0);
+        if (w && h) pack.meta[nameNode.textContent] = { w: w, h: h };
+      }
+      actions.forEach(function (name) { applyPmdSize(pack, name); });
+    }).catch(function () {});
+    return pack;
   }
   function drawCharset(id, sx, sy, dir, moving, size) {
-    const img = imageFor(id, 'character');
-    if (!img.complete || !img.naturalWidth) return false;
+    const img = humanImage(id);
+    if (!img || !img.complete || !img.naturalWidth) return false;
+    const cellW = img.naturalWidth / 4;
+    const cellH = img.naturalHeight / 4;
     const row = { down: 0, left: 1, right: 2, up: 3 }[dir] || 0;
     const frame = moving ? [0, 1, 2, 1][Math.floor(performance.now() / 140) % 4] : 1;
-    const cell = img.width / 4;
-    const drawSize = size || TILE;
-    ctx.drawImage(img, frame * cell, row * cell, cell, cell, sx, sy, drawSize, drawSize);
+    const drawW = size || TILE;
+    const drawH = drawW * (cellH / cellW);
+    ctx.drawImage(img, frame * cellW, row * cellH, cellW, cellH, sx, sy + (TILE - drawH), drawW, drawH);
     return true;
+  }
+  function drawPmd(speciesId, x, y, face, moving, shooting, size) {
+    const pack = ensurePmd(speciesId);
+    if (!pack) return false;
+    const order = shooting ? ['Shoot', 'Attack', 'Walk'] : moving ? ['Walk', 'Idle'] : ['Idle', 'Walk'];
+    let anim = null;
+    let action = '';
+    for (let i = 0; i < order.length; i++) {
+      const candidate = pack.anims[order[i]];
+      if (candidate && candidate.w && candidate.img.complete && candidate.img.naturalWidth) {
+        anim = candidate;
+        action = order[i];
+        break;
+      }
+    }
+    ctx.fillStyle = '#0006';
+    ctx.beginPath();
+    ctx.ellipse(x, y + 8, 12, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (!anim) return false;
+    const basis = pack.anims.Walk && pack.anims.Walk.w ? pack.anims.Walk.h : anim.h;
+    const px = size / basis;
+    const row = { down: 0, right: 2, up: 4, left: 6 }[face] || 0;
+    const tick = Math.floor(performance.now() / (action === 'Shoot' || action === 'Attack' ? 70 : 110));
+    const frame = (moving || shooting) ? (tick % anim.frames) : 0;
+    const dw = anim.w * px;
+    const dh = anim.h * px;
+    const dir = Math.min(row, anim.dirs - 1);
+    ctx.drawImage(anim.img, frame * anim.w, dir * anim.h, anim.w, anim.h, x - dw / 2, y + 8 - dh, dw, dh);
+    return true;
+  }
+  function paintTile(cell, sx, sy, x, y) {
+    ctx.fillStyle = tileColor(cell, x, y);
+    ctx.fillRect(sx, sy, TILE, TILE);
+    const spec = TILE_SRC[cell.k];
+    if (!spec) return;
+    const img = spec.indoor ? tileIndoor : tileBasic;
+    if (!img.complete || !img.naturalWidth) return;
+    const at = spec.cells[(x + y) % spec.cells.length];
+    ctx.drawImage(img, at[0] * 32, at[1] * 32, 32, 32, sx, sy, TILE, TILE);
+  }
+  function charsetId(npc) {
+    if (npc.trainerId && HUMANS[npc.trainerId]) return npc.trainerId;
+    if (HUMANS[npc.id]) return npc.id;
+    return 'leader';
+  }
+  function preloadStorySprites() {
+    Object.keys(HUMANS).forEach(humanImage);
+    Object.keys(core.SPECIES).forEach(ensurePmd);
   }
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -174,6 +310,7 @@
   }
   function drawWorld() {
     if (!state || mode === 'title') return;
+    ctx.imageSmoothingEnabled = false;
     const width = innerWidth;
     const height = innerHeight;
     const originX = state.x * TILE + TILE / 2 - width / 2;
@@ -189,28 +326,7 @@
       const cell = grid[y][x];
       const sx = x * TILE - originX;
       const sy = y * TILE - originY;
-      const art = TILE_ART[cell.k];
-      if (cell.k !== 'roof' && art && tileset.complete && tileset.naturalWidth) {
-        const index = art[(x + y) % art.length];
-        ctx.drawImage(tileset, index * 32, 0, 32, 32, sx, sy, TILE, TILE);
-      } else {
-        ctx.fillStyle = tileColor(cell, x, y);
-        ctx.fillRect(sx, sy, TILE, TILE);
-      }
-      if (!(tileset.complete && tileset.naturalWidth)) {
-        if (cell.k === 'tree') {
-          ctx.fillStyle = '#2f8d45';
-          ctx.beginPath();
-          ctx.arc(sx + 16, sy + 14, 10, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (cell.k === 'door') {
-          ctx.fillStyle = '#f2d56b';
-          ctx.fillRect(sx + 13, sy + 12, 6, 8);
-        } else if (cell.k === 'sign') {
-          ctx.fillStyle = '#efe6cf';
-          ctx.fillRect(sx + 8, sy + 8, 16, 12);
-        }
-      }
+      paintTile(cell, sx, sy, x, y);
       if (cell.k === 'roof') {
         ctx.fillStyle = '#0003';
         ctx.fillRect(sx, sy + 26, TILE, 6);
@@ -221,9 +337,8 @@
       const sx = obj.x * TILE - originX;
       const sy = obj.y * TILE - originY;
       if (obj.kind === 'starter') {
-        const ball = imageFor('ball', 'anim');
-        if (ball.complete && ball.naturalWidth) ctx.drawImage(ball, sx + 8, sy + 8, 16, 16);
-        else { ctx.fillStyle = '#f05a52'; ctx.fillRect(sx + 10, sy + 10, 12, 12); }
+        if (ballImage.complete && ballImage.naturalWidth) ctx.drawImage(ballImage, sx + 4, sy + 4, 24, 24);
+        else { ctx.fillStyle = '#f05a52'; ctx.beginPath(); ctx.arc(sx + 16, sy + 16, 7, 0, Math.PI * 2); ctx.fill(); }
       } else {
         ctx.fillStyle = obj.kind === 'pc' ? '#9fd0ff' : '#f05a52';
         ctx.fillRect(sx + 8, sy + 10, 16, 14);
@@ -232,19 +347,14 @@
       }
     });
     core.npcsOn(state, state.mapId).forEach(function (npc) {
-      const id = npc.id === 'prof' ? 'prof' : npc.id === 'champion' ? 'champion' : npc.id === 'raid' ? 'raid' : npc.trainerId ? 'leader' : npc.id;
       const sx = npc.x * TILE - originX;
       const sy = npc.y * TILE - originY;
-      if (!drawCharset(id, sx, sy, 'down', false)) drawPerson(sx, sy, npc.color, 'down', 0);
+      if (!drawCharset(charsetId(npc), sx, sy, 'down', false)) drawPerson(sx, sy, npc.color, 'down', 0);
     });
     const bob = Math.sin(performance.now() / 160) * 1.2;
     const psx = state.x * TILE - originX;
     const psy = state.y * TILE - originY;
     if (!drawCharset('player', psx, psy + bob, state.dir, !!moveHold)) drawPerson(psx, psy, '#f25d5d', state.dir, bob);
-    ctx.fillStyle = '#1f6dff';
-    const px = state.x * TILE - originX + 11;
-    const py = state.y * TILE - originY + 16 + bob;
-    ctx.fillRect(px, py, 10, 4);
   }
   function renderHud() {
     if (!state) return;
@@ -323,8 +433,7 @@
   }
   function monCard(mon, index, action) {
     const info = core.summary(mon);
-    const img = imageFor(mon.speciesId, 'front');
-    return '<button class="mon" data-act="' + action + '" data-i="' + index + '"><img alt="" src="' + img.src + '"><div><b>' + info.name + ' Lv.' + info.level + '</b><div>' + typeTags(info.types) + '</div><div class="bar"><i style="width:' + Math.round(info.hp / info.maxHp * 100) + '%"></i></div><small>' + info.hp + '/' + info.maxHp + (info.status ? ' · ' + info.status : '') + '</small></div></button>';
+    return '<button class="mon" data-act="' + action + '" data-i="' + index + '"><img alt="" src="' + frontUrl(mon.speciesId) + '"><div><b>' + info.name + ' Lv.' + info.level + '</b><div>' + typeTags(info.types) + '</div><div class="bar"><i style="width:' + Math.round(info.hp / info.maxHp * 100) + '%"></i></div><small>' + info.hp + '/' + info.maxHp + (info.status ? ' · ' + info.status : '') + '</small></div></button>';
   }
   function openMenu() {
     const goals = core.goals(state).map(function (goal) {
@@ -495,35 +604,43 @@
     const scale = Math.min(width / arena.W, (height - 150) / arena.H);
     const ox = (width - arena.W * scale) / 2;
     const oy = 64;
-    const floor = imageFor('shot', 'anim');
-    ctx.fillStyle = arena.battle.kind === 'wild' ? '#3eae4d' : '#6a4632';
+    ctx.imageSmoothingEnabled = false;
+    const wildField = arena.battle.kind === 'wild';
+    ctx.fillStyle = wildField ? '#3eae4d' : '#6a4632';
     ctx.fillRect(ox, oy, arena.W * scale, arena.H * scale);
+    const ground = wildField ? TILE_SRC.grass : TILE_SRC.floor;
+    const groundImg = ground.indoor ? tileIndoor : tileBasic;
+    if (groundImg.complete && groundImg.naturalWidth) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(ox, oy, arena.W * scale, arena.H * scale);
+      ctx.clip();
+      for (let ty = 0; ty < arena.H; ty += 32) {
+        for (let tx = 0; tx < arena.W; tx += 32) {
+          const at = ground.cells[(tx + ty) % ground.cells.length];
+          ctx.drawImage(groundImg, at[0] * 32, at[1] * 32, 32, 32, ox + tx * scale, oy + ty * scale, 32 * scale, 32 * scale);
+        }
+      }
+      ctx.restore();
+    }
     ctx.strokeStyle = '#24180f';
     ctx.strokeRect(ox, oy, arena.W * scale, arena.H * scale);
     function place(x, y) { return [ox + x * scale, oy + y * scale]; }
     arena.shots.forEach(function (shot) {
       const at = place(shot.x, shot.y);
-      const img = floor;
-      if (img.complete && img.naturalWidth) ctx.drawImage(img, at[0] - 6, at[1] - 6, 12, 12);
-      else { ctx.fillStyle = TYPE_COLOR[shot.type] || '#fff'; ctx.fillRect(at[0] - 4, at[1] - 4, 8, 8); }
+      ctx.fillStyle = TYPE_COLOR[shot.type] || '#fff';
+      ctx.fillRect(at[0] - 4, at[1] - 4, 8, 8);
     });
-    const ballImg = imageFor('ball', 'anim');
     arena.balls.forEach(function (ball) {
       const at = place(ball.x, ball.y);
-      if (ballImg.complete && ballImg.naturalWidth) ctx.drawImage(ballImg, at[0] - 8, at[1] - 8, 16, 16);
+      if (ballImage.complete && ballImage.naturalWidth) ctx.drawImage(ballImage, at[0] - 8, at[1] - 8, 16, 16);
     });
     [arena.foe, arena.player].forEach(function (actor) {
       if (!actor || !actor.mon || actor.mon.hp <= 0) return;
       const at = place(actor.x, actor.y);
-      const size = 42 * (scale / 1.2);
+      const size = 64 * (scale / 1.7);
       const shooting = actor.basicCd > 0.2 || actor.specialCd > 0.9;
-      const frameImg = imageFor(actor.mon.speciesId, 'character');
-      if (frameImg.complete && frameImg.naturalWidth) {
-        const row = { down: 0, left: 1, right: 2, up: 3 }[actor.face] || 0;
-        const frame = shooting ? 3 : (actor.moving ? [0, 1, 2, 1][Math.floor(performance.now() / 140) % 4] : 1);
-        const cell = frameImg.width / 4;
-        ctx.drawImage(frameImg, frame * cell, row * cell, cell, cell, at[0] - size / 2, at[1] - size + 8, size, size);
-      }
+      drawPmd(actor.mon.speciesId, at[0], at[1], actor.face, actor.moving, shooting, size);
     });
     const mine = battle.state.party[battle.playerIndex];
     const foe = battle.foe[Math.min(battle.foeIndex, battle.foe.length - 1)];
@@ -679,6 +796,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+  preloadStorySprites();
   bootTitle();
   window.__STORY = {
     core: core,
@@ -689,6 +807,20 @@
     pressB: pressB,
     tryStep: tryStep,
     get mode() { return mode; },
-    get battle() { return battle; }
+    get battle() { return battle; },
+    sprites: function () {
+      const player = humanImage('player');
+      const ready = Object.keys(pmdPacks).filter(function (dex) {
+        const walk = pmdPacks[dex].anims.Walk;
+        return walk && walk.w && walk.img.naturalWidth;
+      });
+      return {
+        player: !!(player && player.complete && player.naturalWidth),
+        tiles: !!(tileBasic.complete && tileBasic.naturalWidth),
+        indoor: !!(tileIndoor.complete && tileIndoor.naturalWidth),
+        ball: !!(ballImage.complete && ballImage.naturalWidth),
+        pmd: ready
+      };
+    }
   };
 })();

@@ -43,7 +43,7 @@ button{cursor:pointer}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:640px){.grid2{grid-template-columns:1fr}}
 .mon{display:flex;gap:8px;align-items:center;background:#20382b;border-radius:12px;padding:8px;border:1px solid transparent}
-.mon img{width:56px;height:56px;image-rendering:pixelated}
+.mon img{width:72px;height:72px;object-fit:contain;image-rendering:pixelated;background:#1c2430}
 .bar{height:8px;background:#102018;border-radius:99px;overflow:hidden;margin-top:4px}
 .bar i{display:block;height:100%;background:var(--good)}
 .bar.exp{height:5px}.bar.exp i{background:#73c7ef}
@@ -107,7 +107,7 @@ button{cursor:pointer}
       <input id="nameInput" maxlength="8" placeholder="트레이너 이름" aria-label="트레이너 이름">
       <div class="row" style="margin-top:8px"><button class="primary" id="begin" type="button">여행 시작</button></div>
     </div>
-    <p class="footer">비상업용 팬 게임입니다. Pokémon 및 관련 명칭의 권리는 각 권리자에게 있으며, 이 게임은 공식 작품이 아닙니다. 스프라이트는 PSDK Sprite_Character 규격(4방향×4프레임)의 오리지널 도트입니다.</p>
+    <p class="footer">비상업용 팬 게임입니다. Pokémon 및 관련 명칭의 권리는 각 권리자에게 있으며, 이 게임은 공식 작품이 아닙니다. 배틀 도트는 PMDCollab 8방향 시트, 필드 인물·초상·타일·볼은 PSDK Technical Demo 그래픽입니다.</p>
   </div>
 </section>
 <section id="overlay"><div class="sheet" id="sheet"></div></section>
