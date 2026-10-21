@@ -43,7 +43,7 @@ studioNode.innerHTML=`
 <button data-action="Idle">대기</button><button data-action="Walk">이동</button><button data-action="Attack">몸통 공격 · 돌진</button><button data-action="Shoot">원거리 공격 · 발사</button><button data-action="Charge">기 모으기</button><button data-action="Hurt">피격</button></div>
 <div class="studioGroup" id="studioDirections"><span class="sLabel">방향</span>
 <button data-dir="5">↖</button><button data-dir="4">↑</button><button data-dir="3">↗</button><button data-dir="6">←</button><button data-dir="2">→</button><button data-dir="7">↙</button><button data-dir="0">↓</button><button data-dir="1">↘</button></div>
-<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button data-test="dash">돌진 동작 시험</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button>
+<div class="studioGroup"><span class="sLabel">기술</span><button data-test="basic">기본 공격</button><button data-test="special">고유 기술</button><button data-test="dash">돌진 동작 시험</button><button id="studioAnchors" aria-pressed="true">발사 좌표 표시 ON</button><button id="studioCompare" aria-pressed="false">8방향 동시 비교</button><button id="studioReplay">현재 모션 다시</button><button id="studioCycle">전체 자동 순회</button><button id="studioStop">순회 중단</button><button id="studioAuditBtn">원본 프레임 검사</button>
 <label class="studioSpeed">재생 속도 <input type="range" id="studioSpeed" min="0.25" max="2" step=".25" value="1"><span id="studioSpeedLabel">1.0×</span></label></div>
 <p class="studioMeta" id="studioMeta" aria-live="polite">스프라이트 정보 확인 중…</p><p class="studioMeta" id="studioAudit" aria-live="polite">검사하면 캐릭터별 원본 8방향 모션 누락을 표시합니다.</p>
 </div>`;
@@ -53,7 +53,7 @@ launcher.id='openMotionStudio';
 launcher.type='button';
 launcher.textContent='🎞 캐릭터 모션 · 4종 기술 테스트';
 $('start').insertAdjacentElement('afterend',launcher);
-const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:0,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false};
+const state={open:false,previous:'menu',menuVisible:true,kind:0,action:'Idle',dir:0,clock:0,last:0,speed:1,preview:null,auto:false,autoIndex:0,autoTime:0,completed:false,compare:false,anchors:true};
 // PMD sprite-sheet row order: S, SE, E, NE, N, NW, W, SW.
 const faces=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
 const faceLabels=['↓','↘','→','↗','↑','↖','←','↙'];
@@ -69,6 +69,9 @@ function meta(){
  for(const btn of studioNode.querySelectorAll('[data-actor]'))btn.classList.toggle('active',+btn.dataset.actor===state.kind);
  for(const btn of studioNode.querySelectorAll('[data-action]'))btn.classList.toggle('active',btn.dataset.action===state.action);
  for(const btn of studioNode.querySelectorAll('[data-dir]'))btn.classList.toggle('active',+btn.dataset.dir===state.dir);
+ $('studioAnchors').classList.toggle('active',state.anchors);
+ $('studioAnchors').textContent=state.anchors?'발사 좌표 표시 ON':'발사 좌표 표시 OFF';
+ $('studioAnchors').setAttribute('aria-pressed',String(state.anchors));
  $('studioCompare').classList.toggle('active',state.compare);
  $('studioCompare').setAttribute('aria-pressed',String(state.compare));
 }
@@ -119,6 +122,7 @@ studioNode.addEventListener('click',(e)=>{
  if(btn.dataset.action!==undefined){state.auto=false;state.completed=false;select(undefined===state.kind?0:state.kind,btn.dataset.action);return;}
  if(btn.dataset.dir!==undefined){state.auto=false;state.completed=false;select(state.kind,state.action,+btn.dataset.dir);return;}
  if(btn.dataset.test)attack(btn.dataset.test);
+ if(btn.id==='studioAnchors'){state.anchors=!state.anchors;meta();}
  if(btn.id==='studioCompare'){state.compare=!state.compare;state.auto=false;state.preview=null;state.completed=false;meta();}
  if(btn.id==='studioReplay'){state.auto=false;state.completed=false;select();}
  if(btn.id==='studioCycle'){state.auto=true;state.compare=false;state.completed=false;state.autoIndex=0;state.autoTime=0;select(0,'Idle',0);}
@@ -127,9 +131,31 @@ studioNode.addEventListener('click',(e)=>{
 });
 $('studioSpeed').addEventListener('input',e=>{state.speed=Number(e.target.value)||1;$('studioSpeedLabel').textContent=state.speed.toFixed(2)+'×';});
 addEventListener('keydown',e=>{if(state.open && (e.key==='Escape'||e.key.toLowerCase()==='p')){e.preventDefault();close();} });
-function drawStudioEffects(x,y,a){
+function studioEmitters(x,y,a,clock,scale,move){
+ const sp=roster[state.kind],avatar={x,y,kind:state.kind,id:sp.id,type:sp.type,face:a,action:'Shoot',animT:clock,actionT:clock};
+ return emissionWorldPoints(avatar,move||MOVE_SPECS[sp.type].id,{action:'Shoot',clock,angle:a,scale,
+   phase:move==='flamethrower'&&clock>=flameShootTiming(sp.id).windup?'hold':'cast'});
+}
+function drawStudioAnchors(x,y,a,clock,scale){
+ if(!state.anchors||state.action!=='Shoot')return;
+ const sp=roster[state.kind],points=studioEmitters(x,y,a,clock,scale);
+ ctx.save();ctx.font='bold 10px system-ui';ctx.textAlign='left';
+ for(let i=0;i<points.length;i++){
+   const p=points[i],color=i%2?'#b5f3ff':'#ffe995';
+   pxRing(p.x,p.y,9,3,color,.98,4);
+   pxRect(p.x-2,p.y-2,4,4,'#ffffff',1);
+   const label=p.port+' ('+p.cell.x+','+p.cell.y+')';
+   ctx.fillStyle='#062534';ctx.fillRect(p.x+10,p.y-14,Math.max(77,label.length*6+5),16);
+   ctx.fillStyle=color;ctx.fillText(label,p.x+13,p.y-3);
+ }
+ ctx.restore();
+}
+function drawStudioEffects(x,y,a,clock,scale){
  if(!state.preview)return;
- const m=state.preview,age=m.age,vx=Math.cos(a),vy=Math.sin(a),nx=-vy,ny=vx,baseX=x+vx*26,baseY=y-33+vy*12;
+ const m=state.preview,age=m.age,vx=Math.cos(a),vy=Math.sin(a),nx=-vy,ny=vx;
+ const points=studioEmitters(x,y,a,clock,scale,m.type==='basic'?'basic':m.type);
+ const baseX=points.length?points.reduce((sum,p)=>sum+p.x,0)/points.length:x+vx*26;
+ const baseY=points.length?points.reduce((sum,p)=>sum+p.y,0)/points.length:y-33+vy*12;
  const k=Math.min(1,age/m.life);
  if(m.type==='dash'){
    const k=Math.min(1,age/m.life),maxDist=Math.min(74,W*.14);
@@ -142,14 +168,18 @@ function drawStudioEffects(x,y,a){
  }else if(m.type==='thunderbolt'){
    const reach=Math.min(1,age/.57),dist=520*reach,steps=Math.max(2,Math.floor(dist/19)),path=[];
    for(let i=0;i<=steps;i++){let d=dist*i/steps;path.push({x:baseX+vx*d+nx*(i===steps?0:Math.sin(i*2.8+age*19)*15),y:baseY+vy*d+ny*(i===steps?0:Math.sin(i*2.8+age*19)*15)});}
-   if(age<.85)drawThunderbolt({type:'thunderbolt',path,age,life:.9,x:baseX+vx*dist,y:baseY+vy*dist});
+   if(age<.85){
+     drawThunderbolt({type:'thunderbolt',path,age,life:.9,x:baseX+vx*dist,y:baseY+vy*dist});
+     if(age<.7){pxRing(baseX,baseY,27+Math.sin(age*28)*6,7,'#ffdf55',.85,8);pxRing(baseX,baseY,37,3,'#fffaab',.63,8);}
+   }
    else drawThunderbolt({type:'boltEcho',path,age:age-.85,life:.38,x:baseX+vx*dist,y:baseY+vy*dist});
  }else if(m.type==='flamethrower'){
    const length=Math.min(335,Math.max(0,age*900))*Math.min(1,(m.life-age)/.25);
    drawFlamethrower({type:'flamethrower',x:baseX,y:baseY,vx,vy,age,stream:length});
  }else if(m.type==='surf'){
    const d=Math.min(360,age*330);
-   drawSurf({type:'surf',x:baseX+vx*(38+d),y:baseY+vy*(38+d),vx,vy,age,life:m.life});
+   drawSurf({type:'surf',x:baseX+vx*(16+d),y:baseY+vy*(16+d),vx,vy,age,life:m.life});
+   if(age<.4)for(const p of points){pxLine(p.x,p.y,p.x+vx*62,p.y+vy*62,8,'#8aefff',.75,.8);}
  }else if(m.type==='energyball'){
    const d=Math.min(435,age*410),cx=baseX+vx*d,cy=baseY+vy*d;
    if(age<1.03)drawEnergyball({type:'energyball',x:cx,y:cy,vx,vy,age,life:m.life});
@@ -188,6 +218,7 @@ function render(){
      ctx.globalAlpha=state.dir===d?1:.93;
      pxRing(xx,yy+1,Math.max(17,scale*27),2,sp.color,.28,4);
      spriteDraw(sp.id,xx,yy,angle,state.action,state.clock,scale,state.action==='Hurt'?.35:0,'player');
+     drawStudioAnchors(xx,yy,angle,state.clock,scale);
      ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillStyle='#eafff7';
      ctx.fillText(faceLabels[d],xx,yy-Math.max(48,scale*(active?.h||80)+8));
    }
@@ -205,14 +236,15 @@ function render(){
   }
   spriteDraw(sp.id,cx+Math.cos(a)*offset,cy+Math.sin(a)*offset,a,state.action,spriteClock,scale,state.action==='Hurt'?.9:0,'player');
  if(state.action==='Hurt' && state.clock<.4){const n=Math.max(0,1-state.clock/.4);fxStar(cx+Math.cos(a)*-16,cy-42,12+20*(1-n),'fire',n);pxRing(cx,cy-28,18+35*(1-n),4,'#ffe6d6',n,4);}
- if(state.preview)drawStudioEffects(cx,cy,a);
+ drawStudioAnchors(cx,cy,a,spriteClock,scale);
+  if(state.preview)drawStudioEffects(cx,cy,a,spriteClock,scale);
  ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillStyle='#f3fff1';ctx.fillText(sp.name+' · '+state.action,cx,Math.max(95,cy-135));
  ctx.font='11px system-ui';ctx.fillStyle='#cdeee6';ctx.fillText('방향별 원본 이미지 프레임을 재생합니다',cx,Math.max(112,cy-116));
  ctx.restore();
 }
 const originalDraw=draw;
 draw=function(){if(state.open)render();else originalDraw();};
-window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,face:faceLabels[state.dir],auto:state.auto,compare:state.compare}),preview:attack,audit,setCompare(enabled){state.compare=!!enabled;state.auto=false;state.preview=null;meta();}};
+window.motionStudio={open,close,getState:()=>({kind:state.kind,action:state.action,dir:state.dir,face:faceLabels[state.dir],auto:state.auto,compare:state.compare,anchors:state.anchors}),preview:attack,audit,setCompare(enabled){state.compare=!!enabled;state.auto=false;state.preview=null;meta();}};
  
 // Layered hand-pixel treatments applied on top of existing combat rendering.
 // All colors are procedural pixels, rather than footage-copied artwork.
