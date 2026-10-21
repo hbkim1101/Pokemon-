@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v26.
+// Dependency-free regression tests for Pokemon Arena v27.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -11,8 +11,8 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=26'), 'Motion Studio not linked');
-assert(html.includes('emitter-anchors.js?v=26'), 'Sprite anchor data not linked');
+assert(html.includes('battle-studio.js?v=27'), 'Motion Studio not linked');
+assert(html.includes('emitter-anchors.js?v=27'), 'Sprite anchor data not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -79,6 +79,7 @@ const exposed = [
   ' anchorPoints:(actor,move,options)=>emissionWorldPoints(actor,move,options),',
   ' anchorPoint:(actor,move,options)=>emissionPoint(actor,move,options),',
   ' atlas:()=>window.PMD_EMISSION_ATLAS,',
+  ' tuneSourceSheet:(id)=>{const atlas=window.PMD_EMISSION_ATLAS[id],sheet=sprites[id].anims.Shoot;const len=atlas.ports[Object.keys(atlas.ports)[0]].frames[0].length;sheet.frames=len;sheet.dur=Array(len).fill(4);sheet.w=atlas.cell[0];sheet.h=atlas.cell[1];sheet.feet=Array.from({length:8},()=>Array(len).fill(atlas.cell[1]*.79));sprites[id].variant=atlas.variant},',
   ' actionOf:(actor)=>combatAnimation(actor),',
   ' state:()=>({gameState,player,enemies,specialEffects,projectiles,extras:EXTRA_SKILLS_ENABLED}),',
   ' injectSheets:()=>{for(const actor of roster){const anims={};for(const key of ACTIONS){anims[key]={image:{width:240,height:448},w:60,h:56,frames:4,dirs:8,dur:[8,8,8,8]}}sprites[actor.id]={anims,variant:"mock",loaded:true}}}',
@@ -202,6 +203,33 @@ assert(releaseClock>=heldClock,'Release must move forward from held frame');
 for(let i=0;i<40;i++)api.advance(.035);
 assert.equal(charizard.flameRecovery,null,'Flamethrower recovery must finish');
 assert.notEqual(api.actionOf(charizard),'Shoot','Caster must leave sustained Shoot pose');
+
+// Assert every port has a distinct, frame-addressable pixel position and that
+// game-space conversion uses the CURRENT rendered Shoot frame.
+for(const id of ['0026','0006','0009','0003']){
+ api.tuneSourceSheet(id);
+ const avatar={id,kind:['0026','0006','0009','0003'].indexOf(id),x:400,y:400,face:0,animT:0,action:'Shoot'};
+ const atlas=api.atlas()[id],names=Object.keys(atlas.ports);
+ for(const name of names){
+  const port=atlas.ports[name];
+  for(let d=0;d<8;d++){
+   const angles=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
+   for(let frame=0;frame<port.frames[d].length;frame++){
+    const clock=(frame*4+.25)/60;
+    const points=api.anchorPoints(avatar,id==='0026'?'thunderbolt':id==='0006'?'flamethrower':id==='0009'?'surf':'energyball',
+      {action:'Shoot',clock,angle:angles[d]});
+    const point=points.find(p=>p.port===name);
+    assert(point,'Missing body part landmark '+name);
+    assert.equal(point.frame,frame,'Incorrect source animation frame');
+    assert.equal(point.exact,true,'Per-frame atlas not applied');
+    assert.equal(point.cell.x,port.frames[d][frame][0],'Incorrect frame-local X landmark');
+    assert.equal(point.cell.y,port.frames[d][frame][1],'Incorrect frame-local Y landmark');
+   }
+  }
+  const first=port.frames[2][0],last=port.frames[2][port.frames[2].length-1];
+  assert(first[0]!==last[0]||first[1]!==last[1],id+' emitter does not follow animation');
+ }
+}
 
 const pmdAngles=[Math.PI/2,Math.PI/4,0,-Math.PI/4,-Math.PI/2,-3*Math.PI/4,Math.PI,3*Math.PI/4];
 for(let direction=0;direction<8;direction++)assert.equal(api.direction(pmdAngles[direction]),direction,'PMD row is mapped to the wrong angle');
