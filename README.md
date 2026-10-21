@@ -1,3 +1,13 @@
+## v30 — combat motion and effects rewrite
+
+- `combat-fx.js` is the shared battle/studio renderer: coherent flame tongues, branching electric trails, foamy surf, rotating energy-ball leaves, smaller projectiles and particles. The studio no longer draws duplicate effect layers.
+- Basic attacks prepare for 120 ms before releasing from the current sprite landmark. Signature attacks have explicit preparation and release phases. Channelled attacks retain their firing stance and recovery.
+- Player and rival movement use time-based acceleration/braking and distance-based walking animation. Casting slows locomotion; dodge velocity eases through its duration.
+- Sprite rendering and emission points share `spritePose`, including the same centre-of-cell rotation pivot. Saved PMD variants and anatomical landmarks are preserved.
+- Flame and surf collision widths now follow the new visible shapes. Damage, move selection and the four-character roster remain unchanged.
+- Validation: `node tests/smoke.cjs` covers anatomy, preparation/release, sustained fire, 30/60/120 Hz locomotion and canvas state balance in both quality modes.
+- Reference: the user-supplied 122-second trailer MP4 was inspected with frame sequences. The Charizard/Blastoise duel informed rolling flame lobes, twin bright cannon jets, impact sparks/steam and compact comet projectiles. The small-step attack/recovery animation and stationary ground shadows informed the motion changes. Existing playable moves are retained; trailer-only characters, beam-clash gameplay and arenas are outside this change.
+
 # Pokémon Arena — Four Moves & Motion Studio (v30)
 
 비상업용 팬 프로젝트입니다. Pokémon 및 관련 캐릭터의 권리는 각 원저작자에게 있습니다.

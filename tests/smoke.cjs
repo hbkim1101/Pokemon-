@@ -1,5 +1,5 @@
 'use strict';
-// Dependency-free regression tests for Pokemon Arena v29.
+// Dependency-free regression tests for Pokemon Arena v30.
 // Run from the repository root: node tests/smoke.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -7,12 +7,13 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const renderer = fs.readFileSync(path.join(root, 'combat-fx.js'), 'utf8');
 const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=29'), 'Motion Studio not linked');
-assert(html.includes('emitter-anchors.js?v=29'), 'Sprite anchor data not linked');
+assert(html.includes('battle-studio.js?v=30'), 'Motion Studio not linked');
+assert(html.includes('emitter-anchors.js?v=30'), 'Sprite anchor data not linked');
 
 function fakeContext(){
   return new Proxy({}, {
@@ -75,6 +76,7 @@ const exposed = [
   ' testShootMetadata:()=>{const shoot=sprites[roster[1].id].anims.Shoot;shoot.frames=18;shoot.dur=[4,2,4,2,1,1,1,2,4,2,2,2,2,2,2,2,2,4];shoot.hitFrame=8;shoot.returnFrame=11;return shoot;},',
   ' spriteClock:(actor)=>combatSpriteClock(actor,combatAnimation(actor),actor.animT||0),',
   ' stopFlame:()=>stopPlayerChannel(),',
+  ' move:(actor,x,y,dt)=>moveActor(actor,x,y,dt),',
   ' signature:(type)=>signatureAnimation(type),',
   ' anchorPoints:(actor,move,options)=>emissionWorldPoints(actor,move,options),',
   ' anchorPoint:(actor,move,options)=>emissionPoint(actor,move,options),',
@@ -86,7 +88,7 @@ const exposed = [
   ' injectSheets:()=>{for(const actor of roster){const anims={};for(const key of ACTIONS){anims[key]={image:{width:240,height:448},w:60,h:56,frames:4,dirs:8,dur:[8,8,8,8]}}sprites[actor.id]={anims,variant:"mock",loaded:true}}}',
   '};'
 ].join('\n');
-vm.runInNewContext(anchors+'\n'+main+'\n'+addon+'\n'+exposed, sandbox, {timeout:20000,filename:'arena+studio.js'});
+vm.runInNewContext(renderer+'\n'+anchors+'\n'+main+'\n'+addon+'\n'+exposed, sandbox, {timeout:20000,filename:'arena+studio.js'});
 const api = sandbox.__smoke;
 assert.equal(api.state().gameState,'menu');
 assert.equal(api.state().extras,false);
@@ -246,12 +248,8 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(addon.includes('scaleSkillBeamWidth(m,skillVisualRatio(m,105'),
- 'Flamethrower width must use sprite-proportional VFX scaling');
-assert(addon.includes('scaleSkillAround(m,skillVisualRatio(m,185'),
- 'Surf art must be scaled independently from its collision box');
-assert(addon.includes('scaleSkillAround(m,skillVisualRatio(m,86'),
- 'Energy Ball pixels must be scaled independently from its collision box');
+assert(html.includes('combat-fx.js?v=30'),'Shared combat renderer must load');
+assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
 
@@ -263,3 +261,31 @@ assert.equal(api.signature('fire'),'Shoot');
 assert.equal(api.signature('water'),'Shoot');
 assert.equal(api.signature('grass'),'Shoot');
 console.log('PASS: character-proportional skill pixels, forward muzzle offsets, 192 sprite cells, 8-way anatomy, sustained Shoot and Flamethrower recovery');
+// v30 timing and locomotion: preparation cannot deal damage or move a projectile.
+api.setChosen(3);api.reset();
+let st=api.state();st.enemies[0].shoot=st.enemies[0].specialCd=1000;
+api.activate(0);const shot=st.projectiles.at(-1),shotX=shot.x,shotY=shot.y;
+api.advance(.035);assert(shot.delay>0);assert.equal(shot.x,shotX);assert.equal(shot.y,shotY);
+for(let i=0;i<4;i++)api.advance(.035);
+assert(shot.delay<=0,'Shot must release after windup');
+api.activate(1);const ball=api.state().specialEffects.find(m=>m.type==='energyball');
+assert(ball.windup>0);api.advance(.035);assert(!ball.released,'Signature must prepare before travelling');
+for(let i=0;i<8;i++)api.advance(.035);assert(ball.released,'Signature must release after preparation');
+// Same duration at three refresh rates must produce the same integrated position.
+api.state().specialEffects.length=0;
+const runs=[];
+for(const fps of [30,60,120]){
+ const actor={x:0,y:0,speed:200,face:0,action:'Idle',actLeft:0,hp:100};
+ for(let i=0;i<fps;i++)api.move(actor,1,0,1/fps);
+ assert(actor.vx>199);assert(actor.x>180&&actor.x<200);
+ for(let i=0;i<fps/2;i++)api.move(actor,0,0,1/fps);
+ assert(actor.vx===0,'Releasing movement must stop without drift');runs.push(actor.x);
+}
+assert(Math.max(...runs)-Math.min(...runs)<.02,'Movement must be frame-rate independent');
+// Render every effect in every direction in both quality modes; stack must balance.
+for(const quality of ['high','low'])for(let i=0;i<8;i++){
+ let depth=0;const g=fakeContext();g.save=()=>depth++;g.restore=()=>{depth--;assert(depth>=0)};
+ const a=i*Math.PI/4,m={x:100,y:100,vx:Math.cos(a),vy:Math.sin(a),age:.3,life:1,stream:210,element:'fire',pulse:1,path:[{x:80,y:100},{x:100,y:100},{x:130,y:110}]};
+ for(const fn of ['charge','projectile','flame','thunder','orb','surf','impact']){sandbox.ArenaFX[fn](g,m,quality);assert.equal(depth,0,fn+' leaked canvas state');}
+}
+console.log('PASS: delayed releases, 30/60/120 Hz movement, braking, all effect directions and balanced canvas state');

@@ -109,7 +109,7 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <div class="ivGrid" id="ivGrid"></div>
   <p class="ivNote">최종 진화형 종족값·IV·성격은 원작 기준 · EV 0 · PvP HP 2배 · 기술 피해 80% · 상대 IV는 무작위</p>
 </section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 기본 공격 + 고유 기술 + 회피 · 4가지 고유 기술(포켓몬별 1개) · 터치/드래그 조준 · 모션 스튜디오에서 8방향 프레임 테스트<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">HGSS 4방향 animated overworld sprites + PokéAPI/PMDCollab fallback<br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 4방향 포켓몬 스프라이트는 인터넷 연결이 필요하며, 실패 시 대체 스프라이트로 계속 플레이할 수 있습니다.<br><a href="https://github.com/teobz/pkmn-hgss-animated-overworld-sprites" target="_blank" rel="noopener">HGSS directional sprite source</a> · <a href="https://pokeapi.github.io/sprites/" target="_blank" rel="noopener">PokéAPI</a> · <a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">PMDCollab fallback</a></div></div></div>
-<script src="./emitter-anchors.js?v=29"></script><script>
+<script src="./emitter-anchors.js?v=30"></script><script src="./combat-fx.js?v=30"></script><script>
 'use strict';
 const BUILD_VERSION='v29-muzzle-offset-proportional-vfx';
 const EXTRA_SKILLS_ENABLED=false; // Advanced moves remain archived in the database but cannot be used in this build.
@@ -629,7 +629,7 @@ function renderImpactLights(){
  ctx.restore();ctx.globalAlpha=1;
 }
 function renderShockwaves(){
- ctx.save();for(const a of shockwaves){const k=1-a.life/a.max;ctx.globalAlpha=(1-k)*.86;pxRing(a.x,a.y,a.r+70*k,8,a.color,.88,6);ctx.globalAlpha=(1-k)*.55;pxRing(a.x,a.y,a.r*.65+110*k,5,a.color,.7,6)}ctx.restore();
+ ctx.save();for(const a of shockwaves){const k=1-a.life/a.max;ctx.globalAlpha=(1-k)*.86;pxRing(a.x,a.y,a.r+40*k,2,a.color,.6,2);ctx.globalAlpha=(1-k)*.55;pxRing(a.x,a.y,a.r*.65+55*k,1.43,a.color,.35,2)}ctx.restore();
 }
 function renderDamageText(){
  for(const a of damageTexts){const k=a.age/a.life,alpha=clamp((1-k)*1.6,0,1),y=a.y-42*(1-(1-k)**2);
@@ -731,6 +731,35 @@ function drawFallbackCreature(id,x,y,scale=1,t=0,angle=Math.PI/2,renderCtx=ctx){
  b('#f2fbf5',-10,-29,2,2);b('#f2fbf5',8,-29,2,2);
  ctx.restore();
 }
+// Single visual transform: emitter landmarks and sprite must use the same pivot.
+function spritePose(action,t,angle){
+ let dx=0,dy=0,sx=1,sy=1,rot=0;
+ if(action==='Walk'){const q=Math.sin(t*12);dy=-Math.abs(q)*.8;sx=1+.006*q;sy=1-.008*q;}
+ else if(action==='Shoot'){const u=Math.min(1,t/.32),prep=Math.sin(Math.min(1,t/.12)*Math.PI),recoil=t>.12?Math.exp(-(t-.12)*17)*Math.sin(Math.min(1,(t-.12)/.13)*Math.PI):0,p=Math.sin(u*Math.PI),offset=-1.5*prep-3*recoil;dx=Math.cos(angle)*offset;dy=Math.sin(angle)*offset-.7*p;sx=1+.018*p;sy=1-.018*p;rot=.018*Math.sin(angle)*p;}
+ else if(action==='Attack'){const u=Math.min(1,t/.29),p=Math.sin(u*Math.PI);dx=Math.cos(angle)*5*p;dy=Math.sin(angle)*3*p-2*p;rot=.035*Math.sin(angle)*p;}
+ else if(action==='Charge'){dy=-Math.sin(t*12)*.6;}
+ else if(action==='Hurt'){const q=Math.exp(-t*15)*Math.sin(t*35);dx=-Math.cos(angle)*3*q;dy=-Math.sin(angle)*2*q;rot=.04*q;}
+ return {dx,dy,sx,sy,rot};
+}
+function turnToward(actor,angle,dt){const delta=Math.atan2(Math.sin(angle-actor.face),Math.cos(angle-actor.face));actor.face+=clamp(delta,-dt*12,dt*12);}
+function moveActor(actor,x,y,dt){
+ const input=len(x,y),locked=actor.riding||(actor.dashTime||0)>0;
+ if(locked){actor.vx=actor.vy=0;return;}
+ const casting=!!activeRangedAttack(actor),speed=actor.speed*statusSpeed(actor)*(casting?.28:actor.actLeft>0?.55:1);
+ const targetX=x*speed,targetY=y*speed,rate=input>.01?22:32,a=1-Math.exp(-rate*dt);
+ const oldX=actor.vx||0,oldY=actor.vy||0;
+ actor.vx=oldX+(targetX-oldX)*a;actor.vy=oldY+(targetY-oldY)*a;
+ // Exact integral of exponential acceleration: stable at 30/60/120 Hz.
+ const dx=targetX*dt+(oldX-targetX)*a/rate,dy=targetY*dt+(oldY-targetY)*a/rate;
+ actor.x+=dx;actor.y+=dy;actor.walkClock=(actor.walkClock||0)+len(dx,dy)/115;
+ if(input<.01&&len(actor.vx,actor.vy)<.2)actor.vx=actor.vy=0;
+ actor.moving=len(actor.vx,actor.vy)>4;
+ if(actor.actLeft<=0&&!casting&&!actor.flameRecovery){
+  actor.action=actor.moving?'Walk':'Idle';
+  if(input>.05)turnToward(actor,Math.atan2(y,x),dt);
+ }
+}
+
 function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0,role='player'){
  const sp=sprites[id]?.anims||{},s=sp[action]||sp.Walk||sp.Idle;
  if(s){
@@ -741,12 +770,7 @@ function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0,role='player'){
   if(frames>1){const sum=s.dur.slice(0,frames).reduce((a,b)=>a+b,0)||1;clock%=sum;
    for(let i=0;i<frames;i++){if(clock<(s.dur[i]||8)){idx=i;break}clock-=s.dur[i]||8}}
   const feet=footOffset(s,f,idx),dw=s.w*scale,dh=s.h*scale;
-  let dx=0,dy=0,sx=1,sy=1,tilt=0;
-  if(action==='Walk'){dy-=Math.abs(Math.sin(t*12))*2.8;sx=1+.01*Math.sin(t*12);sy=1-.02*Math.sin(t*12)}
-  else if(action==='Shoot'){const p=Math.sin(Math.min(t,.28)/.28*Math.PI);dx+=Math.cos(angle)*3*p;dy+=Math.sin(angle)*2*p-1.2*p;sx=1+.03*p;sy=1-.02*p;tilt=.025*Math.sin(angle)*p}
-  else if(action==='Attack'){const p=Math.sin(Math.min(t,.29)/.29*Math.PI);dx+=Math.cos(angle)*6*p;dy+=Math.sin(angle)*4*p-2*p;tilt=.05*Math.sin(angle)*p}
-   else if(action==='Charge'){const p=Math.sin(t*24);dy-=Math.abs(p)*1.5}
-   else if(action==='Hurt'){const q=Math.sin(t*42)*3;dx-=Math.cos(angle)*q*.7;dy-=Math.sin(angle)*q*.45;tilt=.08*Math.sin(t*36)}
+  const {dx,dy,sx,sy,rot:tilt}=spritePose(action,t,angle);
   ctx.save();ctx.imageSmoothingEnabled=false;
   if(flash>0)ctx.globalAlpha=.65+Math.cos(t*65)*.25;
   ctx.translate(x+dx,y+dy-feet*scale+dh/2);ctx.rotate(tilt);ctx.scale(sx,sy);
@@ -818,6 +842,7 @@ function targetAim(){if(mouseAim){return norm(mouseAim.x-W/2,mouseAim.y-H/2)}let
   return actor.action||'Idle';
  }
  function combatSpriteClock(actor,action,normalClock){
+  if(action==='Walk')return actor.walkClock||normalClock;
   if(action!=='Shoot')return normalClock;
   const flame=activeFlameChannel(actor),timing=flameShootTiming(actor.id||roster[actor.kind].id);
   if(flame)return flameChannelClock(flame.age,timing);
@@ -862,13 +887,7 @@ function emissionWorldPoints(actor,moveId='basic',options={}){
  const w=sheet?.w||config?.cell?.[0]||48,h=sheet?.h||config?.cell?.[1]||56;
  const foot=sheet?footOffset(sheet,direction%sheet.dirs,frame):h*.79;
  const mainW=config?.cell?.[0]||w,mainH=config?.cell?.[1]||h;
- let dx=0,dy=0,sx=1,sy=1,rot=0;
- if(visualAction==='Shoot'){
-  const p=Math.sin(Math.min(clock,.28)/.28*Math.PI);
-  const angle=options.angle??actor.face??0;
-  dx+=Math.cos(angle)*3*p;dy+=Math.sin(angle)*2*p-1.2*p;
-  sx=1+.03*p;sy=1-.02*p;rot=.025*Math.sin(angle)*p;
- }
+ const {dx,dy,sx,sy,rot}=spritePose(visualAction,clock,options.angle??actor.face??0);
  return (Array.isArray(names)?names:[names]).map(name=>{
   const port=config?.ports?.[name];
   const phase=options.phase||(moveId==='flamethrower'&&clock>=flameShootTiming(id).windup?'hold':'cast');
@@ -878,7 +897,7 @@ function emissionWorldPoints(actor,moveId='basic',options={}){
   const pos=measured||port?.[phase]?.[direction]||port?.cast?.[direction]||[mainW/2,mainH*.40];
   // The stored landmark belongs to a specific Shoot frame in the chosen PMD
   // variant; do not apply it blindly to a different PMD variant or animation.
-  const lx=((pos[0]/mainW)*w-w/2)*scale,ly=((pos[1]/mainH)*h-foot)*scale;
+  const lx=((pos[0]/mainW)*w-w/2)*scale,ly=((pos[1]/mainH)*h-h/2)*scale;
   // spriteDraw executes rotate() THEN scale(): transform in that same order.
   const rx=lx*sx*Math.cos(rot)-ly*sy*Math.sin(rot);
   const ry=lx*sx*Math.sin(rot)+ly*sy*Math.cos(rot);
@@ -888,8 +907,8 @@ function emissionWorldPoints(actor,moveId='basic',options={}){
   const facing=options.angle??actor.face??Math.PI/2;
   const forward=spritePixelsAhead*scale;
   return {x:actor.x+dx+rx+Math.cos(facing)*forward,
-   y:ground+dy+ry+Math.sin(facing)*forward,port:name,direction,frame,
-   offset:forward,anchorX:actor.x+dx+rx,anchorY:ground+dy+ry,
+   y:ground+dy+(h/2-foot)*scale+ry+Math.sin(facing)*forward,port:name,direction,frame,
+   offset:forward,anchorX:actor.x+dx+rx,anchorY:ground+dy+(h/2-foot)*scale+ry,
    exact:!!measured,source:config?.source||'fallback',
    cell:{x:pos[0],y:pos[1]},action:visualAction};
  });
@@ -906,14 +925,16 @@ function shoot(kind,ang){
  const p=roster[chosen],v={x:Math.cos(ang),y:Math.sin(ang)};
  const packet=damagePacket(player,enemies[0],'basic'),speed=p.type==='grass'?500:560,move=moveOf(player,'basic');
  const origin=emissionPoint(player,'basic',{angle:ang,index:(player.basicShotCount=(player.basicShotCount||0)+1)-1,action:'Shoot',clock:.12});
- projectiles.push({x:origin.x,y:origin.y,vx:v.x*speed,vy:v.y*speed,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'player',kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
- fx(origin.x,origin.y,p.color,7,140);playAction(player,'Shoot',.34);
+ projectiles.push({x:origin.x,y:origin.y,vx:v.x*speed,vy:v.y*speed,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'player',delay:.12,source:player,shotAngle:ang,portIndex:(player.basicShotCount||1)-1,kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
+ playAction(player,'Shoot',.34);
 }
 function enemyShoot(e,ang){
+ if(activeRangedAttack(e))return;
+ e.face=ang;
  const p=roster[e.kind],v={x:Math.cos(ang),y:Math.sin(ang)},packet=damagePacket(e,player,'basic'),move=moveOf(e,'basic');
  const origin=emissionPoint(e,'basic',{angle:ang,index:(e.basicShotCount=(e.basicShotCount||0)+1)-1,action:'Shoot',clock:.12});
- projectiles.push({x:origin.x,y:origin.y,vx:v.x*440,vy:v.y*440,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'enemy',kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
- fx(origin.x,origin.y,p.color,5,100);playAction(e,'Shoot',.34);
+ projectiles.push({x:origin.x,y:origin.y,vx:v.x*440,vy:v.y*440,r:7,life:.95,dmg:arenaDamage(packet.damage),info:packet,move,team:'enemy',delay:.12,source:e,shotAngle:ang,portIndex:(e.basicShotCount||1)-1,kind:0,color:p.color,element:p.type,pierce:0,hit:new Set(),pulse:rand(0,Math.PI*2)});
+ playAction(e,'Shoot',.34);
 }
 const MOVE_SPECS={
  electric:{id:'thunderbolt',name:'10만볼트',cooldown:5.2,power:90,range:565},
@@ -1068,6 +1089,7 @@ function castSpecial(v,owner='player',opts={}){
   actor.riding=true; // TAP starts riding immediately, without needing a drag.
   emitParticle({x:move.x,y:move.y,life:.35,size:24,color:'#abecff',shape:'ring',grow:95,line:4});sfx(115,340,.4);
  }
+ move.windup=move.type==='flamethrower'?flameShootTiming(profile.id).windup:move.type==='energyball'?.22:move.type==='surf'?.14:.16;move.life+=move.windup;
  specialEffects.push(move);
  if(move.type==='energyball'||move.type==='thunderbolt')fxSpawnScene('impact',x,y,{element:profile.type,power:.38,range:24,life:.24});
  createRing(actor.x+v.x*20,actor.y+v.y*20,profile.color,22,.38);
@@ -1111,6 +1133,15 @@ function updateSpecials(dt){
    }
   }
   if(m.age>=m.life)continue;
+  if(m.windup&&!m.released){
+   const clock=combatSpriteClock(actor,'Shoot',actor===player?actor.animT:actor.actionT);
+   const origin=emissionPoint(actor,m.type,{action:'Shoot',clock});m.x=origin.x;m.y=origin.y;
+   if(m.age<m.windup)continue;
+   m.released=true;
+   if(m.type==='thunderbolt'){m.path=[{x:m.x,y:m.y}];m.origin={x:m.x,y:m.y};}
+   if(m.type==='energyball')m.origin={x:m.x,y:m.y};
+   if(m.type==='surf'){m.waveOrigin={x:m.x,y:m.y};m.origin={x:actor.x,y:actor.y-5};}
+  }
   if(m.type==='thunderbolt'){
    // Steer toward the opposing Pokémon each frame, even if it moves after casting.
    const dx=target.x-m.x,dy=target.y-11-m.y,dist=len(dx,dy)||1;
@@ -1132,16 +1163,20 @@ function updateSpecials(dt){
      m.age=m.life;
    }
   }else if(m.type==='flamethrower'){
-   const length=Math.min(m.range,m.age*710+24);
+   const length=Math.min(m.range,Math.max(0,m.age-(m.windup||0))*710+6);
    // Use the exact same sprite-clock frame as the currently rendered caster.
    const action=combatAnimation(actor),spriteClock=combatSpriteClock(actor,action,actor===player?actor.animT:(actor.actionT||0));
    const port=emissionPoint(actor,'flamethrower',{angle:actor.face,action,clock:spriteClock});
    m.x=port.x;m.y=port.y;m.stream=length;
+   const tx=target.x-m.x,ty=target.y-11-m.y,ahead=tx*m.vx+ty*m.vy,side=Math.abs(tx*m.vy-ty*m.vx);
+   const touches=ahead>0&&ahead<length+target.r&&side<3+23*ahead/Math.max(1,length)+target.r;
+   m.renderStream=touches?Math.max(6,Math.min(length,ahead-target.r*.45)):length;
+   m.contact=touches?{x:m.x+m.vx*m.renderStream,y:m.y+m.vy*m.renderStream,steam:(target.type||roster[target.kind]?.type)==='water'}:null;
    m.decalTick-=dt; if(m.decalTick<=0){m.decalTick+=.14; impactMark(m.x+m.vx*(length*.65),m.y+m.vy*(length*.65),'fire',.72)}
-   const amount=Math.min(10,Math.round(3+dt*190)); const perpX=-m.vy,perpY=m.vx;
-   for(let i=0;i<amount;i++){const u=rand(.05,1),dist=rand(10,Math.max(15,length))*u,spread=(10+dist*.24)*rand(-1,1); emitParticle({x:m.x+m.vx*dist+perpX*spread,y:m.y+m.vy*dist+perpY*spread,vx:m.vx*rand(50,135)+perpX*rand(-30,30),vy:m.vy*rand(50,135)+perpY*rand(-30,30)-rand(0,20),life:rand(.12,.25),size:rand(5,12),shape:'flame',color:Math.random()<.4?'#ffe69c':Math.random()<.6?'#ffb14b':'#ff6332',rot:Math.atan2(m.vy,m.vx)});}
+   m.emitCarry=(m.emitCarry||0)+dt*65;const amount=Math.floor(m.emitCarry);m.emitCarry-=amount; const perpX=-m.vy,perpY=m.vx;
+   for(let i=0;i<amount;i++){const u=rand(.05,1),dist=rand(10,Math.max(15,length))*u,spread=(3+dist*.07)*rand(-1,1); emitParticle({x:m.x+m.vx*dist+perpX*spread,y:m.y+m.vy*dist+perpY*spread,vx:m.vx*rand(50,135)+perpX*rand(-30,30),vy:m.vy*rand(50,135)+perpY*rand(-30,30)-rand(0,20),life:rand(.12,.25),size:rand(2,5),shape:'flame',color:Math.random()<.4?'#ffe69c':Math.random()<.6?'#ffb14b':'#ff6332',rot:Math.atan2(m.vy,m.vx)});}
    m.tick-=dt;
-   if(m.tick<=0){m.tick+=.09; const dx=target.x-m.x,dy=target.y-11-m.y,along=dx*m.vx+dy*m.vy,cross=Math.abs(dx*m.vy-dy*m.vx); if(along>0&&along<length+target.r&&cross<(16+along*.34+target.r)){ if(m.owner==='player'){
+   if(m.tick<=0){m.tick+=.09; const dx=target.x-m.x,dy=target.y-11-m.y,along=dx*m.vx+dy*m.vy,cross=Math.abs(dx*m.vy-dy*m.vx); if(along>0&&along<length+target.r&&cross<(3+23*along/Math.max(1,length)+target.r)){ if(m.owner==='player'){
     hitOpponent(target,m.damage*.1,target.x,target.y-10,'fire',.35,m.info);
     m.channelShown=(m.channelShown||0)+m.damage*.1;
     if(m.channelShown>=5){showDamage(target.x,target.y-10,m.channelShown,'fire');m.channelShown=0;}
@@ -1155,7 +1190,7 @@ function updateSpecials(dt){
     let collided=false; if(len(m.x-target.x,m.y-(target.y-11))<target.r+20){ collided=true; if(m.owner==='player') hitOpponent(target,m.damage,m.x,m.y,'grass',1.6,m.info); else hurt(m.damage); applySecondary(target,moveOf(actor,'special')); }
     if(collided||len(m.x-m.origin.x,m.y-m.origin.y)>=m.range){ const ex=m.x,ey=m.y; elementalBurst(ex,ey,'grass',1.7);fxSpawnScene('impact',ex,ey,{element:'grass',power:1.3,range:76,life:.48});impactMark(ex,ey,'grass',1.55);createRing(ex,ey,'#b9ff9a',50,.5); specialEffects.push({type:'energyburst',element:'grass',x:ex,y:ey,age:0,life:.52,pulse:0,owner:m.owner}); if(!collided&&len(target.x-ex,target.y-11-ey)<72){ if(m.owner==='player') hitOpponent(target,m.damage*.55,target.x,target.y-11,'grass',.8,m.info); else hurt(m.damage*.55);applySecondary(target,moveOf(actor,'special'));} m.age=m.life; }
   }else if(m.type==='surf'){
-   m.distance=Math.min(m.range,m.distance+395*dt); m.x=m.waveOrigin.x+m.vx*(16+m.distance); m.y=m.waveOrigin.y+m.vy*(16+m.distance); const perpX=-m.vy,perpY=m.vx; const radius=85;
+   m.distance=Math.min(m.range,m.distance+395*dt); m.x=m.waveOrigin.x+m.vx*(16+m.distance); m.y=m.waveOrigin.y+m.vy*(16+m.distance); const perpX=-m.vy,perpY=m.vx; const radius=47;
    const rideDist=Math.min(m.distance*.92,m.range-10); actor.x=m.origin.x+m.vx*(10+rideDist)-perpX*4; actor.y=m.origin.y+m.vy*(10+rideDist)-perpY*4; actor.face=Math.atan2(m.vy,m.vx); clampToArena(actor,m.owner==='player'?ARENA.r-26:ARENA.r-22); if(m.owner==='player'){player.inv=Math.max(player.inv,.06)}
    m.decalTick-=dt; if(m.decalTick<=0){m.decalTick+=.13;impactMark(m.x,m.y,'water',1.25)}
    for(let i=0;i<4;i++){const spread=rand(-radius*.72,radius*.72),dist=rand(-45,20); emitParticle({x:m.x+perpX*spread+m.vx*dist,y:m.y+perpY*spread+m.vy*dist,vx:m.vx*rand(20,90)+perpX*rand(-25,25),vy:m.vy*rand(20,90)+perpY*rand(-25,25),life:rand(.16,.33),size:rand(4,9),shape:Math.random()<.6?'drop':'dot',color:Math.random()<.3?'#efffff':'#69d3ff',gravity:26});}
@@ -1179,7 +1214,7 @@ function updateSpecials(dt){
 function activate(n,vec,hold=false){
  if(gameState!=='playing'||(!EXTRA_SKILLS_ENABLED&&(n===3||n===4))||((n!==1||roster[chosen].type!=='fire')&&player.cd[n]>0))return;
  let v=vec||targetAim();v=norm(v.x,v.y); if(!len(v.x,v.y))v={x:1,y:0}; lastAim=v;player.channelAim=v;player.aim=Math.atan2(v.y,v.x);player.face=player.aim;
- if(n===0){player.cd[0]=ARENA_BALANCE.basicInterval;if(!canAct(player)){announce('몸이 마비되어 움직일 수 없다!');return;}shoot(0,player.aim);sfx(450,100,.04)}
+ if(n===0){if(activeRangedAttack(player)||player.dashTime>0)return;player.cd[0]=ARENA_BALANCE.basicInterval;if(!canAct(player)){announce('몸이 마비되어 움직일 수 없다!');return;}shoot(0,player.aim);sfx(450,100,.04)}
  if(n===1){
   if(!canAct(player)){announce('상태이상으로 기술 실패!');return;}
   const type=roster[chosen].type;
@@ -1238,11 +1273,10 @@ function advance(dt){
  let mag=len(mx,my),moving=mag>.05;
  if(mag>1){mx/=mag;my/=mag}
  if(specialEffects.some(m=>m.type==='surf'&&m.owner==='player'&&m.age<m.life)){player.dashTime=0; /* ride movement is handled by the Surf state machine */}
- else if(player.dashTime>0){player.x+=player.dashX*850*dt;player.y+=player.dashY*850*dt;player.dashTime-=dt;fx(player.x,player.y,roster[chosen].color,2,20)}
- else{player.x+=mx*player.speed*statusSpeed(player)*dt;player.y+=my*player.speed*statusSpeed(player)*dt;if(moving&&Math.random()<dt*15)footDust(player.x,player.y,1)}
+ else if(player.dashTime>0){const u=clamp(1-player.dashTime/.2,0,1),speed=850*(.3+.35*Math.PI*Math.sin(u*Math.PI));player.x+=player.dashX*speed*dt;player.y+=player.dashY*speed*dt;player.dashTime=Math.max(0,player.dashTime-dt);player.vx=player.vy=0;}
+ else{moveActor(player,mx,my,dt);if(player.moving&&Math.random()<dt*9)footDust(player.x,player.y,.6)}
  clampToArena(player,ARENA.r-26);
- if(moving&&player.actLeft<=0){player.face=Math.atan2(my,mx);player.action='Walk'}
- else if(!moving&&player.actLeft<=0){player.action='Idle'}
+ // moveActor owns locomotion state; casting owns facing until recovery.
  if(mouseAim&&skillPointers.size===0)lastAim=targetAim();
  // A match always has one and only one enemy. No waves or respawns.
  for(const e of enemies){
@@ -1251,10 +1285,9 @@ function advance(dt){
   const data=roster[e.kind];if(data.type==='fire')updateFuel(e,'enemy',dt);
   if(e.tell>0){e.tell-=dt;if(e.tell<=0){if(e.staggerT>0||e.status?.kind==='freeze'){e.tell=0;continue;}e.x+=e.attackVec.x*27;e.y+=e.attackVec.y*27;playAction(e,'Attack',.32);clampToArena(e,ARENA.r-22);if(len(player.x-e.x,player.y-e.y)<74)hurt(arenaDamage(damagePacket(e,player,'basic').damage));applySecondary(player,moveOf(e,'basic'));createRing(e.x,e.y,'#ffa49b',30,.21);}}
   let dx=player.x-e.x,dy=player.y-e.y,d=len(dx,dy)||1;
-  if(e.tell<=0&&d>130){e.x+=dx/d*e.speed*statusSpeed(e)*dt;e.y+=dy/d*e.speed*statusSpeed(e)*dt;if(Math.random()<dt*7)footDust(e.x,e.y,.8)}
-  else if(e.tell<=0&&d<82){e.x-=dx/d*e.speed*statusSpeed(e)*.22*dt;e.y-=dy/d*e.speed*statusSpeed(e)*.22*dt}
-  e.face=Math.atan2(dy,dx);
-  if(e.actLeft<=0)e.action=d>130?'Walk':'Idle';
+  const stride=e.tell<=0?(d>145?1:d<95?-.35:0):0;
+  moveActor(e,dx/d*stride,dy/d*stride,dt);
+  if(activeRangedAttack(e))turnToward(e,Math.atan2(dy,dx),dt);
   if(d<e.r+player.r+24&&e.atk<=0&&e.tell<=0&&e.staggerT<=0){e.tell=.35;e.attackVec=norm(dx,dy);e.atk=1.42;playImpactSound('windup');}
   if(gameState!=='playing')return;
   // Extra attacks are disabled for rival AI as well as the human player.
@@ -1269,6 +1302,14 @@ function advance(dt){
  updateSpecials(dt);
  if(enemies[0]?.hp<=0){victory();return}
  for(const s of projectiles){
+  if(s.delay>0){
+   if(activeRangedAttack(s.source)||(s.source?.dashTime||0)>0){s.life=0;continue;}
+   s.delay-=dt;
+   if(s.delay>0)continue;
+   if(!s.source||s.source.hp<=0){s.life=0;continue;}
+   const origin=emissionPoint(s.source,'basic',{angle:s.shotAngle,action:'Shoot',clock:s.source===player?s.source.animT:s.source.actionT,index:s.portIndex});
+   s.x=origin.x;s.y=origin.y;fx(s.x,s.y,s.color,3,60);continue;
+  }
   s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;s.pulse=(s.pulse||0)+dt*8;trailFx(s);
   if(s.team==='player'){
    for(const e of enemies){
@@ -1285,7 +1326,7 @@ function advance(dt){
  }
  projectiles=projectiles.filter(s=>s.life>0);
  if(enemies[0]?.hp<=0){victory();return}
- for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.95;p.vy*=.95;if(p.gravity)p.vy+=p.gravity*dt;p.life-=dt;p.rot=(p.rot||0)+(p.spin||0)*dt;if(p.grow)p.size+=p.grow*dt}
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=Math.pow(.95,dt*60);p.vy*=Math.pow(.95,dt*60);if(p.gravity)p.vy+=p.gravity*dt;p.life-=dt;p.rot=(p.rot||0)+(p.spin||0)*dt;if(p.grow)p.size+=p.grow*dt}
  particles=particles.filter(p=>p.life>0);
  for(const a of areas)a.life-=dt;areas=areas.filter(a=>a.life>0);
  shake*=Math.pow(.04,dt);
@@ -1311,62 +1352,10 @@ function drawPixelCrescent(x,y,ang,inner,outer,c1,c2,a=.95){ctx.save();ctx.trans
 function drawPixelOrbital(x,y,rot,r,colors,size=6){for(let i=0;i<colors.length;i++){const ang=rot+i*(Math.PI*2/colors.length);drawPixelShard(x+Math.cos(ang)*r,y+Math.sin(ang)*r,size,size,colors[i],.95)}}
 function drawPixelWaveBand(x,y,dirX,dirY,sideX,sideY,aheadStart,aheadEnd,halfW,c1,c2,foam=false){for(let side=-halfW;side<=halfW;side+=8){const ahead=aheadStart+(aheadEnd-aheadStart)*(1-Math.abs(side)/Math.max(1,halfW));for(let t=-28;t<ahead;t+=8){pxRect(x+dirX*t+sideX*side-4,y+dirY*t+sideY*side-4,8,8,c1,.88)}for(let t=0;t<ahead;t+=8){pxRect(x+dirX*t+sideX*side-4,y+dirY*t+sideY*side-4,8,8,c2,.94)}if(foam&&Math.round((side+halfW)/8)%2===0)pxRect(x+dirX*ahead+sideX*side-4,y+dirY*ahead+sideY*side-4,8,8,'#f7ffff',.98)}}
 function drawProjectileSprite(s){
- const pal=ELEMENT_FX[s.element]||{main:EXTRA_PALETTE[s.element]||'#d6ddf3',accent:'#ffffff'},ang=Math.atan2(s.vy,s.vx),u={x:Math.cos(ang),y:Math.sin(ang)},n={x:-u.y,y:u.x};
- ctx.save();ctx.translate(s.x,s.y);ctx.globalAlpha=s.team==='enemy'?.92:.98;
- if(s.extra){
-  const id=s.move.id;
-  if(id==='airSlash'){
-   drawPixelCrescent(0,0,ang,.5,18,'#89dbff','#ffffff',.98); drawPixelCrescent(-2,0,ang,.5,11,'#dff8ff','#ffffff',.9);
-   for(let i=0;i<3;i++)drawPixelShard(-14+i*10,-9+i*2,4,4,'#c8f1ff',.75);
-  }else if(id==='dragonPulse'){
-   ctx.rotate(ang); pxDiamond(0,0,15,'#5879ff',.9,5); pxDiamond(0,0,10,'#8ca2ff',.92,5); pxRect(-3,-3,6,6,'#ffffff',.96);
-   for(let i=0;i<4;i++){const off=i*7-10;pxRect(off,-11+((i%2)*3),4,4,'#96c2ff',.82);pxRect(-off,11-((i%2)*3),4,4,'#6d82ff',.82)}
-  }else if(id==='hydroPump'){
-   ctx.rotate(ang); for(let i=0;i<4;i++)pxRect(-16+i*8,-8+(i%2?2:-2),10,16,'#2677b3',.9); pxRect(-9,-6,18,12,'#8ae9ff',.96); pxRect(-4,-4,8,8,'#ffffff',.98);
-   for(let i=0;i<3;i++)pxRect(-20-i*5,-10+i*8,5,5,'#d9feff',.85);
-  }else if(id==='sludgeBomb'){
-   pxCircle(0,0,13,'#7032a9',.95,5); pxCircle(0,0,8,'#b36bdf',.95,4); pxRect(-4,-4,8,8,'#dcb6ff',.9);
-   for(let i=0;i<4;i++)pxRect(-12+i*7,8-((i%2)*12),4,4,i%2?'#b8f04a':'#c58ef1',.9);
-  }else if(id==='voltSwitch'){
-   ctx.rotate(ang); pxLine(-16,-7,-5,3,8,'#d27f00',1,.8); pxLine(-5,3,3,-9,7,'#ffe76a',1,.8); pxLine(3,-9,15,3,7,'#fffef4',.97,.8); pxRect(-18,-4,4,4,'#ffe76a',.9); pxRect(13,1,4,4,'#ffe76a',.9);
-  }else if(id==='leechSeed'){
-   ctx.rotate(ang); pxDiamond(0,0,10,'#c0ea66',1,4); pxRect(-3,-3,6,6,'#60812e'); pxRect(4,-8,4,4,'#eaffc6'); pxRect(-8,5,4,4,'#8bcf54'); pxRect(8,5,4,4,'#8bcf54');
-  }else if(id==='iceBeam'){
-   ctx.rotate(ang); for(let i=-1;i<=1;i++)pxLine(-13,i*4,13,i*4,4,i===0?'#f8ffff':'#93e4ff',.96,.8); pxLine(0,-12,0,12,4,'#d7fbff',.92,.8);
-  }else if(id==='solarBeam'){
-   ctx.rotate(ang); pxRect(-14,-6,28,12,'#4ecf5e',.9); pxRect(-7,-4,14,8,'#fff2a4',.95); for(let i=0;i<3;i++)pxRect(-18-i*4,-8+i*6,4,4,'#aaff95',.8);
-  }else {pxDiamond(0,0,12,EXTRA_PALETTE[s.element],.95,5);pxDiamond(0,0,5,'#ffffff',.88,3)}
-  ctx.restore();return;
- }
- if(s.element==='electric'){
-  const pts=[[-11,0],[-5,-7],[1,-1],[6,-8],[14,1]];
-  for(let i=0;i<pts.length-1;i++)pxLine(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],6,pal.main,.98,.7);
-  for(let i=0;i<pts.length-1;i++)pxLine(pts[i][0],pts[i][1]-1,pts[i+1][0],pts[i+1][1]-1,3,pal.accent,.95,.7);
-  pxRect(-2,-2,4,4,'#fff8d6'); pxRect(-9,5,4,4,'#aaf7ff',.86); pxRect(8,5,4,4,'#aaf7ff',.86);
- }else if(s.element==='fire'){
-  ctx.rotate(ang);
-  fxStamp('ember',0,0,18,18,Math.floor((s.pulse||0)*2)%4,.98,0);
-  fxStamp('flameCore',4,1,15,18,Math.floor((s.pulse||0)*3)%4,.92,-Math.PI/2);
-  pxRect(-12,-3,6,6,'#5a1b18',.75); pxRect(-16,-1,4,4,'#8c2a1c',.65); pxRect(7,-4,6,6,'#fff1b2',.82);
- }else if(s.element==='water'){
-  ctx.rotate(ang); pxRect(-16,-8,28,16,'#1d73a7',.9); pxRect(-10,-6,24,12,'#4ad8ff',.96); pxRect(4,-4,10,8,'#f1ffff',.97); pxRect(-20,-2,4,4,'#c9fcff',.84);
- }else if(s.element==='grass'){
-  drawLeafShape(13); drawPixelOrbital(0,0,s.pulse||0,11,['#4ae07b','#dffda6','#74ffb8','#4ae07b'],4); pxRect(-3,-3,6,6,'#f4ffd6',.95);
- }else{ctx.rotate(ang);pxDiamond(0,0,11,pal.main,.95,4);pxDiamond(0,0,6,pal.accent,.88,3)}
- ctx.restore();
+ ArenaFX.projectile(ctx,s,fxQuality);
 }
 function drawParticleSprite(p){
- const alpha=clamp((p.life)/(p.max||1),0,1)*(p.alpha??1);if(alpha<=0)return;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.round((p.rot||0)/(Math.PI/4))*(Math.PI/4));
- const s=Math.max(2,Math.round((p.size||4)/1.5));
- if(p.shape==='spark'){pxLine(-s,0,s,0,s,p.color,alpha,.8);pxLine(0,-s,0,s,s,p.color,alpha,.8);if(s>3){pxRect(-2,-2,4,4,'#ffffff',alpha*.85)}}
- else if(p.shape==='ring'){pxRing(0,0,Math.max(s,Math.round(p.size||4)),Math.max(2,Math.round((p.line||2)*1.5)),p.color,alpha,4)}
- else if(p.shape==='leaf'){drawLeafShape(s*1.4);pxRect(-2,-2,4,4,'#f7ffda',alpha*.75)}
- else if(p.shape==='drop'){pxRect(-s,-s,s,2*s,p.color,alpha);pxRect(0,-2*s,s,2*s,p.color,alpha);pxRect(-1,-3*s,2,2,'#ffffff',alpha*.7)}
- else if(p.shape==='flame'){pxRect(-s,-s,s,2*s,p.color,alpha);pxRect(0,-2*s,s,4*s,p.color,alpha);pxRect(s,-s,s,2*s,p.color,alpha);if(s>3)pxRect(0,-s,Math.max(2,s-1),Math.max(2,s-1),'#fff1b9',alpha*.7)}
- else if(p.shape==='bubble'){pxRect(-s,-s,2*s,2*s,p.color,alpha*.65);pxRect(-s+2,-s+2,Math.max(2,2*s-4),Math.max(2,2*s-4),'#e9ffff',alpha*.32);pxRect(-s+1,-s+1,3,3,'#ffffff',alpha*.82)}
- else if(p.shape==='poison'){pxDiamond(0,0,s+2,'#8a4ec6',alpha,4);pxRect(-2,-2,4,4,'#e6bbff',alpha*.85);pxRect(3,3,3,3,'#c4ff64',alpha*.72)}
- else{pxRect(-s/2,-s/2,s,s,p.color,alpha)}
- ctx.restore()
+ ArenaFX.particle(ctx,p);
 }
 function drawAreaPulse(a){let t=1-a.life/.3,r=Math.round(a.r+(a.max-a.r)*t),pal=ELEMENT_FX[a.element]||ELEMENT_FX.neutral;ctx.save();ctx.globalAlpha=1-t;pxRing(a.x,a.y,r,8,pal.main,.85,4);pxRing(a.x,a.y,Math.max(8,Math.round(r*.72)),4,pal.accent,.95,4);for(let i=0;i<10;i++){let ang=i*Math.PI/5+t*2.2;pxRect(a.x+Math.cos(ang)*r*.9-3,a.y+Math.sin(ang)*r*.9-3,6,6,i%2?pal.main:pal.accent,.95)}ctx.restore()}
 function legacy_drawThunderbolt(m){
@@ -1557,29 +1546,9 @@ function fxSpawnScene(kind,x,y,props={}){
 }
 function fxStepScenes(dt){for(const o of vfxScenes)o.age+=dt;vfxScenes=vfxScenes.filter(o=>o.age<o.life)}
 function fxDrawScenes(layer){
- for(const o of vfxScenes){const k=o.age/o.life,fade=Math.min(1,(1-k)*3),grow=Math.min(1,o.age/.19),r=o.range*(.3+grow*.7);
-  if(layer==='ground'){
-   if(o.kind==='wall'){
-    pxRing(o.x,o.y,r,7,'#5f2624',.56*fade,8);pxRing(o.x,o.y,r*.91,5,'#ffa83c',.37*fade,8);
-   }else if(o.kind==='impact'){
-    if(o.element==='fire'){pxCircle(o.x,o.y,r*.25,'#382721',.38*fade,10);pxRing(o.x,o.y,r*.6,5,'#dd672a',.48*fade,8);pxRing(o.x,o.y,r*.38,4,'#ffba4f',.34*fade,8)}
-    if(o.element==='water'){pxCircle(o.x,o.y,r*.42,'#277b9c',.33*fade,12);pxRing(o.x,o.y,r*.6,6,'#b6f6ff',.5*fade,8)}
-    if(o.element==='grass'){pxRing(o.x,o.y,r*.55,5,'#96e66b',.36*fade,8)}
-   }
-  } else if(layer==='over'){
-   if(o.kind==='wall')fxFlameWall(o.x,o.y,o.range,o.age,fade);
-   else if(o.kind==='impact'){
-    fxBloom(o.x,o.y,r*.9,({fire:'#ffb75e',water:'#87eaff',electric:'#fff0a6',grass:'#a5ffb7'})[o.element]||'#ffffff',.42*fade);
-    if(k<.55)fxStar(o.x,o.y,Math.max(9,r*(.26+k*.75)),o.element,(1-k/.7)*.87);
-    const n=fxQuality==='low'?6:12;
-    for(let i=0;i<n;i++){const a=(i/n)*Math.PI*2+o.seed,rr=(r*.19+o.range*.4*k),sx=o.x+Math.cos(a)*rr,sy=o.y+Math.sin(a)*rr*.66;
-     if(o.element==='fire'){fxStamp('flare',sx,sy,12+6*(1-k),15+10*(1-k),i,fade*.84,a); if(i%2===0)fxStamp('ember',sx+Math.cos(a)*8,sy+Math.sin(a)*6,6,7,i,fade*.7,0);}
-     else if(o.element==='water')fxStamp('water',sx,sy,8+5*(1-k),18+10*(1-k),i,fade*.85,a);
-     else if(o.element==='grass')fxStamp('leaves',sx,sy,8+4*(1-k),15+12*(1-k),i,fade*.86,a);
-     else fxStamp('sparks',sx,sy,7+3*(1-k),16+14*(1-k),i,fade*.88,a);
-    }
-   }
-  }
+ for(const m of vfxScenes){
+ if(m.kind==='impact'&&layer==='over')ArenaFX.impact(ctx,m,fxQuality);
+ else if(m.kind==='wall'&&layer==='over')fxFlameWall(m.x,m.y,m.range,m.age,Math.max(0,1-m.age/m.life));
  }
 }
 function fxDrawFlameBeam(m){
@@ -1733,27 +1702,11 @@ function fxPixelSkillIcons(){
 
 function fxDrawActorMotion(o){
  if(!o)return;
- const isPlayer=o===player,phase=Math.max(0,Math.min(1,1-((o.actLeft||0)/.24))),tx=o.x,ty=o.y-(o.riding?10:0)-13,kind=(o.type||roster[o.kind]?.type||'neutral');
- if((o.action==='Shoot'||o.tell>0)&&phase<1.2){
-  const a=(o.face||0),vx=Math.cos(a),vy=Math.sin(a),nx=-vy,ny=vx,pulse=Math.sin((time*18)+(isPlayer?0:1.7))*0.5+0.5;
-  if(kind==='electric'){
-   for(let i=0;i<4;i++){const off=(i-1.5)*8;fxRect(tx+vx*18+nx*off-2,ty+vy*8+ny*off-2,4,4,i%2?'#93f5ff':'#ffe16b',.85);if(i<3)pxLine(tx+nx*off,ty+ny*off,tx+vx*(18+6*pulse)+nx*(off+4),ty+vy*(10+4*pulse)+ny*(off-3),2,'#fff8b8',.75,.8)}
-  } else if(kind==='fire'){
-   for(let i=0;i<3;i++){const off=(i-1)*6;fxStamp('ember',tx+vx*(12+phase*10)+nx*off,ty+vy*(4+phase*5)+ny*off*.2,10,12,i,.72+phase*.18,0)}
-   fxStamp('flameCore',tx+vx*(18+phase*10),ty+vy*(4+phase*6),12,20,Math.floor(time*12)%4,.7+phase*.2,Math.atan2(vy,vx)-Math.PI/2);
-  } else if(kind==='water'){
-   for(let i=0;i<4;i++){const off=(i-1.5)*7;fxStamp('water',tx+vx*(14+phase*8)+nx*off,ty+vy*(6+phase*4)+ny*off*.2,7,14+phase*10,i,.75,a)}
-  } else if(kind==='grass'){
-   for(let i=0;i<4;i++){const off=(i-1.5)*7;fxStamp('leaves',tx+vx*(12+phase*8)+nx*off,ty+vy*(4+phase*5)+ny*off*.25,8,16+phase*12,i,.76,a+off*.03)}
-  }
+ if(o.actLeft>0&&o.action==='Shoot'&&!activeRangedAttack(o)){
+  const age=o===player?o.animT:o.actionT;if(age<.12){const p=emissionPoint(o,'basic');ArenaFX.charge(ctx,{...p,element:o.type||roster[o.kind].type,age,windup:.12},fxQuality);}
  }
- if((o.dashTime||0)>0){
-  const dir=Math.atan2(o.dashY||0,o.dashX||1),vx=Math.cos(dir),vy=Math.sin(dir);
-  for(let i=1;i<=4;i++){const a=.16*(1-i/5),px=tx-vx*i*16,py=ty-vy*i*12;fxRect(px-7,py-7,14,14,'#ffffff',a*.35)}
- }
- if(o.riding){
-  const t=time*12;for(let i=0;i<3;i++){const rr=18+i*8+Math.sin(t+i)*2;pxRing(o.x,o.y+10,rr,2,i===0?'#dffaff':'#8feaff',.25,.8)}
- }
+ if(o.dashTime>0){for(let i=1;i<=4;i++){const x=o.x-o.dashX*i*9,y=o.y-o.dashY*i*9;ctx.save();ctx.globalAlpha=.12*(1-i/5);spriteDraw(o.id||roster[o.kind].id,x,y,o.face,'Attack',o.animT||o.actionT,1.43,0);ctx.restore();}}
+
 }
 function fxDrawChargeHalo(o){
  if(!o)return;const kind=(o.type||roster[o.kind]?.type||'neutral'), a=o.face||0,x=o.x,y=o.y-10;let col='#ffffff';
@@ -1795,19 +1748,21 @@ function fxBitmapNumber(text,x,y,scale,fill){
 }
 
 
-function drawThunderbolt(m){fxDrawThunder(m)}
-function drawFlamethrower(m){fxDrawFlameBeam(m)}
-function drawEnergyball(m){fxDrawOrb(m)}
-function drawEnergyBurst(m){
- const k=clamp(m.age/m.life,0,1),r=12+105*k,a=Math.min(1,(1-k)*1.5);
- pxRing(m.x,m.y,r,9,'#3dc478',.68*a,8);pxRing(m.x,m.y,r*.66,6,'#ddff88',.91*a,7);
- for(let i=0;i<(fxQuality==='low'?8:15);i++){
-  const an=i*Math.PI*2/15+m.age*2.7;
-  fxStamp('leaves',m.x+Math.cos(an)*r*.73,m.y+Math.sin(an)*r*.73,10,22,i,a*.9,an);
- }
- if(k<.25)fxStar(m.x,m.y,Math.max(9,r*.47),'grass',1-k*4);
+function drawThunderbolt(m){
+ ArenaFX.thunder(ctx,m,fxQuality);
 }
-function drawSurf(m){legacy_drawSurf(m);fxDrawSurf(m)}
+function drawFlamethrower(m){
+ ArenaFX.flame(ctx,m,fxQuality);
+}
+function drawEnergyball(m){
+ ArenaFX.orb(ctx,m,fxQuality);
+}
+function drawEnergyBurst(m){
+ ArenaFX.impact(ctx,m,fxQuality);
+}
+function drawSurf(m){
+ ArenaFX.surf(ctx,m,fxQuality);
+}
 function drawExtraSpecial(m,layer){
  legacy_drawExtraSpecial(m,layer);
  fxDrawExtraSignature(m,layer);
@@ -1830,19 +1785,13 @@ function drawElectricBodyAura(m){
  ctx.restore();
 }
 function drawSurfCannonJets(m){
- if(m.age>.39||!m.emitters?.length)return;
- const fade=Math.max(0,1-m.age/.39);
- ctx.save();
- for(const cannon of m.emitters){
-  const dist=Math.min(62,m.distance+15),x=cannon.x+m.vx*dist,y=cannon.y+m.vy*dist;
-  pxLine(cannon.x,cannon.y,x,y,8,'#217bab',fade*.9,.7);
-  pxLine(cannon.x,cannon.y,x,y,4,'#8ae7ff',fade,.7);
-  pxRect(x-4,y-4,8,8,'#f0ffff',fade);
- }
- ctx.restore();
+ const actor=m.owner==='player'?player:m.owner==='enemy'?enemies[0]:null;
+ const ports=actor?emissionWorldPoints(actor,'surf'):m.emitters;
+ if(ports?.length)ArenaFX.jet(ctx,m,ports,fxQuality);
 }
 function drawSpecials(layer){
  for(const m of specialEffects){
+  if(m.windup&&m.age<m.windup){if(layer==='over')ArenaFX.charge(ctx,m,fxQuality);continue;}
   if(m.type==='extra'){drawExtraSpecial(m,layer);continue;}
   if(layer==='under' && m.type==='surf')drawSurf(m);
   if(layer!=='over')continue;
@@ -1916,4 +1865,4 @@ document.addEventListener('touchend',e=>{
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});
-</script><script src="./battle-studio.js?v=29"></script></body></html>
+</script><script src="./battle-studio.js?v=30"></script></body></html>
