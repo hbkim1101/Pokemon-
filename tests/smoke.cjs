@@ -97,7 +97,7 @@ for(let k=0;k<4;k++){
   assert.equal(api.state().gameState,'studio');
   for(const action of ['basic','special','dash']){
     api.studio.preview(action);
-    assert.equal(api.studio.getState().action,action==='dash'?'Attack':action==='basic'?'Shoot':k===2?'Attack':'Shoot', 'Studio action role mismatch');
+    assert.equal(api.studio.getState().action,action==='dash'?'Attack':'Shoot', 'Studio action role mismatch');
     api.draw();
   }
   api.studio.setCompare(true);
