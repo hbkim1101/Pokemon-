@@ -1,7 +1,4 @@
-/* Arena combat renderer v32.
- * One effect cell equals one character sprite pixel. Shapes are dense
- * overlapping bulbs with a crescent highlight, matching the Big Kid Nation
- * gameplay clip: a turbulent mass, not a row of outlined coins. */
+/* Shared pixel combat art: stepped animation, hard outlines and sprite-sized cells. */
 (function(root){
 'use strict';
 let PIXEL=1.43;
@@ -22,7 +19,7 @@ function along(cells,ox,oy,vx,vy,ix,iy,color){
  const [gx,gy]=grid(ox,oy);
  place(cells,gx+Math.round(ix*vx-iy*vy),gy+Math.round(ix*vy+iy*vx),color);
 }
-function unit(m){const d=Math.hypot(m.vx||0,m.vy||0)||1;return {x:(m.vx||1)/d,y:(m.vy||0)/d};}
+function unit(m){const x=m.vx??1,y=m.vy??0,d=Math.hypot(x,y);return d?{x:x/d,y:y/d}:{x:1,y:0};}
 function tickOf(age,rate){return Math.floor(Math.max(0,age||0)*(rate||12));}
 function nse(i){const x=Math.sin(i*127.1+19.2)*43758.5453;return x-Math.floor(x);}
 function paintBitmap(cells,ox,oy,vx,vy,shift,bitmap,pal){
@@ -96,23 +93,33 @@ function flame(cells,m,quality){
  const L=m.renderStream??m.stream??0;
  const len=Math.max(0,Math.round(L/PIXEL));
  if(len<1)return;
- const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,10);
+ const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,14);
  const pal=PAL.fire,[ox,oy]=grid(m.x,m.y);
- let d=0,i=0;
- while(d<len&&i<70){
-  const u=d/Math.max(1,len);
-  const rows=u<.25?1:u<.6?2:(quality==='low'?2:3);
-  for(let row=0;row<rows;row++){
-   const side=(row-(rows-1)/2)*(quality==='low'?4:5)+FIRE_NUDGE[(i+row+step)%FIRE_NUDGE.length];
-   const [gx,gy]=at(ox,oy,v,d,side);
-   stampArt(cells,gx,gy,v.x,v.y,SPIKE,pal);
+ // A continuous tapered body. Travelling lobes break into pointed flame tongues.
+ for(let d=0;d<=len;d++){
+  const u=d/len,phase=d*.34-step*.85;
+  const tip=Math.min(1,(len-d+1)/8);
+  const half=(2+u*8+Math.sin(phase)*u*2)*tip;
+  const center=Math.sin(d*.16-step*.65)*u*2;
+  for(let side=Math.floor(center-half);side<=center+half;side++){
+   const edge=Math.abs(side-center)/half;
+   const hot=Math.abs(side-center+Math.sin(phase)*1.5)/half;
+   const color=edge>.88?pal[0]:edge>.66?pal[1]:hot>.4?pal[2]:hot>.16?pal[3]:pal[4];
+   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
   }
-  d+=quality==='low'?7:5;
-  i++;
  }
- const [tx,ty]=at(ox,oy,v,Math.max(0,len-6),0);
- stampArt(cells,tx,ty,v.x,v.y,CRESCENT,pal);
- fringe(cells,'rgba(255,150,48,.4)');
+ for(let i=0;i<7;i++){
+  const d=len*(.3+i*.1),sign=i%2?1:-1,base=3+d/len*6;
+  for(let k=0;k<9;k++)for(let w=-2;w<=2;w++){
+   if(Math.abs(w)>2-k/4)continue;
+   const [x,y]=at(ox,oy,v,d+k,sign*(base+k*.55)+w);
+   place(cells,x,y,Math.abs(w)>1?pal[1]:pal[2+(k%3===0?1:0)]);
+  }
+ }
+ for(let i=0;i<(quality==='low'?3:6);i++){
+  const [x,y]=at(ox,oy,v,len-8+(i*7+step*3)%20,(i%2?1:-1)*(9+i%3*3));
+  place(cells,x,y,pal[3]);place(cells,x-1,y,pal[1]);
+ }
  if(m.contact){
   const c=m.contact,[cx,cy]=grid(c.x,c.y),p=c.steam?PAL.water:pal;
   bulb(cells,cx,cy,quality==='low'?5:8,p);
@@ -147,35 +154,33 @@ function linePoints(x0,y0,x1,y1){
 }
 function bolt(cells,m,quality){
  const pts=m.path||[];if(pts.length<2)return;
- const pal=PAL.electric,step=tickOf(m.age,14),wide=quality==='low'?1:2;
- const gpts=pts.map(p=>grid(p.x,p.y));
- const drawn=[];
- for(let i=1;i<gpts.length;i++){
-  const seg=linePoints(gpts[i-1][0],gpts[i-1][1],gpts[i][0],gpts[i][1]);
-  const horiz=Math.abs(gpts[i][0]-gpts[i-1][0])>=Math.abs(gpts[i][1]-gpts[i-1][1]);
-  for(let k=0;k<seg.length;k+=2){
-   const x=seg[k],y=seg[k+1];
-   drawn.push(x,y,horiz);
-   for(let w=-wide;w<=wide;w++){
-    const px=horiz?x:x+w,py=horiz?y+w:y;
-    const color=w===0?pal[4]:Math.abs(w)===1?pal[3]:Math.abs(w)===wide?pal[0]:pal[2];
-    place(cells,px,py,color);
+ const pal=PAL.electric,step=tickOf(m.age,16);
+ const paths=[pts.map(p=>grid(p.x,p.y))];
+ // Short, bent forks rather than perpendicular comb teeth.
+ for(let i=1;i<pts.length-1;i+=quality==='low'?4:2){
+  const [x,y]=paths[0][i],prev=paths[0][i-1];
+  const dx=x-prev[0],dy=y-prev[1],len=Math.hypot(dx,dy)||1,sign=(i+step)%2?1:-1;
+  const nx=-dy/len*sign,ny=dx/len*sign;
+  paths.push([[x,y],[x+Math.round(nx*7+dx/len*3),y+Math.round(ny*7+dy/len*3)],
+   [x+Math.round(nx*8-dx/len*2),y+Math.round(ny*8-dy/len*2)],
+   [x+Math.round(nx*14+dx/len*4),y+Math.round(ny*14+dy/len*4)]]);
+ }
+ for(let layer=0;layer<3;layer++)for(let p=0;p<paths.length;p++){
+  const points=paths[p],r=layer===0?(p?1:3):layer===1?(p?0:2):0;
+  for(let i=1;i<points.length;i++){
+   const seg=linePoints(...points[i-1],...points[i]);
+   for(let k=0;k<seg.length;k+=2)for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
+    if(Math.abs(x)+Math.abs(y)>r)continue;
+    place(cells,seg[k]+x,seg[k+1]+y,pal[layer===0?0:layer===1?2:4]);
    }
   }
  }
- if(quality!=='low'){
-  for(let i=0;i<drawn.length;i+=3){
-   if((i/3+step)%6!==2)continue;
-   const x=drawn[i],y=drawn[i+1],horiz=drawn[i+2],dir=(i+step)%2?1:-1,span=4+(i%5);
-   for(let s=1;s<=span;s++){
-    const px=x+(horiz?0:dir*s),py=y+(horiz?dir*s:0);
-    place(cells,px,py,s===span?pal[4]:s>span-2?pal[3]:pal[2]);
-    if(s>2&&s<span-1)place(cells,px+(horiz?1:0),py+(horiz?0:1),pal[0]);
-   }
-  }
+ const [hx,hy]=paths[0].at(-1);
+ for(let i=0;i<8;i++){
+  const a=i*TAU/8,inner=4,outer=7+(i+step)%4;
+  const ray=linePoints(hx+Math.round(Math.cos(a)*inner),hy+Math.round(Math.sin(a)*inner),hx+Math.round(Math.cos(a)*outer),hy+Math.round(Math.sin(a)*outer));
+  for(let k=0;k<ray.length;k+=2)place(cells,ray[k],ray[k+1],pal[i%2?2:4]);
  }
- const head=gpts.at(-1);
- bulb(cells,head[0],head[1],quality==='low'?4:6,pal,0,-1);
 }
 function aura(cells,m){
  const pal=palOf(m.element||'electric'),step=tickOf(m.age,10),[cx,cy]=grid(m.x,m.y);
@@ -232,47 +237,51 @@ function jet(cells,m,ports,quality){
  }
 }
 function surf(cells,m,quality){
- const v=unit(m),pal=PAL.water,step=tickOf(m.age,8);
- const half=quality==='low'?12:18,[ox,oy]=grid(m.x,m.y);
- stampArt(cells,ox,oy,v.x,v.y,CRESCENT,pal);
- for(let s=-half;s<=half;s++){
-  const n=Math.abs(s)/half;
-  const lump=((s+step)%5===0)?1:0;
-  const crest=Math.round((1-n*n)*8)+lump;
-  const tail=Math.round((1-n*n)*6);
-  for(let a=-tail;a<=crest;a++){
-   let color=pal[1];
-   if(a>=crest-1&&(s+step)%2===0)color=pal[4];
-   else if(a>=crest-3)color=pal[3];
-   else if(a>=0)color=pal[2];
-   else if(a<-tail+2)color=pal[0];
-   const [gx,gy]=at(ox,oy,v,a,s);
-   place(cells,gx,gy,color);
+ const v=unit(m),pal=PAL.water,step=tickOf(m.age,12);
+ const half=22,[ox,oy]=grid(m.x,m.y);
+ // Broad bowed wave with a dark trough and a rolling white lip.
+ for(let side=-half;side<=half;side++){
+  const u=side/half,crest=Math.round(10*(1-u*u)+Math.sin(side*.45-step*.7)*2);
+  const tail=-Math.round(9*(1-u*u))-2;
+  for(let d=tail;d<=crest;d++){
+   const depth=crest-d;
+   let color=depth<2?pal[4]:depth<4?pal[3]:depth<7?pal[2]:d<tail+2?pal[0]:pal[1];
+   if(depth>5&&depth<11&&(side+step*2)%9<2)color=pal[2];
+   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
   }
  }
- for(let s=-half+4;s<half;s+=quality==='low'?10:8){
-  const [gx,gy]=at(ox,oy,v,6,s);
-  stampArt(cells,gx,gy,v.x,v.y,SPIKE,pal);
+ for(let i=-2;i<=2;i++){
+  const side=i*8,crest=9-Math.round(i*i*1.4);
+  // Curled foam hooks, open on the trailing side.
+  for(let k=0;k<12;k++){
+   const a=k/12*TAU*.8+step*.12;
+   const [x,y]=at(ox,oy,v,crest+Math.cos(a)*3,side+Math.sin(a)*3);
+   place(cells,x,y,pal[4]);place(cells,x,y+1,pal[3]);
+  }
+ }
+ for(let i=0;i<(quality==='low'?6:12);i++){
+  const side=-24+i*48/(quality==='low'?5:11),d=12+(i*3+step)%7;
+  const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[3]);place(cells,x,y-1,pal[4]);
  }
 }
 const LEAF=['.3.','121','232','.1.'];
 function orb(cells,m,quality){
- const pal=PAL.grass,v=unit(m),step=tickOf(m.age,9),r=quality==='low'?6:8;
+ const pal=PAL.grass,v=unit(m),step=tickOf(m.age,14),r=9;
  const [cx,cy]=grid(m.x,m.y);
- stampArt(cells,cx-4,cy,v.x,v.y,SPIKE,pal);
- stampArt(cells,cx,cy,v.x,v.y,CRESCENT,pal);
- const count=quality==='low'?5:8;
- for(let i=0;i<count;i++){
-  const a=(i+step*.2)/count*TAU,rad=r+4;
-  paintBitmap(cells,(cx+Math.cos(a)*rad)*PIXEL,(cy+Math.sin(a)*rad)*PIXEL,Math.cos(a),Math.sin(a),0,LEAF,pal);
-  if(i%2===0){
-   const er=3;
-   bulb(cells,cx+Math.round(Math.cos(a)*(r+2)),cy+Math.round(Math.sin(a)*(r+2)),er,pal,Math.cos(a),Math.sin(a));
-  }
+ // Filled round seed of energy, with asymmetric light and swirling bands.
+ for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
+  const d=Math.hypot(x,y);if(d>r)continue;
+  const light=Math.hypot(x+3,y+3);
+  const swirl=Math.sin(Math.atan2(y,x)*2+d*.65-step*.6);
+  const color=d>r-1?pal[0]:light<3?pal[4]:swirl>.5?pal[3]:light<9?pal[2]:pal[1];
+  place(cells,cx+x,cy+y,color);
  }
- for(let i=1;i<=5;i++){
-  const [tx,ty]=at(cx,cy,v,-r-i-1,(i%2?1:-1));
-  place(cells,tx,ty,i<3?pal[3]:pal[1]);
+ const count=quality==='low'?4:6;
+ for(let i=0;i<count;i++){
+  const a=i/count*TAU+step*.22,rad=13;
+  paintBitmap(cells,(cx+Math.cos(a)*rad)*PIXEL,(cy+Math.sin(a)*rad)*PIXEL,Math.cos(a),Math.sin(a),0,LEAF,pal);
+  const [x,y]=at(cx,cy,v,-12-i*3,Math.sin(i+step*.3)*4);
+  place(cells,x,y,pal[i%2?2:3]);
  }
 }
 function impact(cells,m){

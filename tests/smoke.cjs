@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=34'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=35'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -302,3 +302,17 @@ const shotW=Math.max(...shotCells.map(c=>c[0]))-Math.min(...shotCells.map(c=>c[0
 const shotH=Math.max(...shotCells.map(c=>c[1]))-Math.min(...shotCells.map(c=>c[1]))+1;
 assert(shotW<=12&&shotH<=12,'Basic projectile pixels must stay within a few sprite pixels');
 assert(!html.includes('ctx.rotate(tilt)'),'Character sprites must not be rotated off the pixel grid');
+
+// Cardinal shots must remain centered on the emitter, especially vx === 0.
+for(const quality of ['high','low']){
+ const vertical=sandbox.ArenaFX.cells('flame',{x:0,y:0,vx:0,vy:1,age:.3,stream:140},quality);
+ assert(Math.max(...vertical.map(p=>Math.abs(p[0])))<22,'Vertical flame must not drift diagonally');
+ for(const kind of ['flame','surf','orb']){
+  const move={x:0,y:0,vx:1,vy:0,age:.1,stream:140};
+  const first=sandbox.ArenaFX.cells(kind,move,quality);
+  const next=sandbox.ArenaFX.cells(kind,{...move,age:.35},quality);
+  assert.notDeepEqual(first,next,kind+' must animate');
+  assert.deepEqual(first,sandbox.ArenaFX.cells(kind,move,quality),kind+' must be deterministic');
+ }
+}
+console.log('PASS: vertical emitter alignment and deterministic animated pixel art');

@@ -253,7 +253,7 @@
     return { anim, f, d, dw, dh, x, y, scale };
   }
 
-  function drawFx(mon, origin, angle, age) {
+  function drawFx(mon, origin, angle, age, scale) {
     const vx = Math.cos(angle), vy = Math.sin(angle);
     const nx = -vy, ny = vx;
     const move = state.move === 'basic' ? 'basic' : mon.moveId;
@@ -263,82 +263,22 @@
       ctx.fillRect(origin.x + vx * d - 4, origin.y + vy * d - 4, 8, 8);
       return;
     }
-    if (move === 'thunderbolt') {
-      const reach = Math.min(1, age / 0.55);
-      const dist = 420 * reach;
-      const steps = Math.max(2, Math.floor(dist / 18));
-      ctx.lineCap = 'round';
-      for (let layer = 0; layer < 3; layer++) {
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          const t = i / steps;
-          const wobble = i === steps ? 0 : Math.sin(i * 2.7 + age * 18) * (12 - layer * 2);
-          const x = origin.x + vx * dist * t + nx * wobble;
-          const y = origin.y + vy * dist * t + ny * wobble;
-          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = layer === 0 ? '#8e5d15' : layer === 1 ? '#fff1a0' : '#ffffff';
-        ctx.lineWidth = layer === 0 ? 7 : layer === 1 ? 4 : 2;
-        ctx.globalAlpha = 0.9;
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.beginPath();
-      ctx.arc(origin.x, origin.y, 28 + Math.sin(age * 26) * 5, 0, Math.PI * 2);
-      ctx.strokeStyle = '#ffdf55';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      return;
-    }
-    if (move === 'flamethrower') {
-      const length = Math.min(300, Math.max(0, age * 820)) * Math.min(1, (1.4 - age) / 0.25);
-      for (let layer = 0; layer < 3; layer++) {
-        let px = origin.x, py = origin.y;
-        const quality = 20;
-        for (let i = 1; i <= quality; i++) {
-          const u = i / quality;
-          const d = u * length;
-          const curve = Math.sin(u * 18 - age * 22 + layer) * ((5 + u * 18) * (layer === 0 ? -1 : layer === 1 ? 1 : 0.2));
-          const x = origin.x + vx * d + nx * curve;
-          const y = origin.y + vy * d + ny * curve;
-          ctx.strokeStyle = layer === 2 ? '#fff9d1' : layer === 1 ? '#ffca5c' : '#df4628';
-          ctx.lineWidth = layer === 2 ? 3 : layer === 1 ? 5 : 8;
-          ctx.globalAlpha = 0.85;
-          ctx.beginPath();
-          ctx.moveTo(px, py);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-          px = x; py = y;
-        }
-      }
-      ctx.globalAlpha = 1;
-      return;
-    }
-    if (move === 'surf') {
-      const d = Math.min(280, age * 300);
-      const cx = origin.x + vx * (20 + d), cy = origin.y + vy * (20 + d);
-      for (let i = 0; i < 16; i++) {
-        const u = i / 15 * 2 - 1;
-        const x = cx + nx * u * 70 + vx * (20 + Math.sin(age * 16 + i) * 8);
-        const y = cy + ny * u * 70 + vy * (20 + Math.sin(age * 16 + i) * 8);
-        ctx.fillStyle = i % 2 ? '#b6f6ff' : '#6bd9f1';
-        ctx.fillRect(x - 6, y - 5, 12, 10);
-      }
-      return;
-    }
-    if (move === 'energyball') {
-      const d = Math.min(360, age * 380);
-      const cx = origin.x + vx * d, cy = origin.y + vy * d;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 16 + Math.sin(age * 12) * 2, 0, Math.PI * 2);
-      ctx.fillStyle = '#7bea77';
-      ctx.fill();
-      for (let i = 0; i < 10; i++) {
-        const a = i / 10 * Math.PI * 2 + age * 8;
-        const r = 22 + 5 * Math.sin(a * 2 + age * 10);
-        ctx.fillStyle = i % 2 ? '#f9ffce' : '#43c882';
-        ctx.fillRect(cx + Math.cos(a) * r - 2, cy + Math.sin(a) * r * 0.75 - 2, 5, 5);
-      }
+    ArenaFX.setPixel(scale);
+    const m={...origin,vx,vy,age,life:1.4,type:move};
+    if(move==='thunderbolt'){
+      const dist=420*Math.min(1,age/.55),steps=Math.max(2,Math.ceil(dist/18));
+      m.path=Array.from({length:steps+1},(_,i)=>{
+        const side=i===0||i===steps?0:Math.sin(i*2.7+Math.floor(age*16))*12;
+        return {x:origin.x+vx*dist*i/steps+nx*side,y:origin.y+vy*dist*i/steps+ny*side};
+      });
+      ArenaFX.thunder(ctx,m);ArenaFX.aura(ctx,{...m,element:'electric'});
+    }else if(move==='flamethrower'){
+      m.stream=Math.min(300,age*820)*Math.max(0,Math.min(1,(1.4-age)/.25));
+      ArenaFX.flame(ctx,m);
+    }else{
+      const dist=move==='surf'?Math.min(280,age*300):Math.min(360,age*380);
+      m.x+=vx*dist;m.y+=vy*dist;
+      if(move==='surf')ArenaFX.surf(ctx,m);else ArenaFX.orb(ctx,m);
     }
   }
 
@@ -386,7 +326,7 @@
         ctx.fillStyle = '#22eeff';
         ctx.fillRect(Math.round(ox) - 2, Math.round(oy) - 2, 4, 4);
       }
-      if (state.playFx && state.previewing) drawFx(mon, world, angle, state.previewAge);
+      if (state.playFx && state.previewing) drawFx(mon, world, angle, state.previewAge, scale);
     }
 
     // Zoomed editable cell on the right half
