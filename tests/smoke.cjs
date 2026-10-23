@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=42'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=43'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -300,7 +300,7 @@ assert(flameCells.every(([x,y])=>Number.isInteger(x)&&Number.isInteger(y)),'Effe
 const shotCells=sandbox.ArenaFX.cells('projectile',{x:0,y:0,vx:1,vy:0,element:'fire',pulse:0,delay:0},'high');
 const shotW=Math.max(...shotCells.map(c=>c[0]))-Math.min(...shotCells.map(c=>c[0]))+1;
 const shotH=Math.max(...shotCells.map(c=>c[1]))-Math.min(...shotCells.map(c=>c[1]))+1;
-assert(shotW<=12&&shotH<=12,'Basic projectile pixels must stay within a few sprite pixels');
+assert(shotW<=22&&shotH<=12,'Basic cores and short tails must remain smaller than signature attacks');
 assert(!html.includes('ctx.rotate(tilt)'),'Character sprites must not be rotated off the pixel grid');
 
 // Cardinal shots must remain centered on the emitter, especially vx === 0.
@@ -328,3 +328,14 @@ for(const scale of [1.43,3,4.2])for(let dir=0;dir<8;dir++){
  }
 }
 console.log('PASS: Surf follows its rider in 8 directions at battle and studio scales');
+
+// Every basic element must remain compact, directional and invisible before release.
+for(const element of ['electric','fire','water','grass'])for(let dir=0;dir<8;dir++){
+ const m={x:0,y:0,vx:Math.cos(dir*Math.PI/4),vy:Math.sin(dir*Math.PI/4),element,age:.3};
+ const cells=sandbox.ArenaFX.cells('projectile',m);
+ assert(cells.length>15,element+' needs a readable core');
+ assert(cells.every(([x,y])=>Math.hypot(x,y)<18),element+' basic attack must stay compact');
+ assert.equal(sandbox.ArenaFX.cells('projectile',{...m,delay:.1}).length,0,'Basic shots must wait for release');
+ assert.notDeepEqual(cells,sandbox.ArenaFX.cells('projectile',{...m,age:.4}),element+' must animate');
+}
+console.log('PASS: four basic attack designs in all eight directions');

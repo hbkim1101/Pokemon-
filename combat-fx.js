@@ -108,8 +108,9 @@ function flame(cells,m,quality){
    const width=half*taper;if(width<.4||Math.abs(side-center)>width)continue;
    const edge=Math.abs(side-center)/width;
    const ribbon=Math.abs(side-center-Math.sin(d*.14-step*.7)*u*2)/width;
-   let color=edge>.94?pal[1]:edge>.74?pal[2]:ribbon>.56?pal[2]:pal[3];
-   if(ribbon<.23&&d<len*.82)color=pal[4];
+   let color=edge>.94?pal[0]:edge>.77?pal[1]:ribbon>.56?pal[2]:pal[3];
+   if(ribbon<.19&&d<len*.82)color=pal[4];
+   if(u>.45&&edge>.5&&Math.sin(d*.22-step*.9+side*.6)>.6)color=pal[1];
    if(u>.3&&Math.sin(d*.16-side*.9-step*.8)>.78&&edge<.7)color=pal[2];
    const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
   }
@@ -171,11 +172,12 @@ function bolt(cells,m,quality){
  }
  for(let layer=0;layer<3;layer++)for(let p=0;p<paths.length;p++){
   const points=paths[p],r=layer===0?(p?1:2):layer===1?(p?0:1):0;
+  if(p&&layer===2&&(p+step)%3===0)continue;
   for(let i=1;i<points.length;i++){
    const seg=linePoints(...points[i-1],...points[i]);
    for(let k=0;k<seg.length;k+=2)for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
     if(Math.abs(x)+Math.abs(y)>r)continue;
-    place(cells,seg[k]+x,seg[k+1]+y,pal[layer===0?0:layer===1?2:4]);
+    place(cells,seg[k]+x,seg[k+1]+y,pal[layer===0?1:layer===1?2:4]);
    }
   }
  }
@@ -206,32 +208,43 @@ function aura(cells,m){
   }
  }
 }
-// Basic attacks stay within a 12 x 9 source-pixel footprint (smaller than signatures).
+// Basic cores fit 14 x 9 cells, with a sparse short tail distinct from signatures.
 const BASIC_ART={
  electric:[
-  ['........3...','...3...35...','...53.35....','233455543332','....35..53..','...35....3..','...3........'],
-  ['....3.......','....53...3..','.....35.35..','233455543332','...35...53..','..35.....3..','..3.........']
+  ['..........3...','.....3...35...','.....53.35....','..23345554332.','......35.53...','.....35...3...','.....3........'],
+  ['......3.......','......53...3..','.......35.35..','..23345554332.','.....35...53..','....35.....3..','....3.........']
  ],
  fire:[
-  ['............','..2...122...','...22123321.','122334554321','..233454321.','.2..123321..','......12....'],
-  ['......12....','.2..123321..','..233454321.','122334554321','...22123321.','..2...122...','............']
+  ['..............','..2....111....','...21.123321..','.122312344321.','1233344554321.','..12334554321.','...221234321..','.2....12321...','.......111....'],
+  ['..............','.......111....','.2....123321..','...2212344321.','1233344554321.','.122334554321.','...21.123321..','..2....121....','..............']
  ],
  water:[
-  ['............','.......111..','..3..1234431','123223455431','..3..1233321','.......111..','............'],
-  ['............','......1111..','.3..12344431','123223455431','...3.1233321','......1111..','............']
+  ['..............','........111...','...3..1124431.','..123123455431','12333445555431','..123123433321','...3..1123321.','........111...','..............'],
+  ['..............','.......1111...','..3...1234441.','...12323455431','12333445555431','...12323433321','..3...1233321.','.......1111...','..............']
  ],
  grass:[
-  ['.........11.','......11231.','....1123431.','..112343321.','1234332211..','..111111....','............'],
-  ['............','..111111....','1234332211..','..112343321.','....1123431.','......11231.','.........11.']
+  ['..........11..','.......11131..','.....1123431..','...112344321..','.1123443321...','1234433221....','..1112211.....','....111.......','..............'],
+  ['..............','....111.......','..1112211.....','1234433221....','.1123443321...','...112344321..','.....1123431..','.......11131..','..........11..']
  ]
 };
 function projectile(cells,m){
  if((m.delay||0)>0)return;
  const v=unit(m),pal=palOf(m.element),[gx,gy]=grid(m.x,m.y);
- // Simulation pulse advances at eight units/second; keep the art at twelve frames/second.
  const step=tickOf(m.age??((m.pulse||0)/8),12);
  const frames=BASIC_ART[m.element],art=frames?frames[step%2]:['..1..','.232.','12341','.232.','..1..'];
  const half=Math.floor(art[0].length/2);
+ // Short authored afterimages replace frame-rate-dependent random basic-shot particles.
+ for(let i=0;i<3;i++){
+  const d=-8-i*3,side=Math.sin(step*.8+i)*.8;
+  const [x,y]=at(gx,gy,v,d,side);
+  if(m.element==='water'){
+   place(cells,x,y,pal[i?2:3]);if(i===0)place(cells,x,y+1,pal[1]);
+  }else if(m.element==='fire'){
+   place(cells,x,y,pal[i?1:3]);if(i===0)place(cells,x,y-1,pal[2]);
+  }else if(m.element==='electric'){
+   const [xx,yy]=at(gx,gy,v,d+1,side+(step%2?1:-1));place(cells,x,y,pal[i?2:3]);place(cells,xx,yy,pal[2]);
+  }else if(m.element==='grass'&&i<2){place(cells,x,y,pal[2]);place(cells,x+1,y,pal[1]);}
+ }
  stampArt(cells,gx-Math.round(half*v.x),gy-Math.round(half*v.y),v.x,v.y,art,pal);
 }
 function charge(cells,m){
@@ -272,8 +285,9 @@ function ride(cells,m){
  for(let a=-35;a<=20;a++)for(let b=-width;b<=width;b++){
   const front=17-Math.pow(Math.abs(b)/width,3)*7+Math.sin(b*.35+step*.4);
   const rear=-34+Math.abs(b)*.36+Math.sin(b*.53+step*.45)*2;
-  if(a>front||a<rear)continue;
-  const edge=Math.abs(b)/width,depth=front-a;
+  const bank=width*(.8+.2*Math.cos((a+6)*.045))+Math.sin(a*.27-step*.6)*1.2;
+  if(a>front||a<rear||Math.abs(b)>bank)continue;
+  const edge=Math.abs(b)/bank,depth=front-a;
   const h=lift*Math.max(0,1-Math.abs(a)/39);
   const [x,y]=project(a,b,h);
   let color=depth<3?p[3]:depth<7?p[2]:edge>.94?p[0]:p[1];
@@ -319,12 +333,12 @@ function orb(cells,m,quality){
  for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
   const d=Math.hypot(x,y);if(d>r)continue;
   const light=Math.hypot(x+1,y+1),band=Math.sin(Math.atan2(y,x)*3-d*.4+step*.6);
-  const color=d>r-1?p[1]:light<r*.42?p[4]:light<r*.65?p[3]:band>.6?p[3]:p[2];
+  const color=d>r-1?(y>1?p[0]:p[1]):light<r*.27?p[4]:light<r*.49?p[3]:band>.7?p[3]:y>r*.5?p[1]:p[2];
   place(cells,cx+x,cy+y,color);
  }
- const count=quality==='low'?4:7;
+ const count=quality==='low'?3:5;
  for(let i=0;i<count;i++){
-  const angle=i/count*TAU+step*.12,reach=13+(i+step)%4;
+  const angle=i/count*TAU+step*.12,reach=12+(i+step)%3;
   let last=null;
   for(let d=r-1;d<reach;d++){
    const a=angle+Math.sin(d*.45-step*.5)*.22;
@@ -333,6 +347,13 @@ function orb(cells,m,quality){
    last=pt;
   }
   if(variant===2&&i%2===0)paintBitmap(cells,last[0]*PIXEL,last[1]*PIXEL,Math.cos(angle),Math.sin(angle),0,LEAF,p);
+ }
+ for(let i=0;i<20;i++){
+  const a=i*.12+step*.2,rr=r+3;
+  for(const sign of [-1,1]){
+   const x=cx+Math.round(Math.cos(a)*rr)*sign,y=cy+Math.round(Math.sin(a)*rr*.6)*sign;
+   if(i%5!==0)place(cells,x,y,p[i<6?3:2]);
+  }
  }
  for(let i=0;i<7;i++){
   const [x,y]=at(cx,cy,v,-r-3-i*3,Math.sin(i*.9-step*.5)*(2+i*.3));
