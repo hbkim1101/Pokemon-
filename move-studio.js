@@ -283,6 +283,7 @@
     }
     ArenaFX.setPixel(scale);
     const m={...origin,vx,vy,age,life:1.4,type:move,variant:state.vfxVariant};
+    if(move==='surf')return;
     if(move==='thunderbolt'){
       const dist=420*Math.min(1,age/.55),steps=Math.max(2,Math.ceil(dist/18));
       m.path=Array.from({length:steps+1},(_,i)=>{
@@ -325,12 +326,18 @@
     const shoot = pack?.anims?.Shoot;
     const scale = shoot ? Math.min(4.2, 210 / Math.max(shoot.w, shoot.h)) : 3.2;
     let drawn = null;
+    const riding=state.move==='special'&&mon.moveId==='surf'&&state.playFx&&state.previewing;
+    const rideBob=riding?Math.sin(state.clock*9)*3:0;
     if (pack?.loaded) {
       ctx.fillStyle = '#0005';
       ctx.beginPath();
       ctx.ellipse(cx, cy + 10, 28, 8, 0, 0, Math.PI * 2);
       ctx.fill();
-      drawn = drawSprite(pack, 'Shoot', cx, cy, state.dir, state.frame, scale);
+      if(riding){
+        ArenaFX.setPixel(scale);
+        ArenaFX.ride(ctx,{x:cx,y:cy+14,vx:Math.cos(angle),vy:Math.sin(angle),age:state.previewAge,life:1.2});
+      }
+      drawn = drawSprite(pack, 'Shoot', cx, cy+rideBob, state.dir, state.frame, scale);
     }
 
     const port = currentPort(mon);

@@ -153,6 +153,6 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 
 ### 연출 비교 시안
 
-기술 스튜디오의 **연출 시안** 버튼으로 네 가지 기술을 각각 세 가지 도트 모션으로 비교할 수 있다. 파도타기는 거북왕이 물결을 타고 나아가는 후류, 큰 말림 파도, 쌍물살을 제안한다. 10만볼트는 굵은 직격, 촘촘한 갈래, 겹번개를 비교하고 화염방사는 이어지는 불길, 갈라지는 혀, 소용돌이형 불길을 비교한다. 에너지볼에는 잎 고리, 세 갈래 핵, 꽃잎 회오리를 둔다. 시안은 미리보기 전용이며 기본 전투 연출은 바꾸지 않는다.
+기술 스튜디오의 **연출 시안** 버튼으로 네 가지 기술을 각각 세 가지 도트 모션으로 비교할 수 있다. 파도타기는 거북왕 바로 아래에 받쳐지는 물결 위 후류, 큰 말림 파도, 쌍물살을 제안한다. 스튜디오와 전투 모두 파도를 포켓몬 뒤 레이어에 깔고 캐릭터가 그 위에 보이도록 그린다. 10만볼트는 굵은 직격, 촘촘한 갈래, 겹번개를 비교하고 화염방사는 이어지는 불길, 갈라지는 혀, 소용돌이형 불길을 비교한다. 에너지볼에는 잎 고리, 세 갈래 핵, 꽃잎 회오리를 둔다. 시안은 미리보기 전용이며 기본 전투 연출은 바꾸지 않는다.
 
 형태 참고: Pokémon의 [Surf 전투 장면](https://www.sportskeeda.com/esports/the-best-moveset-lapras-pokemon-red-blue), [Thunderbolt 도트 애니메이션](https://wiki.otpokemon.com/index.php/TM24_-_Thunderbolt), [Flamethrower 게임 장면](https://archives.bulbagarden.net/wiki/File%3AFlamethrower_LA.png), [Energy Ball 장면](https://bulbapedia.bulbagarden.net/wiki/Energy_Ball_%28move%29). 구성과 픽셀은 이 프로젝트용으로 새로 그렸다.
