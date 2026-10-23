@@ -243,8 +243,8 @@ function jet(cells,m,ports,quality){
  }
 }
 function ride(cells,m){
- const v=unit(m),pal=PAL.water,step=tickOf(m.age,12),[cx,cy]=grid(m.x,m.y);
- const alongRadius=23+Math.round(Math.sin(step*.6)*1),sideRadius=13;
+ const v=unit(m),pal=PAL.water,step=tickOf(m.age,12),variant=m.variant||0,[cx,cy]=grid(m.x,m.y);
+ const alongRadius=(variant===1?21:23)+Math.round(Math.sin(step*.6)*1),sideRadius=variant===1?16:variant===2?11:13;
  // A long rolling swell sits directly under the rider, with a foamy nose and trailing wake.
  for(let a=-alongRadius;a<=alongRadius;a++){
   const u=a/alongRadius,span=sideRadius*Math.sqrt(Math.max(0,1-u*u));
@@ -259,11 +259,17 @@ function ride(cells,m){
   const u=Math.sqrt(Math.max(0,1-(side/13)**2)),a=Math.round(23*u);
   if((side+step)%3!==0){along(cells,cx,cy,v.x,v.y,a,side,pal[4]);along(cells,cx,cy,v.x,v.y,a-1,side,pal[3]);}
  }
- for(const side of [-8,8])for(let a=-34;a<-20;a++){
+ for(const side of (variant===2?[-14,14]:[-8,8]))for(let a=-34;a<-20;a++){
   const wob=Math.round(Math.sin(a*.38+step*.4)*1.5);
   along(cells,cx,cy,v.x,v.y,a,side+wob,(a+step)%5===0?pal[4]:pal[3]);
  }
- for(let i=0;i<6;i++){
+ if(variant===1){
+  for(let i=0;i<13;i++){
+   const a=15+Math.round(Math.sin(i*.25)*4),side=8+Math.round(i*.65);
+   along(cells,cx,cy,v.x,v.y,a,side,pal[i%3===0?4:3]);
+  }
+ }
+ for(let i=0;i<(variant===2?10:6);i++){
   const a=-12+(i*7+step*2)%20,side=(i%2?1:-1)*(15+(i%3)*3);
   const [x,y]=at(cx,cy,v,a,side);place(cells,x,y,pal[i%2?4:3]);
  }

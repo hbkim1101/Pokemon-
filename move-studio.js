@@ -335,7 +335,7 @@
       ctx.fill();
       if(riding){
         ArenaFX.setPixel(scale);
-        ArenaFX.ride(ctx,{x:cx,y:cy+14,vx:Math.cos(angle),vy:Math.sin(angle),age:state.previewAge,life:1.2});
+        ArenaFX.ride(ctx,{x:cx,y:cy+14,vx:Math.cos(angle),vy:Math.sin(angle),age:state.previewAge,life:1.2,variant:state.vfxVariant});
       }
       drawn = drawSprite(pack, 'Shoot', cx, cy+rideBob, state.dir, state.frame, scale);
     }
