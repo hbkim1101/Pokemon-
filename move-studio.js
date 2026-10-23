@@ -288,9 +288,9 @@
     const nx = -vy, ny = vx;
     const move = state.move === 'basic' ? 'basic' : mon.moveId;
     if (move === 'basic') {
+      ArenaFX.setPixel(scale);
       const d = 24 + Math.min(age, 1) * 280;
-      ctx.fillStyle = mon.tone === 'fire' ? '#ff9a55' : mon.tone === 'water' ? '#7ad8ff' : mon.tone === 'leaf' ? '#9be37a' : '#ffe56b';
-      ctx.fillRect(origin.x + vx * d - 4, origin.y + vy * d - 4, 8, 8);
+      ArenaFX.projectile(ctx,{x:origin.x+vx*d,y:origin.y+vy*d,vx,vy,age,element:mon.type});
       return;
     }
     ArenaFX.setPixel(scale);

@@ -206,21 +206,33 @@ function aura(cells,m){
   }
  }
 }
+// Basic attacks stay within a 12 x 9 source-pixel footprint (smaller than signatures).
+const BASIC_ART={
+ electric:[
+  ['........3...','...3...35...','...53.35....','233455543332','....35..53..','...35....3..','...3........'],
+  ['....3.......','....53...3..','.....35.35..','233455543332','...35...53..','..35.....3..','..3.........']
+ ],
+ fire:[
+  ['............','..2...122...','...22123321.','122334554321','..233454321.','.2..123321..','......12....'],
+  ['......12....','.2..123321..','..233454321.','122334554321','...22123321.','..2...122...','............']
+ ],
+ water:[
+  ['............','.......111..','..3..1234431','123223455431','..3..1233321','.......111..','............'],
+  ['............','......1111..','.3..12344431','123223455431','...3.1233321','......1111..','............']
+ ],
+ grass:[
+  ['.........11.','......11231.','....1123431.','..112343321.','1234332211..','..111111....','............'],
+  ['............','..111111....','1234332211..','..112343321.','....1123431.','......11231.','.........11.']
+ ]
+};
 function projectile(cells,m){
  if((m.delay||0)>0)return;
- const v=unit(m),pal=palOf(m.element),[gx,gy]=grid(m.x,m.y),step=tickOf(m.pulse||m.age,10);
- if(m.element==='electric'){
-  [[0,0],[-1,1],[-2,-1],[-3,1],[-4,0],[-5,1]].forEach(([x,y],i)=>{
-   place(cells,gx+Math.round(x*v.x-y*v.y),gy+Math.round(x*v.y+y*v.x),i%2?pal[4]:pal[3]);
-  });
-  return;
- }
- const DART=['..1..','.121.','12341','.121.','..1..'];
- stampArt(cells,gx,gy,v.x,v.y,DART,pal);
- for(let i=1;i<=2;i++){
-  const [tx,ty]=at(gx,gy,v,-2-i,((step+i)%3)-1);
-  place(cells,tx,ty,i===1?pal[3]:pal[1]);
- }
+ const v=unit(m),pal=palOf(m.element),[gx,gy]=grid(m.x,m.y);
+ // Simulation pulse advances at eight units/second; keep the art at twelve frames/second.
+ const step=tickOf(m.age??((m.pulse||0)/8),12);
+ const frames=BASIC_ART[m.element],art=frames?frames[step%2]:['..1..','.232.','12341','.232.','..1..'];
+ const half=Math.floor(art[0].length/2);
+ stampArt(cells,gx-Math.round(half*v.x),gy-Math.round(half*v.y),v.x,v.y,art,pal);
 }
 function charge(cells,m){
  const pal=palOf(m.element),u=clamp((m.age||0)/(m.windup||.18),0,1),step=tickOf(m.age,12);
