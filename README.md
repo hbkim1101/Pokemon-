@@ -172,3 +172,15 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 ### v40: 위에서 내려다본 파도와 연속 화염
 
 파도는 낮은 높이와 넓은 수면 투영을 사용한다. 거북왕의 발 높이도 함께 낮추고, 앞쪽 포말과 뒤로 길게 흐르는 후류로 진행 방향을 표현한다. 화염방사는 구체를 겹치던 방식을 없애고, 외곽선 하나로 이어진 불길 안에 길게 흐르는 밝은 줄기와 갈라진 끝을 그린다. 네 기술의 Chromium 캡처에서 실행 오류가 없었고, 기존 스모크 및 8방향·3배율 좌표 검사를 통과했다.
+
+
+### v41: Pokémon Champions 실제 기술 장면 참고
+
+아래 영상의 실제 재생 프레임을 확인해 색과 형태를 도트로 재해석했다. 3D 자산이나 영상 프레임을 게임 자산으로 사용하지 않았다.
+
+- [Surf (CJTAMBER)](https://www.youtube.com/watch?v=uJ5_MxQZ93w&t=4s), 약 00:04: 청록색 수면과 넓게 부서지는 흰 포말. 현재 게임에서는 요청된 내려다보기 구도와 거북왕 탑승을 유지한다.
+- [All Fire Type Move Showcase (WeeGrind)](https://www.youtube.com/watch?v=QWTUo63h3yY&t=68s), 약 01:08–01:10, 화면의 Flamethrower 표기 확인: 입에서 좁게 시작하는 밝은 황색 불길과 뒤따르는 불티. 개별 구체 테두리를 추가하지 않고 연속 불길의 밝은 중심을 넓혔다.
+- [All Electric Type Moves (Jeyknite)](https://www.youtube.com/watch?v=lx9hm1AdzWU&t=165s), 약 02:45–02:49, Thunderbolt 표기 확인: 시전자 주위 방전과 표적을 감싸는 각진 전기 가지. 몸 주변 방전을 끊어진 호로 바꾸고 끝점의 별 모양을 비대칭 가지 방전으로 교체했다.
+- [All Grass Type Move Showcase (WeeGrind)](https://www.youtube.com/watch?v=dKuKdPppbBc&t=26s), 약 00:26–00:30, Energy Ball 표기 확인: 밝은 녹색 핵, 가느다란 에너지 줄기, 녹백색 명중 섬광. 기본 구체의 잎 장식을 에너지 줄기로 바꾸고 명중 중심부를 밝게 했다. 잎 시안은 선택지로 유지한다.
+
+피해량·판정·쿨다운은 변경하지 않았다. 기술 스튜디오는 에너지볼과 10만볼트의 짧은 응축 단계를 보여준다.

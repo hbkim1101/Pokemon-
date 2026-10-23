@@ -99,7 +99,7 @@ function flame(cells,m,quality){
  for(let d=0;d<=len+7;d++){
   const u=Math.min(1,d/len),phase=d*.19-step*.85;
   const center=Math.sin(d*.11-step*.55)*u*(variant===2?3:1.5);
-  const half=1.5+u*(variant===1?11:8)+Math.sin(phase)*u*1.8;
+  const half=1.8+u*(variant===1?12:9)+Math.sin(phase)*u*1.6;
   for(let side=-15;side<=15;side++){
    const across=(side-center)/half;
    // Unequal pointed tongues break the end of the stream into a ragged flame front.
@@ -108,15 +108,15 @@ function flame(cells,m,quality){
    const width=half*taper;if(width<.4||Math.abs(side-center)>width)continue;
    const edge=Math.abs(side-center)/width;
    const ribbon=Math.abs(side-center-Math.sin(d*.14-step*.7)*u*2)/width;
-   let color=edge>.88?pal[0]:edge>.65?pal[1]:ribbon>.44?pal[2]:pal[3];
-   if(ribbon<.14&&d<len*.64)color=pal[4];
+   let color=edge>.94?pal[1]:edge>.74?pal[2]:ribbon>.56?pal[2]:pal[3];
+   if(ribbon<.23&&d<len*.82)color=pal[4];
    if(u>.3&&Math.sin(d*.16-side*.9-step*.8)>.78&&edge<.7)color=pal[2];
    const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
   }
  }
  for(let i=0;i<(quality==='low'?2:5);i++){
   const d=len*.65+(i*13+step*3)%Math.max(8,len*.35),side=(i%2?1:-1)*(7+i%3*2);
-  for(let k=0;k<5;k++){
+  for(let k=0;k<3+i%3;k++){
    const [x,y]=at(ox,oy,v,d+k,side+Math.sin(k*.6+step)*.8);
    place(cells,x,y,pal[k<2?2:3]);
   }
@@ -180,21 +180,31 @@ function bolt(cells,m,quality){
   }
  }
  const [hx,hy]=paths[0].at(-1);
- for(let i=0;i<8;i++){
-  const a=i*TAU/8,inner=4,outer=7+(i+step)%4;
-  const ray=linePoints(hx+Math.round(Math.cos(a)*inner),hy+Math.round(Math.sin(a)*inner),hx+Math.round(Math.cos(a)*outer),hy+Math.round(Math.sin(a)*outer));
-  for(let k=0;k<ray.length;k+=2)place(cells,ray[k],ray[k+1],pal[i%2?2:4]);
+ // Champions Thunderbolt surrounds the target with angular arcs, not a radial star.
+ for(let i=0;i<(quality==='low'?4:7);i++){
+  const a=i*TAU/7+step*.08,reach=13+nse(i+step)*8;
+  const points=[[hx,hy]];
+  for(let j=1;j<=4;j++){
+   const angle=a+(nse(i*9+j+step*3)-.5)*.7,r=reach*j/4;
+   points.push([hx+Math.round(Math.cos(angle)*r),hy+Math.round(Math.sin(angle)*r)]);
+  }
+  for(let j=1;j<points.length;j++){
+   const line=linePoints(...points[j-1],...points[j]);
+   for(let k=0;k<line.length;k+=2){place(cells,line[k]+1,line[k+1],pal[2]);place(cells,line[k],line[k+1],pal[j<3?4:3]);}
+  }
  }
 }
 function aura(cells,m){
- const pal=palOf(m.element||'electric'),step=tickOf(m.age,10),[cx,cy]=grid(m.x,m.y);
- for(let i=0;i<10;i++){
-  const a=(i+step*.15)/10*TAU,r=8+(i%3);
-  place(cells,cx+Math.round(Math.cos(a)*r),cy+Math.round(Math.sin(a)*r),i%2?pal[3]:pal[2]);
-  const len=3+(i+step)%4;
-  for(let k=r;k<r+len;k++)place(cells,cx+Math.round(Math.cos(a)*k),cy+Math.round(Math.sin(a)*k),k===r+len-1?pal[4]:pal[3]);
+ const pal=palOf(m.element||'electric'),step=tickOf(m.age,12),[cx,cy]=grid(m.x,m.y);
+ for(let arc=0;arc<3;arc++){
+  let last=null;
+  for(let i=0;i<7;i++){
+   const a=arc*TAU/3+i*.19+step*.15,r=9+(i%2?3:0)+nse(step+arc)*2;
+   const pt=[cx+Math.round(Math.cos(a)*r),cy+Math.round(Math.sin(a)*r)];
+   if(last){const seg=linePoints(...last,...pt);for(let k=0;k<seg.length;k+=2)place(cells,seg[k],seg[k+1],pal[i%3?2:4]);}
+   last=pt;
+  }
  }
- bulb(cells,cx,cy,3,pal,0,-1);
 }
 function projectile(cells,m){
  if((m.delay||0)>0)return;
@@ -243,18 +253,21 @@ function jet(cells,m,ports,quality){
 // Ground-plane heading and screen-space height are separate: height never rotates.
 function rideLift(age,variant=0){return (variant===1?6:4)+Math.round(Math.sin(tickOf(age,12)*.6));}
 function ride(cells,m){
- const v=unit(m),p=PAL.water,[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,12),variant=m.variant||0;
+ const v=unit(m),p=['#135e9c','#169ed1','#68d9ed','#c9faff','#ffffff'],[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,12),variant=m.variant||0;
  const lift=rideLift(m.age,variant),width=variant===1?25:variant===2?17:22;
  // High camera: show the surface plane, with very little visible vertical face.
  const project=(a,b,h)=>[cx+Math.round(a*v.x-b*v.y),cy+Math.round((a*v.y+b*v.x)*.78-h)];
  for(let a=-35;a<=20;a++)for(let b=-width;b<=width;b++){
   const front=17-Math.pow(Math.abs(b)/width,3)*7+Math.sin(b*.35+step*.4);
-  const rear=-34+Math.abs(b)*.36;
+  const rear=-34+Math.abs(b)*.36+Math.sin(b*.53+step*.45)*2;
   if(a>front||a<rear)continue;
   const edge=Math.abs(b)/width,depth=front-a;
   const h=lift*Math.max(0,1-Math.abs(a)/39);
   const [x,y]=project(a,b,h);
-  let color=depth<2?p[3]:depth<5?p[2]:edge>.94?p[0]:p[1];
+  let color=depth<3?p[3]:depth<7?p[2]:edge>.94?p[0]:p[1];
+  const foam=Math.sin(b*1.3+step*.7)+Math.sin(a*.8-b*.4-step*.5);
+  if(depth<6&&foam>.4)color=p[4];
+  if(depth>8&&Math.sin(a*.31+b*.29-step*.65)>.8&&Math.sin(a*.15-b*.4)>.1)color=p[2];
   if(a< -15&&((b+Math.round(Math.sin(a*.16)*3))%7<2))color=p[2];
   if(Math.sin(a*.25+b*.17-step*.65)>.9&&a>-17&&depth>7)color=p[2];
   if(depth<2&&(b+step)%5!==0)color=p[4];
@@ -288,29 +301,39 @@ function rideFoam(cells,m){
 function surf(cells,m){ride(cells,m);}
 const LEAF=['.3.','121','232','.1.'];
 function orb(cells,m,quality){
- const pal=PAL.grass,v=unit(m),step=tickOf(m.age,14),variant=m.variant||0,r=variant===1?11:variant===2?8:9;
+ const p=PAL.grass,v=unit(m),step=tickOf(m.age,14),variant=m.variant||0,r=variant===1?11:9;
  const [cx,cy]=grid(m.x,m.y);
- // Filled round seed of energy, with asymmetric light and swirling bands.
+ // Champions: white-green nucleus inside a vivid green envelope, with fine energy tendrils.
  for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
   const d=Math.hypot(x,y);if(d>r)continue;
-  const light=Math.hypot(x+3,y+3);
-  const lobes=variant===1?3:variant===2?5:2;
-  const swirl=Math.sin(Math.atan2(y,x)*lobes+d*(variant===2?1.1:.65)-step*(variant===2?1:.6));
-  const color=d>r-1?pal[0]:light<2.5?pal[4]:swirl>.82&&d<r-2?pal[3]:light<r*.75?pal[2]:pal[1];
+  const light=Math.hypot(x+1,y+1),band=Math.sin(Math.atan2(y,x)*3-d*.4+step*.6);
+  const color=d>r-1?p[1]:light<r*.42?p[4]:light<r*.65?p[3]:band>.6?p[3]:p[2];
   place(cells,cx+x,cy+y,color);
  }
- const count=variant===2?10:quality==='low'?4:6;
+ const count=quality==='low'?4:7;
  for(let i=0;i<count;i++){
-  const a=i/count*TAU+step*(variant===2?.38:.22),rad=variant===1?16:13;
-  paintBitmap(cells,(cx+Math.cos(a)*rad)*PIXEL,(cy+Math.sin(a)*rad)*PIXEL,Math.cos(a),Math.sin(a),0,LEAF,pal);
-  const [x,y]=at(cx,cy,v,-12-i*3,Math.sin(i+step*.3)*4);
-  place(cells,x,y,pal[i%2?2:3]);
+  const angle=i/count*TAU+step*.12,reach=13+(i+step)%4;
+  let last=null;
+  for(let d=r-1;d<reach;d++){
+   const a=angle+Math.sin(d*.45-step*.5)*.22;
+   const pt=[cx+Math.round(Math.cos(a)*d),cy+Math.round(Math.sin(a)*d)];
+   if(last){const points=linePoints(...last,...pt);for(let k=0;k<points.length;k+=2)place(cells,points[k],points[k+1],d<r+2?p[3]:p[2]);}
+   last=pt;
+  }
+  if(variant===2&&i%2===0)paintBitmap(cells,last[0]*PIXEL,last[1]*PIXEL,Math.cos(angle),Math.sin(angle),0,LEAF,p);
+ }
+ for(let i=0;i<7;i++){
+  const [x,y]=at(cx,cy,v,-r-3-i*3,Math.sin(i*.9-step*.5)*(2+i*.3));
+  place(cells,x,y,i<2?p[3]:p[2]);
  }
 }
 function impact(cells,m){
  const u=clamp((m.age||0)/(m.life||.4),0,1),pal=palOf(m.element);
  const [cx,cy]=grid(m.x,m.y),r=Math.max(2,Math.round((1-u)*4+u*12));
- if(u<.55)stampArt(cells,cx-5,cy,1,0,CRESCENT,pal);
+ if(m.element==='grass'){
+  const core=Math.max(1,Math.round((1-u)*8));
+  for(let y=-core;y<=core;y++)for(let x=-core;x<=core;x++)if(x*x+y*y<core*core)place(cells,cx+x,cy+y,pal[u<.28?4:3]);
+ }else if(u<.55)stampArt(cells,cx-5,cy,1,0,CRESCENT,pal);
  ring(cells,m.x,m.y,Math.max(3,Math.round(6+u*8)),pal[4]);
  for(let i=0;i<8;i++){
   const a=i/8*TAU+(m.seed||0),len=r+(i%3);

@@ -173,7 +173,7 @@
       surf: ['파도에 올라타기', '말리는 큰 파도', '좁은 급류'],
       thunderbolt: ['굵은 직격 번개', '촘촘한 방전 가지', '겹번개 폭주'],
       flamethrower: ['이어지는 불길', '넓게 퍼지는 불길', '소용돌이 화염'],
-      energyball: ['잎을 두른 구체', '숲의 에너지 핵', '꽃잎 회오리']
+      energyball: ['빛나는 에너지 핵', '응축된 큰 구체', '잎의 회오리']
     }[mon.moveId] || ['기본 시안', '시안 2', '시안 3'];
     variants.forEach((label, i) => {
       const btn = document.createElement('button');
@@ -296,10 +296,14 @@
     ArenaFX.setPixel(scale);
     const m={...origin,vx,vy,age,life:1.4,type:move,variant:state.vfxVariant};
     if(move==='surf')return;
+    const windup=move==='energyball'?.18:move==='thunderbolt'?.12:0;
+    if(age<windup){ArenaFX.charge(ctx,{...m,element:move==='energyball'?'grass':'electric',windup});return;}
+    age-=windup;m.age=age;
     if(move==='thunderbolt'){
       const dist=420*Math.min(1,age/.55),steps=Math.max(2,Math.ceil(dist/18));
       m.path=Array.from({length:steps+1},(_,i)=>{
-        const side=i===0||i===steps?0:Math.sin(i*2.7+Math.floor(age*16))*12;
+        const seed=Math.sin(i*127.1+Math.floor(age*16)*19.7)*43758.5453;
+        const side=i===0||i===steps?0:((seed-Math.floor(seed))-.5)*38;
         return {x:origin.x+vx*dist*i/steps+nx*side,y:origin.y+vy*dist*i/steps+ny*side};
       });
       ArenaFX.thunder(ctx,m);ArenaFX.aura(ctx,{...m,element:'electric'});
