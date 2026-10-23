@@ -38,6 +38,8 @@ button.chip.fire.active{background:var(--fire);color:#2a1208;border-color:#ffd0a
 button.chip.volt.active{background:var(--volt);color:#2a2308;border-color:#fff3ad}
 button.chip.water.active{background:var(--water);color:#082232;border-color:#c8f0ff}
 button.chip.leaf.active{background:var(--leaf);color:#163014;border-color:#d8ffb8}
+#variantGroup .chip{font-size:11px;padding:8px 9px}
+.variantNote{margin:-8px 0 14px;color:var(--mute);font-size:10px;line-height:1.5}
 .stageWrap{position:relative;min-height:0;display:grid;place-items:center;padding:10px}
 #stage{width:min(100%,920px);height:min(70dvh,620px);max-height:100%;background:
   linear-gradient(180deg,#163744,#214f48 55%,#1a4038);border:1px solid #3d7a6e66;border-radius:16px;image-rendering:pixelated;cursor:crosshair;box-shadow:0 20px 50px #0007}
@@ -76,6 +78,9 @@ textarea#jsonOut{width:100%;min-height:110px;margin-top:8px;background:#07151b;c
       <div class="group" id="pokemonGroup"></div>
       <h2>기술</h2>
       <div class="group" id="moveGroup"></div>
+      <h2>연출 시안</h2>
+      <div class="group" id="variantGroup" aria-label="기술 연출 시안"></div>
+      <p class="variantNote" id="variantNote">세 가지 픽셀 연출을 바꿔 보며 비교하세요.</p>
       <h2>방향</h2>
       <div class="group" id="dirGroup"></div>
       <h2>도구</h2>
@@ -111,7 +116,7 @@ textarea#jsonOut{width:100%;min-height:110px;margin-top:8px;background:#07151b;c
   </footer>
 </div>
 <script src="./emitter-anchors.js?v=30"></script>
-<script src="./combat-fx.js?v=35"></script>
-<script src="./move-studio.js?v=35"></script>
+<script src="./combat-fx.js?v=36"></script>
+<script src="./move-studio.js?v=36"></script>
 </body>
 </html>

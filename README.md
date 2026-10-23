@@ -149,3 +149,10 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 ## 고유 기술 도트 그래픽 (v35)
 
 공유 `combat-fx.js`에서 파도타기는 휘어진 수면과 말리는 흰 포말, 10만볼트는 흰 코어와 꺾이는 가지 번개, 화염방사는 입에서 넓어지는 연속 불꽃과 불티, 에너지볼은 회전 무늬가 있는 녹색 구체와 작은 잎으로 표현합니다. 애니메이션은 12–16Hz 단계로 갱신하며 캐릭터와 같은 픽셀 크기를 유지합니다. `studio.html`도 전투와 같은 렌더러를 사용하며 확대된 캐릭터 배율에 도트 크기를 맞춥니다. 피해량·쿨다운·판정 범위는 유지됩니다.
+
+
+### 연출 비교 시안
+
+기술 스튜디오의 **연출 시안** 버튼으로 네 가지 기술을 각각 세 가지 도트 모션으로 비교할 수 있다. 파도타기는 거북왕이 물결을 타고 나아가는 후류, 큰 말림 파도, 쌍물살을 제안한다. 10만볼트는 굵은 직격, 촘촘한 갈래, 겹번개를 비교하고 화염방사는 이어지는 불길, 갈라지는 혀, 소용돌이형 불길을 비교한다. 에너지볼에는 잎 고리, 세 갈래 핵, 꽃잎 회오리를 둔다. 시안은 미리보기 전용이며 기본 전투 연출은 바꾸지 않는다.
+
+형태 참고: Pokémon의 [Surf 전투 장면](https://www.sportskeeda.com/esports/the-best-moveset-lapras-pokemon-red-blue), [Thunderbolt 도트 애니메이션](https://wiki.otpokemon.com/index.php/TM24_-_Thunderbolt), [Flamethrower 게임 장면](https://archives.bulbagarden.net/wiki/File%3AFlamethrower_LA.png), [Energy Ball 장면](https://bulbapedia.bulbagarden.net/wiki/Energy_Ball_%28move%29). 구성과 픽셀은 이 프로젝트용으로 새로 그렸다.

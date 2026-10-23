@@ -21,6 +21,7 @@
   const state = {
     kind: 1,
     move: 'special',
+    vfxVariant: 0,
     dir: 0,
     frame: 0,
     portIndex: 0,
@@ -132,9 +133,11 @@
     const pokemonGroup = $('pokemonGroup');
     const moveGroup = $('moveGroup');
     const dirGroup = $('dirGroup');
+    const variantGroup = $('variantGroup');
     pokemonGroup.innerHTML = '';
     moveGroup.innerHTML = '';
     dirGroup.innerHTML = '';
+    variantGroup.innerHTML = '';
     ROSTER.forEach((mon, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -166,6 +169,21 @@
         moveGroup.append(btn);
       });
     }
+    const variants = {
+      surf: ['파도에 올라타기', '말리는 큰 파도', '쌍물살 질주'],
+      thunderbolt: ['굵은 직격 번개', '촘촘한 방전 가지', '겹번개 폭주'],
+      flamethrower: ['이어지는 불길', '갈라지는 화염 혀', '소용돌이 화염'],
+      energyball: ['잎을 두른 구체', '숲의 에너지 핵', '꽃잎 회오리']
+    }[mon.moveId] || ['기본 시안', '시안 2', '시안 3'];
+    variants.forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip ' + mon.tone + (state.vfxVariant === i ? ' active' : '');
+      btn.textContent = (i + 1) + ' · ' + label;
+      btn.onclick = () => { state.vfxVariant = i; state.previewAge = 0; state.previewing = true; refresh(); };
+      variantGroup.append(btn);
+    });
+    $('variantNote').textContent = '시안 ' + (state.vfxVariant + 1) + '/3 · ' + variants[state.vfxVariant] + ' · 전투 밸런스는 바뀌지 않습니다.';
     DIRS.forEach((dir) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -264,7 +282,7 @@
       return;
     }
     ArenaFX.setPixel(scale);
-    const m={...origin,vx,vy,age,life:1.4,type:move};
+    const m={...origin,vx,vy,age,life:1.4,type:move,variant:state.vfxVariant};
     if(move==='thunderbolt'){
       const dist=420*Math.min(1,age/.55),steps=Math.max(2,Math.ceil(dist/18));
       m.path=Array.from({length:steps+1},(_,i)=>{
