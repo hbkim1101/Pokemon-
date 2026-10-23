@@ -95,34 +95,24 @@ function flame(cells,m,quality){
  if(len<1)return;
  const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,14);
  const pal=PAL.fire,[ox,oy]=grid(m.x,m.y),variant=m.variant||0;
- // A continuous tapered body. Travelling lobes break into pointed flame tongues.
- for(let d=0;d<=len;d++){
-  const u=d/len,phase=d*.34-step*.85;
-  const tip=Math.min(1,(len-d+1)/8);
-  const wave=variant===2?Math.sin(d*.27-step*.9)*u*4:Math.sin(phase)*u*(variant===1?3:2);
-  const half=(2+u*(variant===1?10:8)+wave)*tip;
-  const center=Math.sin(d*(variant===2?.24:.16)-step*(variant===2?1:.65))*u*(variant===2?4:2);
-  for(let side=Math.floor(center-half);side<=center+half;side++){
-   const edge=Math.abs(side-center)/half;
-   const hot=Math.abs(side-center+Math.sin(phase)*1.5)/half;
-   const color=edge>.88?pal[0]:edge>.66?pal[1]:hot>.4?pal[2]:hot>.16?pal[3]:pal[4];
-   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
+ // Reference clip 00:35: overlapping round flame lobes grow from a narrow mouth.
+ const count=Math.max(3,Math.ceil(len/6));
+ for(let i=0;i<=count;i++){
+  const d=Math.min(len,i*len/count),u=d/len;
+  const sway=Math.sin(i*1.8-step*.7)*u*(variant===2?5:2);
+  const radius=Math.max(2,Math.round(2+u*(variant===1?11:9)+Math.sin(i*2-step*.6)));
+  const [x,y]=at(ox,oy,v,d,sway);
+  // Offset hot interiors make each lobe a licking flame rather than concentric targets.
+  for(let yy=-radius;yy<=radius;yy++)for(let xx=-radius;xx<=radius;xx++){
+   const rr=xx*xx+yy*yy;if(rr>radius*radius)continue;
+   const hot=Math.hypot(xx+v.x*radius*.35+v.y*2,yy+v.y*radius*.35-v.x*2);
+   const color=rr>(radius-1)**2?pal[0]:hot<radius*.23?pal[4]:hot<radius*.48?pal[3]:hot<radius*.78?pal[2]:pal[1];
+   place(cells,x+xx,y+yy,color);
   }
  }
- const tongues=variant===1?11:variant===2?9:7;
- for(let i=0;i<tongues;i++){
-  const d=len*(.16+i*(variant===1?.065:.1)),sign=i%2?1:-1,base=3+d/len*(variant===2?10:6);
-  const tongueLen=variant===1?7:9;
-  for(let k=0;k<tongueLen;k++)for(let w=-2;w<=2;w++){
-   if(Math.abs(w)>2-k/4)continue;
-   const sway=variant===2?Math.sin(k*.8+step*.5)*2:0;
-   const [x,y]=at(ox,oy,v,d+k,sign*(base+k*.55)+w+sway);
-   place(cells,x,y,Math.abs(w)>1?pal[1]:pal[2+(k%3===0?1:0)]);
-  }
- }
- for(let i=0;i<(quality==='low'?3:6);i++){
-  const [x,y]=at(ox,oy,v,len-8+(i*7+step*3)%20,(i%2?1:-1)*(9+i%3*3));
-  place(cells,x,y,pal[3]);place(cells,x-1,y,pal[1]);
+ for(let i=0;i<(quality==='low'?2:4);i++){
+  const d=len*.65+((step*2+i*11)%23),side=(i%2?1:-1)*(9+i%3*3);
+  const [x,y]=at(ox,oy,v,d,side);bulb(cells,x,y,2+i%2,pal);
  }
  if(m.contact){
   const c=m.contact,[cx,cy]=grid(c.x,c.y),p=c.steam?PAL.water:pal;
@@ -162,9 +152,10 @@ function bolt(cells,m,quality){
  const paths=[pts.map(p=>grid(p.x,p.y))];
  // Short, bent forks rather than perpendicular comb teeth.
  for(let i=1;i<pts.length-1;i+=variant===1?1:variant===2?3:quality==='low'?4:2){
+  if(nse(i+step*7)>.65)continue;
   const [x,y]=paths[0][i],prev=paths[0][i-1];
   const dx=x-prev[0],dy=y-prev[1],len=Math.hypot(dx,dy)||1,sign=(i+step)%2?1:-1;
-  const nx=-dy/len*sign,ny=dx/len*sign,reach=variant===1?11:variant===2?17:14;
+  const nx=-dy/len*sign,ny=dx/len*sign,reach=(variant===1?9:variant===2?16:12)*( .6+nse(i*5+step)*.6);
   paths.push([[x,y],[x+Math.round(nx*7+dx/len*3),y+Math.round(ny*7+dy/len*3)],
    [x+Math.round(nx*(reach-4)-dx/len*2),y+Math.round(ny*(reach-4)-dy/len*2)],
    [x+Math.round(nx*reach+dx/len*4),y+Math.round(ny*reach+dy/len*4)]]);
@@ -172,7 +163,7 @@ function bolt(cells,m,quality){
    [x+Math.round(nx*8-dx/len*3),y+Math.round(ny*8-dy/len*3)]]);
  }
  for(let layer=0;layer<3;layer++)for(let p=0;p<paths.length;p++){
-  const points=paths[p],r=layer===0?(p?1:3):layer===1?(p?0:2):0;
+  const points=paths[p],r=layer===0?(p?1:2):layer===1?(p?0:1):0;
   for(let i=1;i<points.length;i++){
    const seg=linePoints(...points[i-1],...points[i]);
    for(let k=0;k<seg.length;k+=2)for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
@@ -242,95 +233,75 @@ function jet(cells,m,ports,quality){
   bulb(cells,sx+Math.round(v.x*reach),sy+Math.round(v.y*reach),3,pal,v.x,v.y);
  }
 }
+// Ground-plane heading and screen-space height are separate: height never rotates.
+function rideLift(age,variant=0){return (variant===1?18:14)+Math.round(Math.sin(tickOf(age,12)*.6));}
 function ride(cells,m){
- const v=unit(m),pal=PAL.water,step=tickOf(m.age,12),variant=m.variant||0,[cx,cy]=grid(m.x,m.y);
- const alongRadius=(variant===1?21:23)+Math.round(Math.sin(step*.6)*1),sideRadius=variant===1?16:variant===2?11:13;
- // A long rolling swell sits directly under the rider, with a foamy nose and trailing wake.
- for(let a=-alongRadius;a<=alongRadius;a++){
-  const u=a/alongRadius,span=sideRadius*Math.sqrt(Math.max(0,1-u*u));
-  for(let side=-Math.ceil(span);side<=span;side++){
-   const edge=Math.abs(side)/Math.max(1,span),rear=Math.max(0,-u);
-   let color=edge>.88?pal[3]:rear>.72?pal[0]:edge>.58?pal[2]:pal[1];
-   if(u>.65&&edge<.82)color=pal[2];
-   along(cells,cx,cy,v.x,v.y,a,side,color);
+ const v=unit(m),p=PAL.water,[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,12),variant=m.variant||0;
+ const lift=rideLift(m.age,variant),width=variant===1?23:variant===2?15:20;
+ const project=(a,b,h)=>[cx+Math.round(a*v.x-b*v.y),cy+Math.round((a*v.y+b*v.x)*.28-h)];
+ // A curled cross-section is swept across the wave, preserving a hollow breaking lip.
+ const profile=[[-34,0],[-25,2],[-17,6],[-9,12],[-2,16],[6,18],[13,17],[18,13],[19,9],[16,6],[12,6],[9,9],[10,12],[7,13],[4,11],[4,7],[8,3],[19,0]];
+ const inside=(a,z)=>{let hit=false;for(let i=0,j=profile.length-1;i<profile.length;j=i++){
+  const [x,y]=profile[i],[xx,yy]=profile[j];if((y>z)!==(yy>z)&&a<(xx-x)*(z-y)/(yy-y)+x)hit=!hit;
+ }return hit;};
+ const sections=Array.from({length:width*2+1},(_,i)=>i-width).sort((a,b)=>(a-b)*v.x);
+ for(const side of sections){
+  const edge=Math.abs(side)/width,taper=.78+.22*Math.sqrt(Math.max(0,1-edge*edge));
+  for(let a=-34;a<=19;a++)for(let z=0;z<=18;z++){
+   if(!inside(a,z)||Math.abs(side)>width*(.45+.55*Math.sin((a+34)/53*Math.PI)))continue;
+   const h=z*taper*lift/16;
+   const [x,y]=project(a,side,h);
+   const rim=!inside(a,z+1)||!inside(a+1,z);
+   let color=z<2?p[0]:edge>.93?p[1]:p[1];
+   if(z>7)color=p[2];
+   if(rim&&z>12&&a<15)color=p[3];
+   if(rim&&z>15)color=p[4];
+   if(a>8&&z<11)color=z>7?p[2]:p[0];
+   if(!rim&&z>3&&Math.sin(a*.32+z*.45+step*.6+side*.18)>.94)color=p[2];
+   place(cells,x,y,color);
   }
  }
- for(let side=-10;side<=10;side++){
-  const u=Math.sqrt(Math.max(0,1-(side/13)**2)),a=Math.round(23*u);
-  if((side+step)%3!==0){along(cells,cx,cy,v.x,v.y,a,side,pal[4]);along(cells,cx,cy,v.x,v.y,a-1,side,pal[3]);}
- }
- for(const side of (variant===2?[-14,14]:[-8,8]))for(let a=-34;a<-20;a++){
-  const wob=Math.round(Math.sin(a*.38+step*.4)*1.5);
-  along(cells,cx,cy,v.x,v.y,a,side+wob,(a+step)%5===0?pal[4]:pal[3]);
- }
- if(variant===1){
-  for(let i=0;i<13;i++){
-   const a=15+Math.round(Math.sin(i*.25)*4),side=8+Math.round(i*.65);
-   along(cells,cx,cy,v.x,v.y,a,side,pal[i%3===0?4:3]);
+ // Broken white curls ride across the top; small irregular gaps reveal the blue body.
+ for(let side=-width+2;side<width-1;side++){
+  const taper=.78+.22*Math.sqrt(Math.max(0,1-(side/width)**2));
+  for(let k=0;k<5;k++){
+   const a=7+k,h=(17-Math.max(0,k-1)*.65)*taper*lift/16;
+   const [x,y]=project(a,side,h+Math.sin(side*.55+step*.6));
+   if((side+step+k)%7!==0)place(cells,x,y,p[k<5?3:4]);
   }
  }
- for(let i=0;i<(variant===2?10:6);i++){
-  const a=-12+(i*7+step*2)%20,side=(i%2?1:-1)*(15+(i%3)*3);
-  const [x,y]=at(cx,cy,v,a,side);place(cells,x,y,pal[i%2?4:3]);
+ // Visible hollow at the breaking edge in side views.
+ if(Math.abs(v.x)>.45){
+  const side=width*.68*Math.sign(v.x),[hx,hy]=project(12,side,10*lift/16);
+  for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){
+   const d=x*x+y*y;if(d>25)continue;
+   if(d<10)place(cells,hx+x,hy+y,p[0]);
+   else if(y<0||x*v.x>0)place(cells,hx+x,hy+y,d>18?p[3]:p[2]);
+  }
+ }
+ for(let i=0;i<14;i++){
+  const [x,y]=project(12+(i%3)*3,-width+i*width*2/13,1+(i+step)%2);
+  if(i%3!==0){place(cells,x,y,p[3]);place(cells,x+1,y,p[4]);}
+ }
+ // Broken wake ribbons and kicked-up drops, moving away from the rider.
+ for(const b of [-width+3,width-3])for(let a=-40;a<-19;a++){
+  const [x,y]=project(a,b+Math.sin(a*.3+step*.6)*2,1);
+  if((a+step)%6!==0)place(cells,x,y,p[(a+step)%3?2:3]);
+ }
+ for(let i=0;i<8;i++){
+  const [x,y]=project(5+(i*3+step)%14,(i%2?1:-1)*(width+2+i%3),4+(step+i*2)%7);
+  place(cells,x,y,p[3]);place(cells,x,y-1,p[4]);
  }
 }
-function surf(cells,m,quality){
- const v=unit(m),pal=PAL.water,step=tickOf(m.age,12),variant=m.variant||0;
- const half=variant===1?25:variant===2?20:23,[ox,oy]=grid(m.x,m.y);
- // A broad rolling face with almost parallel edges; the crest no longer fans out from its center.
- for(let side=-half;side<=half;side++){
-  const u=Math.abs(side)/half,edge=Math.min(1,(1-u)*6);
-  let front,tail;
-  const round=Math.sqrt(Math.max(0,1-u*u));
-  if(variant===1){front=4+Math.round(12*round+Math.sin(side*.16-step*.45)*1.5);tail=-3-Math.round(5*round);}
-  else if(variant===2){front=3+Math.round(7*round+Math.sin(side*.32-step*.5)*2);tail=-5-Math.round(10*round);}
-  else {front=2+Math.round(9*round+Math.sin(side*.2-step*.42)*1.5);tail=-2-Math.round(7*round);}
-  front=Math.round(front*edge);tail=Math.round(tail*edge);
-  for(let d=tail;d<=front;d++){
-   const depth=front-d;
-   let color=depth<2?pal[4]:depth<4?pal[3]:depth<8?pal[2]:depth>Math.max(1,front-tail-3)?pal[0]:pal[1];
-   if(variant===2&&((side+step*2)%11<2)&&depth>5&&depth<13)color=pal[2];
-   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
-  }
-  // Broken white lip tracks the leading edge and scrolls across it like foam.
-  if(edge>.35&&((side+step*2)%4!==0)){
-   const [x,y]=at(ox,oy,v,front,side);place(cells,x,y,pal[4]);
-   if((side+step)%3===0){const [sx,sy]=at(ox,oy,v,front-1,side);place(cells,sx,sy,pal[3]);}
-  }
- }
- if(variant===0){
-  // A short hooked crest folds over one end of the swell.
-  for(let k=0;k<10;k++){
-   const side=Math.round(half*.44+k*.55),d=7-Math.round(Math.sin(k/9*Math.PI)*5);
-   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[4]);
-   if(k%2===0){const [tx,ty]=at(ox,oy,v,d-1,side);place(cells,tx,ty,pal[3]);}
-  }
- }
- if(variant===1){
-  // One high curl rolls over the face with a hollow, hooked lip.
-  for(let k=0;k<15;k++){
-   const side=-4+k, d=9+Math.round(Math.sin(k*.31+step*.12)*3)-Math.floor(k/5);
-   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[4]);place(cells,x,y-1,pal[3]);
-  }
-  for(let k=0;k<7;k++){
-   const [x,y]=at(ox,oy,v,12-k,6+Math.floor(k/2));place(cells,x,y,pal[4]);
-  }
- }
- const sprayCount=variant===2?12:quality==='low'?4:8;
- for(let i=0;i<sprayCount;i++){
-  const side=Math.round(-half*.82+i*half*1.64/(sprayCount-1));
-  const d=(variant===2?9:-2)+(i*3+step)%6;
-  const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[3]);
-  if(i%2===0)place(cells,x,y-1,pal[4]);
- }
- if(variant!==1){
-  // Parallel wake trails point back to Blastoise and make the wave feel rideable.
-  for(const side of variant===2?[-14,14]:[-10,10])for(let d=-24;d<-8;d++){
-   const [x,y]=at(ox,oy,v,d,side+Math.round(Math.sin(d*.42+step*.38)*1.5));
-   place(cells,x,y,(d+step)%5===0?pal[4]:pal[3]);
-  }
+function rideFoam(cells,m){
+ const [cx,cy]=grid(m.x,m.y),h=rideLift(m.age,m.variant||0),step=tickOf(m.age,12);
+ // Tiny contact splashes overlap the feet, joining the sprite to the water surface.
+ for(let x=-10;x<=10;x++){
+  const y=cy-h+1+Math.round(Math.abs(x)/7);
+  if(Math.abs(x)>5||(x+step)%5===0){place(cells,cx+x,y,PAL.water[3]);place(cells,cx+x,y+1,PAL.water[2]);}
  }
 }
+function surf(cells,m){ride(cells,m);}
 const LEAF=['.3.','121','232','.1.'];
 function orb(cells,m,quality){
  const pal=PAL.grass,v=unit(m),step=tickOf(m.age,14),variant=m.variant||0,r=variant===1?11:variant===2?8:9;
@@ -341,7 +312,7 @@ function orb(cells,m,quality){
   const light=Math.hypot(x+3,y+3);
   const lobes=variant===1?3:variant===2?5:2;
   const swirl=Math.sin(Math.atan2(y,x)*lobes+d*(variant===2?1.1:.65)-step*(variant===2?1:.6));
-  const color=d>r-1?pal[0]:light<3?pal[4]:swirl>.5?pal[3]:light<9?pal[2]:pal[1];
+  const color=d>r-1?pal[0]:light<2.5?pal[4]:swirl>.82&&d<r-2?pal[3]:light<r*.75?pal[2]:pal[1];
   place(cells,cx+x,cy+y,color);
  }
  const count=variant===2?10:quality==='low'?4:6;
@@ -376,7 +347,7 @@ function particle(cells,p){
  else place(cells,gx,gy,p.color||pal[3]);
 }
 const BUILD={
- flame,thunder:bolt,orb,surf,ride,impact,projectile,charge,aura,particle,
+ flame,thunder:bolt,orb,surf,ride,rideFoam,impact,projectile,charge,aura,particle,
  jet:(cells,m,quality)=>jet(cells,m,m.ports||m.emitters||[],quality),
  contact:(cells,m)=>flame(cells,{...m,stream:0,renderStream:0,contact:m.contact||{x:m.x,y:m.y}},'high')
 };
@@ -443,7 +414,9 @@ root.ArenaFX={
  thunder:(g,m,q)=>run('thunder',g,m,q,fadeOf(m)),
  orb:(g,m,q)=>run('orb',g,m,q,1),
  surf:(g,m,q)=>run('surf',g,m,q,fadeOf(m)),
- ride:(g,m,q)=>run('ride',g,m,q,clamp(1-(m.age||0)/Math.max(.05,m.life||1),.35,1)),
+ ride:(g,m,q)=>run('ride',g,m,q,1),
+ rideFoam:(g,m,q)=>run('rideFoam',g,m,q,1),
+ rideLift,
  impact:(g,m,q)=>run('impact',g,m,q,clamp(1-(m.age||0)/Math.max(.001,m.life||.4),0,1)**2),
  particle:(g,p)=>{
   const a=clamp((p.life||0)/Math.max(.001,p.max||p.life||.001),0,1)*(p.alpha??1);

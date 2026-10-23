@@ -227,10 +227,7 @@ function drawStudioEffects(x,y,a,clock,scale){
    const length=Math.min(335,Math.max(0,age*900))*Math.min(1,(m.life-age)/.25);
    drawFlamethrower({type:'flamethrower',x:baseX,y:baseY,vx,vy,age,stream:length});
  }else if(m.type==='surf'){
-   const d=Math.min(360,age*330);
-   if(window.ArenaFX)ArenaFX.setPixel(scale);
-   drawSurf({type:'surf',x:baseX+vx*(16+d),y:baseY+vy*(16+d),vx,vy,age,life:m.life});
-   if(age<.4)ArenaFX.jet(ctx,{x:baseX,y:baseY,vx,vy,age,windup:0},points,fxQuality);
+   return; // Rider and wave are composed together in render().
  }else if(m.type==='energyball'){
    const d=Math.min(435,age*410),cx=baseX+vx*d,cy=baseY+vy*d;
    if(age<1.03)drawEnergyball({type:'energyball',x:cx,y:cy,vx,vy,age,life:m.life});
@@ -286,7 +283,11 @@ function render(){
    spriteClock=p.age<releaseStart?flameChannelClock(p.age,timing):
     timing.hold+(timing.end-timing.hold)*Math.min(1,(p.age-releaseStart)/.22);
   }
-  spriteDraw(sp.id,cx+Math.cos(a)*offset,cy+Math.sin(a)*offset,a,state.action,spriteClock,scale,state.action==='Hurt'?.9:0,'player');
+  const surfing=state.preview?.type==='surf';
+  const wave=surfing?{x:cx,y:cy,vx:Math.cos(a),vy:Math.sin(a),age:state.preview.age}:null;
+  if(wave)ArenaFX.ride(ctx,wave);
+  spriteDraw(sp.id,cx+Math.cos(a)*offset,cy+Math.sin(a)*offset-(wave?ArenaFX.rideLift(wave.age)*scale:0),a,state.action,spriteClock,scale,state.action==='Hurt'?.9:0,'player');
+  if(wave)ArenaFX.rideFoam(ctx,wave);
  if(state.action==='Hurt' && state.clock<.4){const n=Math.max(0,1-state.clock/.4);fxStar(cx+Math.cos(a)*-16,cy-42,12+20*(1-n),'fire',n);pxRing(cx,cy-28,18+35*(1-n),4,'#ffe6d6',n,4);}
  drawStudioAnchors(cx,cy,a,spriteClock,scale);
   if(state.preview)drawStudioEffects(cx,cy,a,spriteClock,scale);

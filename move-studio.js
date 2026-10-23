@@ -170,9 +170,9 @@
       });
     }
     const variants = {
-      surf: ['파도에 올라타기', '말리는 큰 파도', '쌍물살 질주'],
+      surf: ['파도에 올라타기', '말리는 큰 파도', '좁은 급류'],
       thunderbolt: ['굵은 직격 번개', '촘촘한 방전 가지', '겹번개 폭주'],
-      flamethrower: ['이어지는 불길', '갈라지는 화염 혀', '소용돌이 화염'],
+      flamethrower: ['이어지는 불길', '넓게 퍼지는 불길', '소용돌이 화염'],
       energyball: ['잎을 두른 구체', '숲의 에너지 핵', '꽃잎 회오리']
     }[mon.moveId] || ['기본 시안', '시안 2', '시안 3'];
     variants.forEach((label, i) => {
@@ -267,8 +267,20 @@
     const f = Math.max(0, Math.min(frame, anim.frames - 1));
     const d = Math.max(0, Math.min(dir, anim.dirs - 1));
     const dw = anim.w * scale, dh = anim.h * scale;
-    ctx.drawImage(anim.image, f * anim.w, d * anim.h, anim.w, anim.h, x - dw / 2, y - dh + 8, dw, dh);
-    return { anim, f, d, dw, dh, x, y, scale };
+    anim.feet ||= new Map();
+    const key=d+','+f;
+    if(!anim.feet.has(key)){
+      const scan=document.createElement('canvas');scan.width=anim.w;scan.height=anim.h;
+      const sc=scan.getContext('2d',{willReadFrequently:true});
+      sc.drawImage(anim.image,f*anim.w,d*anim.h,anim.w,anim.h,0,0,anim.w,anim.h);
+      const pixels=sc.getImageData(0,0,anim.w,anim.h).data;
+      let bottom=0;
+      for(let yy=0;yy<anim.h;yy++)for(let xx=0;xx<anim.w;xx++)if(pixels[(yy*anim.w+xx)*4+3]>128)bottom=yy+1;
+      anim.feet.set(key,bottom);
+    }
+    const left=Math.round(x/scale-anim.w/2)*scale,top=Math.round(y/scale-anim.feet.get(key))*scale;
+    ctx.drawImage(anim.image,f*anim.w,d*anim.h,anim.w,anim.h,left,top,dw,dh);
+    return { anim, f, d, dw, dh, x, y, scale, left, top };
   }
 
   function drawFx(mon, origin, angle, age, scale) {
@@ -321,13 +333,15 @@
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
     }
 
-    const cx = w * 0.38, cy = h * 0.62;
+    let cx = w * 0.36, cy = h * 0.62;
     const angle = FACES[state.dir];
     const shoot = pack?.anims?.Shoot;
     const scale = shoot ? Math.min(4.2, 210 / Math.max(shoot.w, shoot.h)) : 3.2;
     let drawn = null;
     const riding=state.move==='special'&&mon.moveId==='surf'&&state.playFx&&state.previewing;
-    const rideBob=riding?Math.sin(state.clock*9)*3:0;
+    const rideBob=riding?-ArenaFX.rideLift(state.previewAge,state.vfxVariant)*scale:0;
+    if(riding){cx+=Math.cos(angle)*Math.sin(state.previewAge/1.2*Math.PI*2)*22;cy+=Math.sin(angle)*Math.sin(state.previewAge/1.2*Math.PI*2)*12;}
+    const wave={x:cx,y:cy,vx:Math.cos(angle),vy:Math.sin(angle),age:state.previewAge,life:1.2,variant:state.vfxVariant};
     if (pack?.loaded) {
       ctx.fillStyle = '#0005';
       ctx.beginPath();
@@ -335,17 +349,18 @@
       ctx.fill();
       if(riding){
         ArenaFX.setPixel(scale);
-        ArenaFX.ride(ctx,{x:cx,y:cy+14,vx:Math.cos(angle),vy:Math.sin(angle),age:state.previewAge,life:1.2,variant:state.vfxVariant});
+        ArenaFX.ride(ctx,wave);
       }
       drawn = drawSprite(pack, 'Shoot', cx, cy+rideBob, state.dir, state.frame, scale);
+      if(riding)ArenaFX.rideFoam(ctx,wave);
     }
 
     const port = currentPort(mon);
     const pt = pointAt(mon, port, state.dir, state.frame);
     let world = null;
     if (drawn && pt) {
-      const ox = cx - drawn.dw / 2 + pt[0] * scale;
-      const oy = cy - drawn.dh + 8 + pt[1] * scale;
+      const ox = drawn.left + pt[0] * scale;
+      const oy = drawn.top + pt[1] * scale;
       world = { x: ox, y: oy };
       if (state.showMarker) {
         ctx.fillStyle = '#22eeff';
@@ -358,7 +373,7 @@
     if (shoot) {
       const zoom = Math.min(8, Math.floor(220 / Math.max(shoot.w, shoot.h)));
       const zw = shoot.w * zoom, zh = shoot.h * zoom;
-      const zx = w * 0.68 - zw / 2, zy = h * 0.42 - zh / 2;
+      const zx = w * 0.68 - zw / 2, zy = h * 0.23 - zh / 2;
       state.zoomCell = { zx, zy, zw, zh, zoom, shoot };
       ctx.fillStyle = '#0b1f27';
       ctx.fillRect(zx - 10, zy - 28, zw + 20, zh + 44);

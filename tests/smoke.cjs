@@ -12,7 +12,7 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=31'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=39'), 'Motion Studio not linked');
 assert(html.includes('emitter-anchors.js?v=30'), 'Sprite anchor data not linked');
 
 function fakeContext(){
@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=38'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=39'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -316,3 +316,15 @@ for(const quality of ['high','low']){
  }
 }
 console.log('PASS: vertical emitter alignment and deterministic animated pixel art');
+
+// Regression: ride origin must be converted to effect cells exactly once at every scale.
+for(const scale of [1.43,3,4.2])for(let dir=0;dir<8;dir++){
+ sandbox.ArenaFX.setPixel(scale);
+ for(const kind of ['ride','rideFoam']){
+  const move={x:0,y:0,vx:Math.cos(dir*Math.PI/4),vy:Math.sin(dir*Math.PI/4),age:.35};
+  const base=sandbox.ArenaFX.cells(kind,move);
+  const shifted=sandbox.ArenaFX.cells(kind,{...move,x:100*scale,y:80*scale});
+  assert.equal(JSON.stringify(base),JSON.stringify(shifted.map(([x,y,c])=>[x-100,y-80,c])),kind+' must follow its rider at enlarged scale');
+ }
+}
+console.log('PASS: Surf follows its rider in 8 directions at battle and studio scales');
