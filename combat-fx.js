@@ -244,42 +244,58 @@ function jet(cells,m,ports,quality){
 }
 function surf(cells,m,quality){
  const v=unit(m),pal=PAL.water,step=tickOf(m.age,12),variant=m.variant||0;
- const half=variant===1?26:variant===2?16:22,[ox,oy]=grid(m.x,m.y);
- // The wake concept stretches the trough behind the travelling crest.
+ const half=variant===1?25:variant===2?20:23,[ox,oy]=grid(m.x,m.y);
+ // A broad rolling face with almost parallel edges; the crest no longer fans out from its center.
  for(let side=-half;side<=half;side++){
-  const u=side/half,amplitude=variant===1?15:variant===2?6:10;
-  const crest=Math.round(amplitude*(1-u*u)+Math.sin(side*.45-step*.7)*2);
-  const tail=-Math.round((variant===2?18:9)*(1-u*u))-2;
-  for(let d=tail;d<=crest;d++){
-   const depth=crest-d;
-   let color=depth<2?pal[4]:depth<4?pal[3]:depth<7?pal[2]:d<tail+2?pal[0]:pal[1];
-   if(depth>5&&depth<11&&(side+step*2)%9<2)color=pal[2];
+  const u=Math.abs(side)/half,edge=Math.min(1,(1-u)*6);
+  let front,tail;
+  const round=Math.sqrt(Math.max(0,1-u*u));
+  if(variant===1){front=4+Math.round(12*round+Math.sin(side*.16-step*.45)*1.5);tail=-3-Math.round(5*round);}
+  else if(variant===2){front=3+Math.round(7*round+Math.sin(side*.32-step*.5)*2);tail=-5-Math.round(10*round);}
+  else {front=2+Math.round(9*round+Math.sin(side*.2-step*.42)*1.5);tail=-2-Math.round(7*round);}
+  front=Math.round(front*edge);tail=Math.round(tail*edge);
+  for(let d=tail;d<=front;d++){
+   const depth=front-d;
+   let color=depth<2?pal[4]:depth<4?pal[3]:depth<8?pal[2]:depth>Math.max(1,front-tail-3)?pal[0]:pal[1];
+   if(variant===2&&((side+step*2)%11<2)&&depth>5&&depth<13)color=pal[2];
    const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
   }
- }
- if(variant!==2){
-  const curls=variant===1?3:5;
-  for(let i=-Math.floor(curls/2);i<=Math.floor(curls/2);i++){
-   const side=i*(variant===1?15:8),crest=(variant===1?14:9)-Math.round(i*i*(variant===1?1.8:1.4));
-   for(let k=0;k<16;k++){
-    const a=k/16*TAU*.8+step*.12;
-    const [x,y]=at(ox,oy,v,crest+Math.cos(a)*(variant===1?4:3),side+Math.sin(a)*(variant===1?5:3));
-    place(cells,x,y,pal[4]);place(cells,x,y+1,pal[3]);
-   }
+  // Broken white lip tracks the leading edge and scrolls across it like foam.
+  if(edge>.35&&((side+step*2)%4!==0)){
+   const [x,y]=at(ox,oy,v,front,side);place(cells,x,y,pal[4]);
+   if((side+step)%3===0){const [sx,sy]=at(ox,oy,v,front-1,side);place(cells,sx,sy,pal[3]);}
   }
  }
- const sprayCount=variant===2?18:quality==='low'?6:12;
- for(let i=0;i<sprayCount;i++){
-  const side=variant===2?-18+i*36/(sprayCount-1):-24+i*48/(sprayCount-1),
-    d=(variant===2?-12:12)+(i*3+step)%7;
-  const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[3]);place(cells,x,y-1,pal[4]);
- }
  if(variant===0){
-  // Two water trails stream behind the crest so it reads as a wave being ridden.
-  for(let side of [-10,10])for(let d=-24;d<-8;d++){
-   const [x,y]=at(ox,oy,v,d,side+Math.round(Math.sin(d*.42+step*.38)*2));
-   const col=(d+step)%5===0?pal[4]:Math.abs(side)===10?pal[2]:pal[3];
-   place(cells,x,y,col);
+  // A short hooked crest folds over one end of the swell.
+  for(let k=0;k<10;k++){
+   const side=Math.round(half*.44+k*.55),d=7-Math.round(Math.sin(k/9*Math.PI)*5);
+   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[4]);
+   if(k%2===0){const [tx,ty]=at(ox,oy,v,d-1,side);place(cells,tx,ty,pal[3]);}
+  }
+ }
+ if(variant===1){
+  // One high curl rolls over the face with a hollow, hooked lip.
+  for(let k=0;k<15;k++){
+   const side=-4+k, d=9+Math.round(Math.sin(k*.31+step*.12)*3)-Math.floor(k/5);
+   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[4]);place(cells,x,y-1,pal[3]);
+  }
+  for(let k=0;k<7;k++){
+   const [x,y]=at(ox,oy,v,12-k,6+Math.floor(k/2));place(cells,x,y,pal[4]);
+  }
+ }
+ const sprayCount=variant===2?12:quality==='low'?4:8;
+ for(let i=0;i<sprayCount;i++){
+  const side=Math.round(-half*.82+i*half*1.64/(sprayCount-1));
+  const d=(variant===2?9:-2)+(i*3+step)%6;
+  const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,pal[3]);
+  if(i%2===0)place(cells,x,y-1,pal[4]);
+ }
+ if(variant!==1){
+  // Parallel wake trails point back to Blastoise and make the wave feel rideable.
+  for(const side of variant===2?[-14,14]:[-10,10])for(let d=-24;d<-8;d++){
+   const [x,y]=at(ox,oy,v,d,side+Math.round(Math.sin(d*.42+step*.38)*1.5));
+   place(cells,x,y,(d+step)%5===0?pal[4]:pal[3]);
   }
  }
 }

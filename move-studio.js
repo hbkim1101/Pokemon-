@@ -294,7 +294,7 @@
       m.stream=Math.min(300,age*820)*Math.max(0,Math.min(1,(1.4-age)/.25));
       ArenaFX.flame(ctx,m);
     }else{
-      const dist=move==='surf'?Math.min(280,age*300):Math.min(360,age*380);
+      const dist=move==='surf'?42+Math.sin(age*5)*8:Math.min(360,age*380);
       m.x+=vx*dist;m.y+=vy*dist;
       if(move==='surf')ArenaFX.surf(ctx,m);else ArenaFX.orb(ctx,m);
     }
