@@ -89,51 +89,33 @@ function stampArt(cells,gx,gy,vx,vy,bitmap,pal){
   }
  }
 }
-function flame(cells,m,quality){
- const L=m.renderStream??m.stream??0;
- const len=Math.max(0,Math.round(L/PIXEL));
- if(len<1)return;
- const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,12);
- const pal=PAL.fire,[ox,oy]=grid(m.x,m.y),variant=m.variant||0;
- // One continuous plume: only its outside edge is outlined, never individual lobes.
- for(let d=0;d<=len+7;d++){
-  const u=Math.min(1,d/len),phase=d*.19-step*.85;
-  const center=Math.round(Math.sin(d*.11-step*.55)*u*(variant===2?3:1.5));
-  const half=1.8+u*(variant===1?12:9)+Math.sin(phase)*u*1.6;
-  for(let side=-15;side<=15;side++){
-   const across=(side-center)/half;
-   // Unequal pointed tongues break the end of the stream into a ragged flame front.
-   const end=len-5+Math.sin(side*.7+step*.45)*6-Math.abs(across)*4;
-   const taper=Math.min(1,Math.max(0,(end-d)/12));
-   const width=half*taper;if(width<.4||Math.abs(side-center)>width)continue;
-   const edge=Math.abs(side-center)/width;
-   const ribbon=Math.abs(side-center-Math.sin(d*.14-step*.7)*u*2)/width;
-   let color=edge>.94?pal[0]:edge>.77?pal[1]:ribbon>.56?pal[2]:pal[3];
-   if(ribbon<.19&&d<len*.82)color=pal[4];
-   if(u>.45&&edge>.5&&Math.sin(d*.22-step*.9+side*.6)>.6)color=pal[1];
-   // Long travelling tongues keep a continuous flame, with no circular hot spots.
-   if(u>.25&&Math.sin(d*.12-side*1.3-step*.9)>.62&&edge<.7)color=pal[2];
-   if(u>.3&&ribbon<.35&&Math.sin(d*.17-step*1.2)>.45)color=pal[4];
-   const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
-  }
- }
- for(let i=0;i<(quality==='low'?2:5);i++){
-  const d=len*.65+(i*13+step*3)%Math.max(8,len*.35),side=(i%2?1:-1)*(7+i%3*2);
-  for(let k=0;k<3+i%3;k++){
-   const [x,y]=at(ox,oy,v,d+k,side+Math.sin(k*.6+step)*.8);
-   place(cells,x,y,pal[k<2?2:3]);
-  }
- }
- if(m.contact){
-  const c=m.contact,[cx,cy]=grid(c.x,c.y),p=c.steam?PAL.water:pal;
-  bulb(cells,cx,cy,quality==='low'?5:8,p);
-  for(let k=0;k<6;k++){
-   const puff=2+(step+k)%7;
-   place(cells,cx+((k%3)-1),cy-puff,c.steam?p[4]:pal[4]);
-   place(cells,cx+((k%2)?2:-2),cy-puff-1,c.steam?p[3]:pal[3]);
-  }
+// BW2 flame particles overlap into a turbulent stream, with red rims and yellow lobes.
+function fireCloud(cells,cx,cy,v,r,step,seed=0){
+ const p=['#a4230d','#df2d08','#ff6508','#ffac10','#ffe647'];
+ for(let x=-r-2;x<=r+2;x++)for(let y=-r-2;y<=r+2;y++){
+  const angle=Math.atan2(y,x),edge=r*(.86+.12*Math.sin(angle*5+seed+step*.6)+.1*Math.cos(angle*3-step*.45));
+  const d=Math.hypot(x,y);if(d>edge)continue;
+  const heat=Math.hypot(x+r*.2+Math.sin(y*.6+step)*r*.14,y+r*.12);
+  const shade=d>edge-1?(x< -r*.45?1:0):heat<r*.23?4:heat<r*.49?3:heat<r*.76?2:1;
+  const [px,py]=at(cx,cy,v,x,y);place(cells,px,py,p[shade]);
  }
 }
+function flame(cells,m,quality){
+ const len=Math.round((m.renderStream??m.stream??0)/PIXEL);if(len<1)return;
+ const v=unit(m),[ox,oy]=grid(m.x,m.y),step=tickOf(Math.max(0,m.age-(m.windup||0)),16);
+ const spacing=7,offset=(step*2)%spacing;
+ for(let d=offset;d<len;d+=4+Math.round(d/Math.max(1,len)*7)){
+  const u=d/Math.max(1,len),r=Math.round(3+u*(m.variant===1?10:8));
+  const [x,y]=at(ox,oy,v,d,Math.round(Math.sin(d*.33-step*.7)*u*2));
+  fireCloud(cells,x,y,v,r,step,Math.floor(d/spacing)*1.7);
+ }
+ if(m.contact){
+  const [x,y]=grid(m.contact.x,m.contact.y);
+  if(m.contact.steam)bulb(cells,x,y,6,PAL.water);
+  else fireCloud(cells,x,y,v,11,step,3);
+ }
+}
+
 function disk(cells,wx,wy,r,color){
  const [cx,cy]=grid(wx,wy),rad=Math.max(0,r|0);
  for(let y=-rad;y<=rad;y++)for(let x=-rad;x<=rad;x++)if(x*x+y*y<=rad*rad)place(cells,cx+x,cy+y,color);
@@ -156,47 +138,47 @@ function linePoints(x0,y0,x1,y1){
  }
  return pts;
 }
+function lightningStroke(cells,points,strong,step){
+ for(let i=1;i<points.length;i++){
+  const seg=linePoints(...points[i-1],...points[i]);
+  for(let k=0;k<seg.length;k+=2){
+   const x=seg[k],y=seg[k+1];
+   if(strong){place(cells,x-1,y,'#b7b02e');place(cells,x+1,y,'#dfe54b');}
+   place(cells,x,y,step%3?'#f1ff86':'#ffffff');
+  }
+ }
+}
 function bolt(cells,m,quality){
  const pts=m.path||[];if(pts.length<2)return;
- const pal=PAL.electric,step=tickOf(m.age,12),variant=m.variant||0;
- const paths=[pts.map(p=>grid(p.x,p.y))];
- // Short, bent forks rather than perpendicular comb teeth.
- for(let i=1;i<pts.length-1;i+=variant===1?1:variant===2?3:quality==='low'?4:2){
-  if(nse(i+step*7)>.65)continue;
-  const [x,y]=paths[0][i],prev=paths[0][i-1];
-  const dx=x-prev[0],dy=y-prev[1],len=Math.hypot(dx,dy)||1,sign=(i+step)%2?1:-1;
-  const nx=-dy/len*sign,ny=dx/len*sign,reach=(variant===1?9:variant===2?16:12)*( .6+nse(i*5+step)*.6);
-  paths.push([[x,y],[x+Math.round(nx*7+dx/len*3),y+Math.round(ny*7+dy/len*3)],
-   [x+Math.round(nx*(reach-4)-dx/len*2),y+Math.round(ny*(reach-4)-dy/len*2)],
-   [x+Math.round(nx*reach+dx/len*4),y+Math.round(ny*reach+dy/len*4)]]);
-  if(variant===2)paths.push([[x,y],[x+Math.round(nx*3+dx/len*5),y+Math.round(ny*3+dy/len*5)],
-   [x+Math.round(nx*8-dx/len*3),y+Math.round(ny*8-dy/len*3)]]);
+ const [cx,cy]=grid(pts.at(-1).x,pts.at(-1).y),step=tickOf(Math.max(0,m.age-(m.windup||0)),18);
+ // BW2 Thunderbolt descends on the target in several slender yellow flashes.
+ // The gameplay path still selects the impact position; it is not drawn as a laser.
+ const t=Math.max(0,m.age-(m.windup||0)),count=t<.12?1:quality==='low'?2:3;
+ for(let i=0;i<count&&t<.7;i++){
+  if((step+i)%5===4)continue;
+  const x=cx+(i-1)*8,points=[];
+  for(let j=0;j<9;j++){
+   const dx=j===8?0:Math.round((nse(i*23+j*11+Math.floor(step/2)*7)-.5)*8);
+   points.push([x+dx,cy-35+j*5]);
+  }
+  lightningStroke(cells,points,i===1,step+i);
+  const joint=points[4];lightningStroke(cells,[joint,[joint[0]+(i%2?6:-6),joint[1]+5],[joint[0]+(i%2?3:-3),joint[1]+10]],false,step);
  }
- for(let layer=0;layer<3;layer++)for(let p=0;p<paths.length;p++){
-  const points=paths[p],r=layer===0?(p?1:2):layer===1?(p?0:1):0;
-  if(p&&layer===2&&(p+step)%3===0)continue;
-  for(let i=1;i<points.length;i++){
-   const seg=linePoints(...points[i-1],...points[i]);
-   for(let k=0;k<seg.length;k+=2)for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
-    if(Math.abs(x)+Math.abs(y)>r)continue;
-    place(cells,seg[k]+x,seg[k+1]+y,pal[layer===0?1:layer===1?2:4]);
-   }
+ if(t>.16&&t<.65){
+  const r=7+(step%3),p=['#b1c830','#e0f45d','#f8ffb1'];
+  for(let y=-r-4;y<=r+4;y++)for(let x=-r-4;x<=r+4;x++){
+   const angle=Math.atan2(y,x),d=Math.hypot(x,y),limit=r+(Math.cos(angle*16)>0?4:0);
+   if(d<=limit)place(cells,cx+x,cy+y,d<r*.75?p[2]:d<r?p[1]:p[0]);
   }
  }
- const [hx,hy]=paths[0].at(-1);
- // Alternating angular brackets enclose the target; avoid a radial spider shape.
- for(let side=-1;side<=1;side+=2){
-  const spread=11+(step%3)*2;
-  const points=[[hx+side*5,hy-17],[hx+side*spread,hy-9],
-   [hx+side*(spread-4),hy-2],[hx+side*(spread+2),hy+5],[hx+side*5,hy+16]];
-  for(let j=1;j<points.length;j++){
-   if((step+j+(side>0?1:0))%4===0)continue;
-   const seg=linePoints(...points[j-1],...points[j]);
-   for(let k=0;k<seg.length;k+=2){place(cells,seg[k]+side,seg[k+1],pal[1]);place(cells,seg[k],seg[k+1],pal[step%2?3:4]);}
-  }
+ if(t>.55)for(let i=0;i<4;i++){
+  const a=i*TAU/4+step*.2,points=[];
+  for(let j=0;j<5;j++){const r=11+(j%2)*4,theta=a+j*.19;points.push([cx+Math.round(Math.cos(theta)*r),cy+Math.round(Math.sin(theta)*r)]);}
+  lightningStroke(cells,points,false,step);
  }
 
 }
+
 function aura(cells,m){
  const pal=palOf(m.element||'electric'),step=tickOf(m.age,12),[cx,cy]=grid(m.x,m.y);
  for(let arc=0;arc<3;arc++){
@@ -209,54 +191,57 @@ function aura(cells,m){
   }
  }
 }
-// Basic cores fit 14 x 9 cells, with a sparse short tail distinct from signatures.
-const BASIC_ART={
- electric:[
-  ['.........23...','........253...','...233.253....','..2355255432..','.....2553.....','....253.......','...23.........'],
-  ['........23....','.......253....','......2553....','..2345525532..','....253.233...','...253........','...23.........']
- ],
- fire:[
-  ['..............','.....2........','..2..32..22...','...233212332..','1233443345432.','.233454455432.','...234554432..','....233332....','......22......'],
-  ['..............','...2..........','....32...22...','..2333212332..','1233443345432.','..23445455432.','.23334544332..','.....23332....','.......22.....']
- ],
- water:[
-  ['..............','........222...','.....2234432..','..22334555432.','12334444444321','..22333333321.','.....223332...','........22....','..............'],
-  ['..............','.......222....','....22344432..','..23345555432.','12334444444321','..23333333321.','....2233332...','.......222....','..............']
- ],
- grass:[
-  ['..........11..','........1231..','......123431..','....12344321..','..123443321...','1234433321....','..1222211.....','....111.......','..............'],
-  ['..............','..............','.......11111..','....112333431.','1234444444321.','..112333321...','.....11111....','..............','..............']
- ]
-};
 function projectile(cells,m){
  if((m.delay||0)>0)return;
- const v=unit(m),pal=palOf(m.element),[gx,gy]=grid(m.x,m.y);
- const step=tickOf(m.age??((m.pulse||0)/8),12);
- const frames=BASIC_ART[m.element],art=frames?frames[step%2]:['..1..','.232.','12341','.232.','..1..'];
- const half=Math.floor(art[0].length/2);
- // Short authored afterimages replace frame-rate-dependent random basic-shot particles.
- for(let i=0;i<3;i++){
-  const d=-8-i*3,side=Math.sin(step*.8+i)*.8;
-  const [x,y]=at(gx,gy,v,d,side);
-  if(m.element==='water'){
-   place(cells,x,y,pal[i?2:3]);if(i===0)place(cells,x,y+1,pal[1]);
-  }else if(m.element==='fire'){
-   place(cells,x,y,pal[i?1:3]);if(i===0)place(cells,x,y-1,pal[2]);
-  }else if(m.element==='electric'){
-   const [xx,yy]=at(gx,gy,v,d+1,side+(step%2?1:-1));place(cells,x,y,pal[i?2:3]);place(cells,xx,yy,pal[2]);
-  }else if(m.element==='grass'&&i<2){place(cells,x,y,pal[2]);place(cells,x+1,y,pal[1]);}
+ const v=unit(m),[gx,gy]=grid(m.x,m.y),step=tickOf(m.age??((m.pulse||0)/8),16);
+ if(m.element==='electric'){
+  const points=[[-2,-8],[1,-5],[-1,-2],[2,0],[-1,3],[1,7]].map(([x,y],i)=>[gx+x+(i%2?step%2:0),gy+y]);
+  lightningStroke(cells,points,true,step);return;
  }
- stampArt(cells,gx-Math.round(half*v.x),gy-Math.round(half*v.y),v.x,v.y,art,pal);
+ if(m.element==='water'){
+  // White-blue droplets merge into a short narrow water jet.
+  for(let i=3;i>=0;i--){
+   const d=5-i*5,rad=i===3?2:3;
+   for(let x=-rad;x<=rad;x++)for(let y=-rad;y<=rad;y++){
+    if(x*x+y*y>rad*rad)continue;
+    const [px,py]=at(gx,gy,v,d+x,y+Math.round(Math.sin(step*.7+i)));
+    const light=Math.hypot(x+1,y+1);
+    place(cells,px,py,light<1.5?'#ffffff':light<2.8?'#b6efff':x*x+y*y>rad*rad-2?'#258bcc':'#6dcfff');
+   }
+  }return;
+ }
+ if(m.element==='fire'){
+  const art=step%2?['....2....','....32...','...232...','..23432..','..345432.','.2345432.','..23432..','...232...','....2....']:['.....2...','....23...','...2332..','..23432..','.2345432.','.2345432.','..23432..','...232...','....2....'];
+  stampArt(cells,gx-4,gy,1,0,art,['#9b310f','#e75010','#ff9a16','#ffce3d','#fff29b']);
+  for(let i=0;i<3;i++){const [x,y]=at(gx,gy,v,-7-i*3,(step+i)%3-1);place(cells,x,y,'#ed8626');}
+  return;
+ }
+ if(m.element==='grass'){
+  const leaf=['....22.','..23342','.234432','123332.','.122...'];
+  for(let i=0;i<3;i++){
+   const [x,y]=at(gx,gy,v,4-i*6,Math.round(Math.sin(step*.5+i*2)*3));
+   const a=Math.atan2(v.y,v.x)+Math.sin(step*.6+i)*.65;
+   stampArt(cells,x-3,y,Math.cos(a),Math.sin(a),leaf,['#355e1e','#548d22','#8cbd39','#c4dc63']);
+  }return;
+ }
+ stampArt(cells,gx-2,gy,v.x,v.y,['..1..','.232.','12341','.232.','..1..'],PAL.neutral);
 }
+
 function charge(cells,m){
- const pal=palOf(m.element),u=clamp((m.age||0)/(m.windup||.18),0,1),step=tickOf(m.age,12);
- const r=Math.max(2,Math.round(9*(1-u)+2)),[cx,cy]=grid(m.x,m.y);
- for(let i=0;i<8;i++){
-  const a=(i+step)/8*TAU;
-  place(cells,cx+Math.round(Math.cos(a)*r),cy+Math.round(Math.sin(a)*r),pal[i%2?3:2]);
+ const pal=palOf(m.element),u=clamp((m.age||0)/(m.windup||.18),0,1),step=tickOf(m.age,16),[cx,cy]=grid(m.x,m.y);
+ if(m.element==='grass'&&(m.windup||0)<=.12){
+  for(let i=0;i<4;i++){const a=i*TAU/4+step*.6;stampArt(cells,cx+Math.round(Math.cos(a)*7),cy+Math.round(Math.sin(a)*5),1,0,LEAF,PAL.grass);}
+ }else if(m.element==='grass'){
+  energySphere(cells,cx,cy,Math.round(3+u*7),step);
+  for(let i=0;i<4;i++){const a=i*TAU/4+step*.4,r=14*(1-u)+4;place(cells,cx+Math.round(Math.cos(a)*r),cy+Math.round(Math.sin(a)*r),'#d9fa81');}
+ }else if(m.element==='electric'){
+  for(let i=0;i<2;i++)lightningStroke(cells,[[cx-7+i*14,cy-5],[cx-4+i*8,cy-1],[cx-7+i*14,cy+4]],false,step);
+ }else for(let i=0;i<4;i++){
+  const a=i*TAU/4+step*.4,r=5*(1-u)+2;
+  place(cells,cx+Math.round(Math.cos(a)*r),cy+Math.round(Math.sin(a)*r),pal[2]);
  }
- bulb(cells,cx,cy,u>.6?3:2,pal,0,-1);
 }
+
 function jet(cells,m,ports,quality){
  const age=Math.max(0,m.age-(m.windup||0));
  const reach=Math.round(Math.min(quality==='low'?18:32,age*50));
@@ -279,46 +264,35 @@ function jet(cells,m,ports,quality){
 // Ground-plane heading and screen-space height are separate: height never rotates.
 function rideLift(age,variant=0){return (variant===1?6:4)+Math.round(Math.sin(tickOf(age,12)*.6));}
 function ride(cells,m){
- const v=unit(m),p=['#294a9c','#427be7','#73bdff','#c6efff','#ffffff'],[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,12),variant=m.variant||0;
- const lift=rideLift(m.age,variant),width=variant===1?25:variant===2?17:22;
- // High camera: show the surface plane, with very little visible vertical face.
+ const v=unit(m),p=['#1262af','#188bd5','#49b5ed','#a2e8ff','#f2ffff'],[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,16);
+ const lift=rideLift(m.age,m.variant||0),width=m.variant===1?34:m.variant===2?23:29;
  const project=(a,b,h)=>[cx+Math.round(a*v.x-b*v.y),cy+Math.round((a*v.y+b*v.x)*.78-h)];
- for(let a=-35;a<=20;a++)for(let b=-width;b<=width;b++){
-  const front=17-Math.pow(Math.abs(b)/width,2)*9+Math.sin(b*.4+step*.4)*2;
-  const rear=-34+Math.abs(b)*.36+Math.sin(b*.53+step*.45)*2;
-  const bank=width*(.8+.2*Math.cos((a+6)*.045))+Math.sin(a*.27-step*.6)*2.5;
-  if(a>front||a<rear||Math.abs(b)>bank)continue;
-  const edge=Math.abs(b)/bank,depth=front-a;
-  const h=lift*Math.max(0,1-Math.abs(a)/39);
-  const [x,y]=project(a,b,h);
-  let color=depth<3?p[3]:depth<7?p[2]:edge>.94?p[0]:p[1];
-  // Scrolling scalloped wave bands: broad blue troughs and narrow white crests.
-  const wave=((Math.round(a+Math.sin(b*.32)*2)+step*2)%16+16)%16;
-  if(depth>7&&wave<3)color=p[2];
-  if(depth>7&&wave===0&&((b+24)%9)<6)color=p[3];
-  if(depth<5&&((b+step*2+30)%8)<5)color=p[3];
-  if(depth<2&&((b+step+30)%7)<5)color=p[4];
-  // Rear edge dissolves into separate streaks rather than closing an oval outline.
-  if(a< -25&&(b+step)%6>2)continue;
-  place(cells,x,y,color);
-  // Close nearest-neighbour projection gaps in diagonal water surfaces.
-  if(Math.abs(v.x*v.y)>.2)place(cells,x+1,y,color);
+ // Broad sheet of water, shallow crests and broken interlocking white foam as in BW2 Surf.
+ for(let a=-40;a<=24;a++)for(let b=-width;b<=width;b++){
+  const front=21-Math.pow(Math.abs(b)/width,4)*5+Math.sin(b*.29-step*.25)*1.5;
+  const bank=width-2+Math.sin(a*.2+step*.2)*2;
+  if(a>front||Math.abs(b)>bank||a< -38+Math.sin(b*.4)*2)continue;
+  const phase=((a+step*1.5+Math.sin(b*.28)*2)%15+15)%15;
+  const crest=phase<1.6,h=lift+Math.max(0,3-phase)*.6;
+  const [x,y]=project(a,b,h),edge=front-a;
+  let color=a< -25?p[0]:p[1];
+  if(phase<4)color=p[2];
+  if(crest)color=p[3];
+  if(phase<.8&&((b+50+Math.floor(a/5))%9)<5)color=p[4];
+  if(phase>5&&phase<10&&Math.sin(b*.65+a*.3)>.94)color=p[2];
+  if(edge<2)color=p[3];
+  if(edge<1&&((b+30)%5)<3)color=p[4];
+  if(a< -33&&(b+40)%7>3)continue;
+  place(cells,x,y,color);if(Math.abs(v.x*v.y)>.2)place(cells,x+1,y,color);
  }
- // Two travelling foam bands across the water, with the rider between them.
- for(const row of [-15,11])for(let b=-width+3;b<width-2;b++){
-  const a=row-Math.abs(b)*.16+Math.sin(b*.33+step*.5)*1.3;
-  const [x,y]=project(a,b,lift);
-  if((b+step)%7<4){place(cells,x,y,p[3]);if(row>0)place(cells,x,y+1,p[2]);}
- }
- for(const b of [-width+3,width-3])for(let a=-48;a<-25;a++){
-  const [x,y]=project(a,b+Math.sin(a*.25+step*.5)*1.5,0);
-  if((a+step)%7<5)place(cells,x,y,p[(a+step)%3?2:3]);
- }
- for(let i=0;i<8;i++){
-  const [x,y]=project(10+(step+i*3)%13,(i%2?1:-1)*(width+i%3),1);
-  place(cells,x,y,p[3]);if(i%2)place(cells,x+1,y,p[4]);
+ // Small forked foam tips, rather than long ornamental wake tendrils.
+ for(let i=0;i<9;i++){
+  const b=(i-4)*6,a=20-Math.abs(b)*.14;
+  const [x,y]=project(a,b,lift+1+(step+i)%4);
+  place(cells,x,y,p[4]);place(cells,x,y-1,p[3]);if(i%2)place(cells,x+1,y-2,p[4]);
  }
 }
+
 function rideFoam(cells,m){
  const [cx,cy]=grid(m.x,m.y),h=rideLift(m.age,m.variant||0),step=tickOf(m.age,12);
  // Tiny contact splashes overlap the feet, joining the sprite to the water surface.
@@ -329,56 +303,75 @@ function rideFoam(cells,m){
 }
 function surf(cells,m){ride(cells,m);}
 const LEAF=['.3.','121','232','.1.'];
-function orb(cells,m,quality){
- const p=PAL.grass,v=unit(m),step=tickOf(m.age,14),variant=m.variant||0,r=variant===1?11:9;
- const [cx,cy]=grid(m.x,m.y);
- // DS-inspired compact shaded core, stepped luminous bands and orbiting motes.
+// BW2 Energy Ball is a translucent green sphere with orbiting rings, not a solid leaf orb.
+function energySphere(cells,cx,cy,r,step){
+ const p=['#246d1a','#47a621','#8bd52b','#b9e947','#e4ff9b'];
  for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
   const d=Math.hypot(x,y);if(d>r)continue;
-  const light=Math.hypot(x+1,y+1),band=Math.sin(Math.atan2(y,x)*3-d*.4+step*.6);
-  const color=d>r-1?(y>1?p[0]:p[1]):light<r*.22?p[4]:light<r*.45?p[3]:band>.82?p[3]:y>r*.35?p[1]:p[2];
-  place(cells,cx+x,cy+y,color);
+  if(d>r-1.1)place(cells,cx+x,cy+y,p[2]);
+  else if(d>r-2.1)place(cells,cx+x,cy+y,p[0]);
+  else if(Math.sin(x*.5+y*.3+step*.45)>.4)place(cells,cx+x,cy+y,'#387c2380');
  }
- const count=quality==='low'?2:4;
- for(let i=0;i<count;i++){
-  const angle=i/count*TAU+step*.12,reach=11+(i+step)%2;
-  let last=null;
-  for(let d=r-1;d<reach;d++){
-   const a=angle+Math.sin(d*.45-step*.5)*.22;
-   const pt=[cx+Math.round(Math.cos(a)*d),cy+Math.round(Math.sin(a)*d)];
-   if(last){const points=linePoints(...last,...pt);for(let k=0;k<points.length;k+=2)place(cells,points[k],points[k+1],d<r+2?p[3]:p[2]);}
-   last=pt;
-  }
-  if(variant===2&&i%2===0)paintBitmap(cells,last[0]*PIXEL,last[1]*PIXEL,Math.cos(angle),Math.sin(angle),0,LEAF,p);
- }
- for(let i=0;i<20;i++){
-  const a=i*.12+step*.2,rr=r+3;
-  for(const sign of [-1,1]){
-   const x=cx+Math.round(Math.cos(a)*rr)*sign,y=cy+Math.round(Math.sin(a)*rr*.6)*sign;
-   if(i%5!==0)place(cells,x,y,p[i<6?3:2]);
+ for(let orbit=0;orbit<3;orbit++){
+  const turn=orbit*1.05+step*.14,co=Math.cos(turn),si=Math.sin(turn);
+  let previous=null;
+  for(let i=0;i<=44;i++){
+   const a=i/44*TAU,xx=Math.cos(a)*(r-1),yy=Math.sin(a)*(r*.48);
+   const pt=[cx+Math.round(xx*co-yy*si),cy+Math.round(xx*si+yy*co)];
+   if(previous){const line=linePoints(...previous,...pt);for(let j=0;j<line.length;j+=2)place(cells,line[j],line[j+1],p[(i+orbit*5)%16<5?3:1]);}
+   previous=pt;
   }
  }
- for(let i=0;i<7;i++){
-  const [x,y]=at(cx,cy,v,-r-3-i*3,Math.sin(i*.9-step*.5)*(2+i*.3));
-  place(cells,x,y,i<2?p[3]:p[2]);
+ const a=step*.4;for(let i=0;i<3;i++){
+  const x=cx+Math.round(Math.cos(a+i*2.1)*r*.5),y=cy+Math.round(Math.sin(a+i*2.1)*r*.5);
+  place(cells,x,y,p[4]);place(cells,x+1,y,p[3]);place(cells,x,y+1,p[3]);
  }
 }
+function orb(cells,m,quality){
+ const v=unit(m),[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,16),r=m.variant===1?12:10;
+ energySphere(cells,cx,cy,r,step);
+ for(let i=0;i<(quality==='low'?2:4);i++){
+  const [x,y]=at(cx,cy,v,-r-4-i*4,Math.sin(i*1.7-step*.3)*3);
+  place(cells,x,y,'#c9f96e');if(i<2){place(cells,x+1,y,'#89c62e');place(cells,x,y+1,'#89c62e');}
+ }
+}
+
 function impact(cells,m){
  const u=clamp((m.age||0)/(m.life||.4),0,1),pal=palOf(m.element);
  const [cx,cy]=grid(m.x,m.y),r=Math.max(2,Math.round((1-u)*4+u*12));
- if(m.element==='grass'){
-  const core=Math.max(1,Math.round((1-u)*8));
-  for(let y=-core;y<=core;y++)for(let x=-core;x<=core;x++)if(x*x+y*y<core*core)place(cells,cx+x,cy+y,pal[u<.28?4:3]);
- }else if(u<.55)stampArt(cells,cx-5,cy,1,0,CRESCENT,pal);
- ring(cells,m.x,m.y,Math.max(3,Math.round(6+u*8)),pal[4]);
- for(let i=0;i<8;i++){
-  const a=i/8*TAU+(m.seed||0),len=r+(i%3);
-  for(let k=Math.max(0,r-3);k<=len;k++){
-   const x=cx+Math.round(Math.cos(a)*k),y=cy+Math.round(Math.sin(a)*k);
-   if(m.element==='grass'&&k===len)paintBitmap(cells,x*PIXEL,y*PIXEL,Math.cos(a),Math.sin(a),0,LEAF,pal);
-   else place(cells,x,y,k>=len-1?pal[4]:pal[2]);
+ if(m.element==='grass'&&m.basic){
+  for(let i=0;i<4;i++){
+   const a=i*TAU/4+u,r=4+u*12,x=cx+Math.round(Math.cos(a)*r),y=cy+Math.round(Math.sin(a)*r*.6);
+   const points=[[x-3,y+2],[x,y-2],[x+3,y-3]];
+   lightningStroke(cells,points,false,1);
   }
+  return;
  }
+ if(m.element==='grass'){
+  for(let i=0;i<6;i++){
+   const a=i*TAU/6+u*.8,spread=3+u*18;
+   energySphere(cells,cx+Math.round(Math.cos(a)*spread),cy+Math.round(Math.sin(a)*spread*.7),Math.max(2,Math.round(7*(1-u))),tickOf(m.age,16)+i);
+  }
+  return;
+ }
+ if(m.element==='electric'){
+  if(u<.7){const points=[];for(let i=0;i<7;i++)points.push([cx+(i%2?2:-2)+(tickOf(m.age,18)%2),cy-26+i*5]);lightningStroke(cells,points,false,tickOf(m.age,18));}
+  return;
+ }
+ if(m.element==='fire'){
+  const step=tickOf(m.age,16);
+  for(let i=0;i<3;i++)fireCloud(cells,cx+(i-1)*4,cy-Math.round(u*13)-i*3,{x:1,y:0},Math.max(2,Math.round(5*(1-u))),step,i);
+  return;
+ }
+ if(m.element==='water'){
+  for(let i=0;i<7;i++){
+   const x=cx+Math.round((i-3)*(2+u*5)),y=cy-Math.round(Math.sin(u*Math.PI)*(8+i%3*4))+Math.round(u*5);
+   place(cells,x,y,'#f2ffff');place(cells,x,y+1,'#a5edff');place(cells,x+1,y+1,'#67d9ed');
+  }
+  return;
+ }
+ ring(cells,m.x,m.y,r,pal[3]);
+
 }
 function particle(cells,p){
  const pal=palOf(p.element),v=unit(p),[gx,gy]=grid(p.x,p.y);

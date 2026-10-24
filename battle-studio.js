@@ -211,16 +211,16 @@ function drawStudioEffects(x,y,a,clock,scale){
    const reach=maxDist*(k<.55?k/.55:1-(k-.55)/.45);
    for(let i=1;i<=5;i++){const d=reach-i*13;pxRect(x+vx*d-4,y-17+vy*d-4,8,8,roster[state.kind].color,(.55-i*.075)*(1-k*.5));}
  }else if(m.type==='basic'){
-   const d=30+Math.min(age,1)*420,q={x:baseX+vx*d,y:baseY+vy*d,vx,vy,element:roster[state.kind].type,team:'player',pulse:age*8};
-   if(age<.95)drawProjectileSprite(q);
-   if(age>.65 && age<1.15)fxStar(q.x,q.y,10+age*12,q.element,(1.15-age)*2);
+   const d=30+Math.min(age,.7)*420,q={x:baseX+vx*d,y:baseY+vy*d,vx,vy,element:roster[state.kind].type,team:'player',pulse:age*8};
+   if(age<.7)drawProjectileSprite(q);
+   if(age>=.7)ArenaFX.impact(ctx,{...q,basic:true,age:age-.7,life:.4});
  }else if(m.type==='thunderbolt'){
    const reach=Math.min(1,age/.57),dist=520*reach,steps=Math.max(2,Math.floor(dist/19)),path=[];
    for(let i=0;i<=steps;i++){let d=dist*i/steps;path.push({x:baseX+vx*d+nx*(i===steps?0:Math.sin(i*2.8+age*19)*15),y:baseY+vy*d+ny*(i===steps?0:Math.sin(i*2.8+age*19)*15)});}
    if(age<.85){
      if(window.ArenaFX)ArenaFX.setPixel(scale);
      drawThunderbolt({type:'thunderbolt',path,age,life:.9,x:baseX+vx*dist,y:baseY+vy*dist});
-     if(age<.7)ArenaFX.aura(ctx,{x:baseX,y:baseY,age,element:'electric'},fxQuality);
+
    }
    else drawThunderbolt({type:'boltEcho',path,age:age-.85,life:.38,x:baseX+vx*dist,y:baseY+vy*dist});
  }else if(m.type==='flamethrower'){
@@ -231,7 +231,7 @@ function drawStudioEffects(x,y,a,clock,scale){
  }else if(m.type==='energyball'){
    const d=Math.min(435,age*410),cx=baseX+vx*d,cy=baseY+vy*d;
    if(age<1.03)drawEnergyball({type:'energyball',x:cx,y:cy,vx,vy,age,life:m.life});
-   else drawEnergyBurst({x:baseX+vx*420,y:baseY+vy*420,age:age-1.03,life:.3});
+   else drawEnergyBurst({element:'grass',x:baseX+vx*420,y:baseY+vy*420,age:age-1.03,life:.3});
  }
 }
 function render(){

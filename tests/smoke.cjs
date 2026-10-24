@@ -12,7 +12,7 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=39'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=45'), 'Motion Studio not linked');
 assert(html.includes('emitter-anchors.js?v=30'), 'Sprite anchor data not linked');
 
 function fakeContext(){
@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=44'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=45'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -339,3 +339,15 @@ for(const element of ['electric','fire','water','grass'])for(let dir=0;dir<8;dir
  assert.notDeepEqual(cells,sandbox.ArenaFX.cells('projectile',{...m,age:.4}),element+' must animate');
 }
 console.log('PASS: four basic attack designs in all eight directions');
+
+// BW2 Thunderbolt falls in screen-space at the path endpoint in every heading.
+for(const scale of [1.43,4.2])for(let dir=0;dir<8;dir++){
+ sandbox.ArenaFX.setPixel(scale);
+ const a=dir*Math.PI/4,target={x:Math.round(Math.cos(a)*100)*scale,y:Math.round(Math.sin(a)*100)*scale};
+ const cells=sandbox.ArenaFX.cells('thunder',{path:[{x:0,y:0},target],age:.3});
+ const cx=Math.round(target.x/scale),cy=Math.round(target.y/scale);
+ assert(cells.length>40);
+ assert(cells.every(([x,y])=>Math.abs(x-cx)<24&&y>=cy-36&&y<=cy+20),'Lightning must surround its target, not rotate or draw a source-to-target beam');
+ assert(cells.some(([x,y])=>y<cy-28),'Lightning must descend from above');
+}
+console.log('PASS: BW2 lightning stays vertical at the target in every heading');

@@ -289,7 +289,8 @@
     const move = state.move === 'basic' ? 'basic' : mon.moveId;
     if (move === 'basic') {
       ArenaFX.setPixel(scale);
-      const d = 24 + Math.min(age, 1) * 280;
+      const d = 24 + Math.min(age, .7) * 280;
+      if(age>.7){ArenaFX.impact(ctx,{x:origin.x+vx*d,y:origin.y+vy*d,element:mon.type,basic:true,age:age-.7,life:.35});return;}
       ArenaFX.projectile(ctx,{x:origin.x+vx*d,y:origin.y+vy*d,vx,vy,age,element:mon.type});
       return;
     }
@@ -300,20 +301,20 @@
     if(age<windup){ArenaFX.charge(ctx,{...m,element:move==='energyball'?'grass':'electric',windup});return;}
     age-=windup;m.age=age;
     if(move==='thunderbolt'){
-      const dist=420*Math.min(1,age/.55),steps=Math.max(2,Math.ceil(dist/18));
+      const dist=300,steps=Math.max(2,Math.ceil(dist/18));
       m.path=Array.from({length:steps+1},(_,i)=>{
         const seed=Math.sin(i*127.1+Math.floor(age*16)*19.7)*43758.5453;
         const side=i===0||i===steps?0:((seed-Math.floor(seed))-.5)*38;
         return {x:origin.x+vx*dist*i/steps+nx*side,y:origin.y+vy*dist*i/steps+ny*side};
       });
-      ArenaFX.thunder(ctx,m);ArenaFX.aura(ctx,{...m,element:'electric'});
+      ArenaFX.thunder(ctx,m);
     }else if(move==='flamethrower'){
       m.stream=Math.min(300,age*820)*Math.max(0,Math.min(1,(1.4-age)/.25));
       ArenaFX.flame(ctx,m);
     }else{
       const dist=move==='surf'?42+Math.sin(age*5)*8:Math.min(360,age*380);
       m.x+=vx*dist;m.y+=vy*dist;
-      if(move==='surf')ArenaFX.surf(ctx,m);else ArenaFX.orb(ctx,m);
+      if(age>.75){m.x=origin.x+vx*285;m.y=origin.y+vy*285;ArenaFX.impact(ctx,{...m,element:'grass',age:age-.75,life:.45});}else ArenaFX.orb(ctx,m);
     }
   }
 
