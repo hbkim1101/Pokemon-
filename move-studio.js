@@ -169,21 +169,19 @@
         moveGroup.append(btn);
       });
     }
-    const variants = {
-      surf: ['파도에 올라타기', '말리는 큰 파도', '좁은 급류'],
-      thunderbolt: ['굵은 직격 번개', '촘촘한 방전 가지', '겹번개 폭주'],
-      flamethrower: ['이어지는 불길', '넓게 퍼지는 불길', '소용돌이 화염'],
-      energyball: ['빛나는 에너지 핵', '응축된 큰 구체', '잎의 회오리']
-    }[mon.moveId] || ['기본 시안', '시안 2', '시안 3'];
-    variants.forEach((label, i) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'chip ' + mon.tone + (state.vfxVariant === i ? ' active' : '');
-      btn.textContent = (i + 1) + ' · ' + label;
-      btn.onclick = () => { state.vfxVariant = i; state.previewAge = 0; state.previewing = true; refresh(); };
-      variantGroup.append(btn);
-    });
-    $('variantNote').textContent = '시안 ' + (state.vfxVariant + 1) + '/3 · ' + variants[state.vfxVariant] + ' · 전투 밸런스는 바뀌지 않습니다.';
+    state.vfxVariant = 0;
+    const source = state.move === 'basic'
+      ? {electric: [3873, '전기쇼크'], fire: [1022, '불꽃세례'], water: [4070, '물대포'], grass: [2844, '잎날가르기']}[mon.type]
+      : {thunderbolt: [3888, '10만볼트'], flamethrower: [1272, '화염방사'], surf: [3669, '파도타기'], energyball: [1042, '에너지볼']}[mon.moveId];
+    const reference = document.createElement('a');
+    reference.className = 'chip active';
+    reference.textContent = 'BW2 ' + source[1] + ' 원작 영상 ↗';
+    reference.href = 'https://www.youtube.com/watch?v=bNW2L2DtPIg&t=' + source[0] + 's';
+    reference.target = '_blank';reference.rel = 'noopener noreferrer';
+    variantGroup.append(reference);
+    $('variantNote').textContent = state.move === 'basic' && mon.type === 'grass'
+      ? '풀 기본기는 BW2 잎날가르기의 연출을 사용합니다.'
+      : '블랙·화이트 2의 해당 기술 장면을 기준으로 제작했습니다.';
     DIRS.forEach((dir) => {
       const btn = document.createElement('button');
       btn.type = 'button';

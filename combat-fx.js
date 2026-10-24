@@ -91,12 +91,14 @@ function stampArt(cells,gx,gy,vx,vy,bitmap,pal){
 }
 // BW2 flame particles overlap into a turbulent stream, with red rims and yellow lobes.
 function fireCloud(cells,cx,cy,v,r,step,seed=0){
- const p=['#a4230d','#df2d08','#ff6508','#ffac10','#ffe647'];
+ const p=['#b72c1080','#d7330b','#f76308','#ff9c0c','#ffd431'];
  for(let x=-r-2;x<=r+2;x++)for(let y=-r-2;y<=r+2;y++){
-  const angle=Math.atan2(y,x),edge=r*(.86+.12*Math.sin(angle*5+seed+step*.6)+.1*Math.cos(angle*3-step*.45));
+  const angle=Math.atan2(y,x),edge=r*(.85+.17*Math.sin(angle*5+seed+step*.6)+.12*Math.cos(angle*3-step*.45));
   const d=Math.hypot(x,y);if(d>edge)continue;
-  const heat=Math.hypot(x+r*.2+Math.sin(y*.6+step)*r*.14,y+r*.12);
-  const shade=d>edge-1?(x< -r*.45?1:0):heat<r*.23?4:heat<r*.49?3:heat<r*.76?2:1;
+  // Offset hot pockets merge across the particle edges instead of concentric coin rings.
+  const hx=x+r*.22+Math.sin(y*.55+step*.8+seed)*r*.24;
+  const heat=Math.hypot(hx,y+r*.12+Math.cos(x*.5-step*.7)*r*.18);
+  const shade=d>edge-.7?(x< -r*.45?1:0):heat<r*.32?4:heat<r*.62?3:heat<r*.85?2:1;
   const [px,py]=at(cx,cy,v,x,y);place(cells,px,py,p[shade]);
  }
 }
@@ -105,8 +107,8 @@ function flame(cells,m,quality){
  const v=unit(m),[ox,oy]=grid(m.x,m.y),step=tickOf(Math.max(0,m.age-(m.windup||0)),16);
  const spacing=7,offset=(step*2)%spacing;
  for(let d=offset;d<len;d+=4+Math.round(d/Math.max(1,len)*7)){
-  const u=d/Math.max(1,len),r=Math.round(3+u*(m.variant===1?10:8));
-  const [x,y]=at(ox,oy,v,d,Math.round(Math.sin(d*.33-step*.7)*u*2));
+  const u=d/Math.max(1,len),r=Math.round(3+u*(m.variant===1?10:8)+(nse(Math.floor(d/7)+step)-.5)*u*2);
+  const [x,y]=at(ox,oy,v,d,Math.round(Math.sin(d*.33-step*.7)*u*3));
   fireCloud(cells,x,y,v,r,step,Math.floor(d/spacing)*1.7);
  }
  if(m.contact){
@@ -279,7 +281,10 @@ function ride(cells,m){
   if(phase<4)color=p[2];
   if(crest)color=p[3];
   if(phase<.8&&((b+50+Math.floor(a/5))%9)<5)color=p[4];
-  if(phase>5&&phase<10&&Math.sin(b*.65+a*.3)>.94)color=p[2];
+  // Interlocking foam bridges break the surface into rippling patches.
+  const bridge=((b+Math.round(Math.sin(a*.27)*2)+60)%11+11)%11;
+  if(phase>3&&phase<11&&bridge<1.2)color=p[2];
+  if(phase>4&&phase<8&&bridge<.8&&(Math.floor(a/15)+Math.floor(b/11))%2===0)color=p[3];
   if(edge<2)color=p[3];
   if(edge<1&&((b+30)%5)<3)color=p[4];
   if(a< -33&&(b+40)%7>3)continue;
