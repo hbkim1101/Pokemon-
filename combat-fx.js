@@ -4,10 +4,10 @@
 let PIXEL=1.43;
 const TAU=Math.PI*2;
 const PAL={
- fire:['#7a1c12','#c43214','#f25c1c','#ffb038','#fff4b4'],
- water:['#123f88','#2b78dc','#7ec8ff','#e7f6ff','#ffffff'],
- grass:['#14502c','#2f9a48','#7ed85a','#d8ff9a','#f4ffd0'],
- electric:['#6a4a08','#e0a018','#ffe14a','#fff7b0','#ffffff'],
+ fire:['#9c2921','#e74921','#ff8429','#ffce52','#fff7bd'],
+ water:['#294a9c','#427be7','#73bdff','#c6efff','#ffffff'],
+ grass:['#315a29','#52a539','#94d64a','#d6ef84','#f7ffce'],
+ electric:['#9c6321','#e7a529','#ffde42','#fff794','#ffffff'],
  neutral:['#243038','#6a8490','#c5d8de','#ffffff','#ffffff']
 };
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -93,12 +93,12 @@ function flame(cells,m,quality){
  const L=m.renderStream??m.stream??0;
  const len=Math.max(0,Math.round(L/PIXEL));
  if(len<1)return;
- const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,14);
+ const v=unit(m),t=Math.max(0,m.age-(m.windup||0)),step=tickOf(t,12);
  const pal=PAL.fire,[ox,oy]=grid(m.x,m.y),variant=m.variant||0;
  // One continuous plume: only its outside edge is outlined, never individual lobes.
  for(let d=0;d<=len+7;d++){
   const u=Math.min(1,d/len),phase=d*.19-step*.85;
-  const center=Math.sin(d*.11-step*.55)*u*(variant===2?3:1.5);
+  const center=Math.round(Math.sin(d*.11-step*.55)*u*(variant===2?3:1.5));
   const half=1.8+u*(variant===1?12:9)+Math.sin(phase)*u*1.6;
   for(let side=-15;side<=15;side++){
    const across=(side-center)/half;
@@ -111,7 +111,9 @@ function flame(cells,m,quality){
    let color=edge>.94?pal[0]:edge>.77?pal[1]:ribbon>.56?pal[2]:pal[3];
    if(ribbon<.19&&d<len*.82)color=pal[4];
    if(u>.45&&edge>.5&&Math.sin(d*.22-step*.9+side*.6)>.6)color=pal[1];
-   if(u>.3&&Math.sin(d*.16-side*.9-step*.8)>.78&&edge<.7)color=pal[2];
+   // Long travelling tongues keep a continuous flame, with no circular hot spots.
+   if(u>.25&&Math.sin(d*.12-side*1.3-step*.9)>.62&&edge<.7)color=pal[2];
+   if(u>.3&&ribbon<.35&&Math.sin(d*.17-step*1.2)>.45)color=pal[4];
    const [x,y]=at(ox,oy,v,d,side);place(cells,x,y,color);
   }
  }
@@ -156,7 +158,7 @@ function linePoints(x0,y0,x1,y1){
 }
 function bolt(cells,m,quality){
  const pts=m.path||[];if(pts.length<2)return;
- const pal=PAL.electric,step=tickOf(m.age,16),variant=m.variant||0;
+ const pal=PAL.electric,step=tickOf(m.age,12),variant=m.variant||0;
  const paths=[pts.map(p=>grid(p.x,p.y))];
  // Short, bent forks rather than perpendicular comb teeth.
  for(let i=1;i<pts.length-1;i+=variant===1?1:variant===2?3:quality==='low'?4:2){
@@ -182,19 +184,18 @@ function bolt(cells,m,quality){
   }
  }
  const [hx,hy]=paths[0].at(-1);
- // Champions Thunderbolt surrounds the target with angular arcs, not a radial star.
- for(let i=0;i<(quality==='low'?4:7);i++){
-  const a=i*TAU/7+step*.08,reach=13+nse(i+step)*8;
-  const points=[[hx,hy]];
-  for(let j=1;j<=4;j++){
-   const angle=a+(nse(i*9+j+step*3)-.5)*.7,r=reach*j/4;
-   points.push([hx+Math.round(Math.cos(angle)*r),hy+Math.round(Math.sin(angle)*r)]);
-  }
+ // Alternating angular brackets enclose the target; avoid a radial spider shape.
+ for(let side=-1;side<=1;side+=2){
+  const spread=11+(step%3)*2;
+  const points=[[hx+side*5,hy-17],[hx+side*spread,hy-9],
+   [hx+side*(spread-4),hy-2],[hx+side*(spread+2),hy+5],[hx+side*5,hy+16]];
   for(let j=1;j<points.length;j++){
-   const line=linePoints(...points[j-1],...points[j]);
-   for(let k=0;k<line.length;k+=2){place(cells,line[k]+1,line[k+1],pal[2]);place(cells,line[k],line[k+1],pal[j<3?4:3]);}
+   if((step+j+(side>0?1:0))%4===0)continue;
+   const seg=linePoints(...points[j-1],...points[j]);
+   for(let k=0;k<seg.length;k+=2){place(cells,seg[k]+side,seg[k+1],pal[1]);place(cells,seg[k],seg[k+1],pal[step%2?3:4]);}
   }
  }
+
 }
 function aura(cells,m){
  const pal=palOf(m.element||'electric'),step=tickOf(m.age,12),[cx,cy]=grid(m.x,m.y);
@@ -211,20 +212,20 @@ function aura(cells,m){
 // Basic cores fit 14 x 9 cells, with a sparse short tail distinct from signatures.
 const BASIC_ART={
  electric:[
-  ['..........3...','.....3...35...','.....53.35....','..23345554332.','......35.53...','.....35...3...','.....3........'],
-  ['......3.......','......53...3..','.......35.35..','..23345554332.','.....35...53..','....35.....3..','....3.........']
+  ['.........23...','........253...','...233.253....','..2355255432..','.....2553.....','....253.......','...23.........'],
+  ['........23....','.......253....','......2553....','..2345525532..','....253.233...','...253........','...23.........']
  ],
  fire:[
-  ['..............','..2....111....','...21.123321..','.122312344321.','1233344554321.','..12334554321.','...221234321..','.2....12321...','.......111....'],
-  ['..............','.......111....','.2....123321..','...2212344321.','1233344554321.','.122334554321.','...21.123321..','..2....121....','..............']
+  ['..............','.....2........','..2..32..22...','...233212332..','1233443345432.','.233454455432.','...234554432..','....233332....','......22......'],
+  ['..............','...2..........','....32...22...','..2333212332..','1233443345432.','..23445455432.','.23334544332..','.....23332....','.......22.....']
  ],
  water:[
-  ['..............','........111...','...3..1124431.','..123123455431','12333445555431','..123123433321','...3..1123321.','........111...','..............'],
-  ['..............','.......1111...','..3...1234441.','...12323455431','12333445555431','...12323433321','..3...1233321.','.......1111...','..............']
+  ['..............','........222...','.....2234432..','..22334555432.','12334444444321','..22333333321.','.....223332...','........22....','..............'],
+  ['..............','.......222....','....22344432..','..23345555432.','12334444444321','..23333333321.','....2233332...','.......222....','..............']
  ],
  grass:[
-  ['..........11..','.......11131..','.....1123431..','...112344321..','.1123443321...','1234433221....','..1112211.....','....111.......','..............'],
-  ['..............','....111.......','..1112211.....','1234433221....','.1123443321...','...112344321..','.....1123431..','.......11131..','..........11..']
+  ['..........11..','........1231..','......123431..','....12344321..','..123443321...','1234433321....','..1222211.....','....111.......','..............'],
+  ['..............','..............','.......11111..','....112333431.','1234444444321.','..112333321...','.....11111....','..............','..............']
  ]
 };
 function projectile(cells,m){
@@ -278,28 +279,30 @@ function jet(cells,m,ports,quality){
 // Ground-plane heading and screen-space height are separate: height never rotates.
 function rideLift(age,variant=0){return (variant===1?6:4)+Math.round(Math.sin(tickOf(age,12)*.6));}
 function ride(cells,m){
- const v=unit(m),p=['#135e9c','#169ed1','#68d9ed','#c9faff','#ffffff'],[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,12),variant=m.variant||0;
+ const v=unit(m),p=['#294a9c','#427be7','#73bdff','#c6efff','#ffffff'],[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,12),variant=m.variant||0;
  const lift=rideLift(m.age,variant),width=variant===1?25:variant===2?17:22;
  // High camera: show the surface plane, with very little visible vertical face.
  const project=(a,b,h)=>[cx+Math.round(a*v.x-b*v.y),cy+Math.round((a*v.y+b*v.x)*.78-h)];
  for(let a=-35;a<=20;a++)for(let b=-width;b<=width;b++){
-  const front=17-Math.pow(Math.abs(b)/width,3)*7+Math.sin(b*.35+step*.4);
+  const front=17-Math.pow(Math.abs(b)/width,2)*9+Math.sin(b*.4+step*.4)*2;
   const rear=-34+Math.abs(b)*.36+Math.sin(b*.53+step*.45)*2;
-  const bank=width*(.8+.2*Math.cos((a+6)*.045))+Math.sin(a*.27-step*.6)*1.2;
+  const bank=width*(.8+.2*Math.cos((a+6)*.045))+Math.sin(a*.27-step*.6)*2.5;
   if(a>front||a<rear||Math.abs(b)>bank)continue;
   const edge=Math.abs(b)/bank,depth=front-a;
   const h=lift*Math.max(0,1-Math.abs(a)/39);
   const [x,y]=project(a,b,h);
   let color=depth<3?p[3]:depth<7?p[2]:edge>.94?p[0]:p[1];
-  const foam=Math.sin(b*1.3+step*.7)+Math.sin(a*.8-b*.4-step*.5);
-  if(depth<6&&foam>.4)color=p[4];
-  if(depth>8&&Math.sin(a*.31+b*.29-step*.65)>.8&&Math.sin(a*.15-b*.4)>.1)color=p[2];
-  if(a< -15&&((b+Math.round(Math.sin(a*.16)*3))%7<2))color=p[2];
-  if(Math.sin(a*.25+b*.17-step*.65)>.9&&a>-17&&depth>7)color=p[2];
-  if(depth<2&&(b+step)%5!==0)color=p[4];
+  // Scrolling scalloped wave bands: broad blue troughs and narrow white crests.
+  const wave=((Math.round(a+Math.sin(b*.32)*2)+step*2)%16+16)%16;
+  if(depth>7&&wave<3)color=p[2];
+  if(depth>7&&wave===0&&((b+24)%9)<6)color=p[3];
+  if(depth<5&&((b+step*2+30)%8)<5)color=p[3];
+  if(depth<2&&((b+step+30)%7)<5)color=p[4];
   // Rear edge dissolves into separate streaks rather than closing an oval outline.
   if(a< -25&&(b+step)%6>2)continue;
   place(cells,x,y,color);
+  // Close nearest-neighbour projection gaps in diagonal water surfaces.
+  if(Math.abs(v.x*v.y)>.2)place(cells,x+1,y,color);
  }
  // Two travelling foam bands across the water, with the rider between them.
  for(const row of [-15,11])for(let b=-width+3;b<width-2;b++){
@@ -329,16 +332,16 @@ const LEAF=['.3.','121','232','.1.'];
 function orb(cells,m,quality){
  const p=PAL.grass,v=unit(m),step=tickOf(m.age,14),variant=m.variant||0,r=variant===1?11:9;
  const [cx,cy]=grid(m.x,m.y);
- // Champions: white-green nucleus inside a vivid green envelope, with fine energy tendrils.
+ // DS-inspired compact shaded core, stepped luminous bands and orbiting motes.
  for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){
   const d=Math.hypot(x,y);if(d>r)continue;
   const light=Math.hypot(x+1,y+1),band=Math.sin(Math.atan2(y,x)*3-d*.4+step*.6);
-  const color=d>r-1?(y>1?p[0]:p[1]):light<r*.27?p[4]:light<r*.49?p[3]:band>.7?p[3]:y>r*.5?p[1]:p[2];
+  const color=d>r-1?(y>1?p[0]:p[1]):light<r*.22?p[4]:light<r*.45?p[3]:band>.82?p[3]:y>r*.35?p[1]:p[2];
   place(cells,cx+x,cy+y,color);
  }
- const count=quality==='low'?3:5;
+ const count=quality==='low'?2:4;
  for(let i=0;i<count;i++){
-  const angle=i/count*TAU+step*.12,reach=12+(i+step)%3;
+  const angle=i/count*TAU+step*.12,reach=11+(i+step)%2;
   let last=null;
   for(let d=r-1;d<reach;d++){
    const a=angle+Math.sin(d*.45-step*.5)*.22;
