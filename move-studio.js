@@ -181,7 +181,9 @@
     variantGroup.append(reference);
     $('variantNote').textContent = state.move === 'basic' && mon.type === 'grass'
       ? '풀 기본기는 BW2 잎날가르기의 연출을 사용합니다.'
-      : '블랙·화이트 2의 해당 기술 장면을 기준으로 제작했습니다.';
+      : mon.moveId === 'thunderbolt' && state.move !== 'basic'
+        ? 'BW2의 전기 색감을 바탕으로 몸에서 뻗어 나가도록 변경했습니다.'
+        : '블랙·화이트 2의 해당 기술 장면을 기준으로 제작했습니다.';
     DIRS.forEach((dir) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -299,7 +301,7 @@
     if(age<windup){ArenaFX.charge(ctx,{...m,element:move==='energyball'?'grass':'electric',windup});return;}
     age-=windup;m.age=age;
     if(move==='thunderbolt'){
-      const dist=300,steps=Math.max(2,Math.ceil(dist/18));
+      const dist=300*Math.min(1,age/.3),steps=Math.max(2,Math.ceil(dist/18));
       m.path=Array.from({length:steps+1},(_,i)=>{
         const seed=Math.sin(i*127.1+Math.floor(age*16)*19.7)*43758.5453;
         const side=i===0||i===steps?0:((seed-Math.floor(seed))-.5)*38;

@@ -152,33 +152,40 @@ function lightningStroke(cells,points,strong,step){
 }
 function bolt(cells,m,quality){
  const pts=m.path||[];if(pts.length<2)return;
- const [cx,cy]=grid(pts.at(-1).x,pts.at(-1).y),step=tickOf(Math.max(0,m.age-(m.windup||0)),18);
- // BW2 Thunderbolt descends on the target in several slender yellow flashes.
- // The gameplay path still selects the impact position; it is not drawn as a laser.
- const t=Math.max(0,m.age-(m.windup||0)),count=t<.12?1:quality==='low'?2:3;
- for(let i=0;i<count&&t<.7;i++){
-  if((step+i)%5===4)continue;
-  const x=cx+(i-1)*8,points=[];
-  for(let j=0;j<9;j++){
-   const dx=j===8?0:Math.round((nse(i*23+j*11+Math.floor(step/2)*7)-.5)*8);
-   points.push([x+dx,cy-35+j*5]);
-  }
-  lightningStroke(cells,points,i===1,step+i);
-  const joint=points[4];lightningStroke(cells,[joint,[joint[0]+(i%2?6:-6),joint[1]+5],[joint[0]+(i%2?3:-3),joint[1]+10]],false,step);
- }
- if(t>.16&&t<.65){
-  const r=7+(step%3),p=['#b1c830','#e0f45d','#f8ffb1'];
-  for(let y=-r-4;y<=r+4;y++)for(let x=-r-4;x<=r+4;x++){
-   const angle=Math.atan2(y,x),d=Math.hypot(x,y),limit=r+(Math.cos(angle*16)>0?4:0);
-   if(d<=limit)place(cells,cx+x,cy+y,d<r*.75?p[2]:d<r?p[1]:p[0]);
+ const source=m.source||pts[0],start=grid(source.x,source.y),step=tickOf(Math.max(0,m.age-(m.windup||0)),16);
+ const route=[start,...pts.map(p=>grid(p.x,p.y))],points=[start];
+ // Join the current body anchor to the retained homing trail without changing physics.
+ for(let i=1;i<route.length;i++){
+  const a=route[i-1],b=route[i],dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy);
+  if(length<.5)continue;
+  const count=Math.max(1,Math.ceil(length/7));
+  for(let j=1;j<=count;j++){
+   const u=j/count,side=j===count?0:(nse(step*13+i*7+j*17)-.5)*9;
+   points.push([Math.round(a[0]+dx*u-dy/length*side),Math.round(a[1]+dy*u+dx/length*side)]);
   }
  }
- if(t>.55)for(let i=0;i<4;i++){
-  const a=i*TAU/4+step*.2,points=[];
-  for(let j=0;j<5;j++){const r=11+(j%2)*4,theta=a+j*.19;points.push([cx+Math.round(Math.cos(theta)*r),cy+Math.round(Math.sin(theta)*r)]);}
-  lightningStroke(cells,points,false,step);
+ // The body crackle and forward stroke share an origin, so the bolt never floats away.
+ aura(cells,{x:source.x,y:source.y,age:m.age,element:'electric'});
+ for(let i=1;i<points.length;i++){
+  const a=points[i-1],b=points[i],seg=linePoints(...a,...b),vertical=Math.abs(b[1]-a[1])>Math.abs(b[0]-a[0]);
+  for(let j=0;j<seg.length;j+=2){
+   const x=seg[j],y=seg[j+1];
+   place(cells,x+(vertical?1:0),y+(vertical?0:1),'#dfe54b');
+   place(cells,x-(vertical?1:0),y-(vertical?0:1),'#b7b02e');
+   place(cells,x,y,'#f8ffb1');
+  }
+  if(i>1&&i%(quality==='low'?7:4)===step%3){
+   const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1,sign=i%2?1:-1;
+   const nx=-dy/len*sign,ny=dx/len*sign;
+   lightningStroke(cells,[a,[a[0]+Math.round(nx*5+dx/len*2),a[1]+Math.round(ny*5+dy/len*2)],
+    [a[0]+Math.round(nx*9),a[1]+Math.round(ny*9)]],false,step);
+  }
  }
-
+ const [cx,cy]=points.at(-1),r=m.type==='boltEcho'?6:3+step%2;
+ for(let i=0;i<8;i++){
+  const a=i*TAU/8+step*.1;
+  lightningStroke(cells,[[cx,cy],[cx+Math.round(Math.cos(a)*r),cy+Math.round(Math.sin(a)*r)]],false,step);
+ }
 }
 
 function aura(cells,m){

@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=46'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=47'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -340,14 +340,23 @@ for(const element of ['electric','fire','water','grass'])for(let dir=0;dir<8;dir
 }
 console.log('PASS: four basic attack designs in all eight directions');
 
-// BW2 Thunderbolt falls in screen-space at the path endpoint in every heading.
+// Body-origin lightning must remain connected even when the gameplay trail is trimmed.
 for(const scale of [1.43,4.2])for(let dir=0;dir<8;dir++){
  sandbox.ArenaFX.setPixel(scale);
- const a=dir*Math.PI/4,target={x:Math.round(Math.cos(a)*100)*scale,y:Math.round(Math.sin(a)*100)*scale};
- const cells=sandbox.ArenaFX.cells('thunder',{path:[{x:0,y:0},target],age:.3});
- const cx=Math.round(target.x/scale),cy=Math.round(target.y/scale);
- assert(cells.length>40);
- assert(cells.every(([x,y])=>Math.abs(x-cx)<24&&y>=cy-36&&y<=cy+20),'Lightning must surround its target, not rotate or draw a source-to-target beam');
- assert(cells.some(([x,y])=>y<cy-28),'Lightning must descend from above');
+ const a=dir*Math.PI/4,source={x:10*scale,y:20*scale};
+ const tail={x:Math.round(10+Math.cos(a)*50)*scale,y:Math.round(20+Math.sin(a)*50)*scale};
+ const target={x:Math.round(10+Math.cos(a)*100)*scale,y:Math.round(20+Math.sin(a)*100)*scale};
+ const cells=sandbox.ArenaFX.cells('thunder',{source,path:[tail,target],age:.3});
+ const keys=new Set(cells.map(([x,y])=>x+','+y));
+ assert(keys.has('10,20'),'Lightning must originate at the current body anchor');
+ assert(keys.has(Math.round(target.x/scale)+','+Math.round(target.y/scale)),'Lightning must reach the moving endpoint');
+ const visited=new Set(['10,20']),queue=[[10,20]];
+ for(let i=0;i<queue.length;i++)for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){
+  const x=queue[i][0]+dx,y=queue[i][1]+dy,key=x+','+y;
+  if(keys.has(key)&&!visited.has(key)){visited.add(key);queue.push([x,y]);}
+ }
+ assert(visited.has(Math.round(target.x/scale)+','+Math.round(target.y/scale)),'Body and target must have a continuous pixel connection');
+ const shifted=sandbox.ArenaFX.cells('thunder',{source:{x:source.x+30*scale,y:source.y},path:[tail,target],age:.3});
+ assert(shifted.some(([x,y])=>x===40&&y===20),'Moving the caster must move the visible source');
 }
-console.log('PASS: BW2 lightning stays vertical at the target in every heading');
+console.log('PASS: body-origin lightning remains attached and connected in all directions');
