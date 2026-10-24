@@ -152,20 +152,27 @@ function lightningStroke(cells,points,strong,step){
 }
 function bolt(cells,m,quality){
  const pts=m.path||[];if(pts.length<2)return;
- const source=m.source||pts[0],start=grid(source.x,source.y),step=tickOf(Math.max(0,m.age-(m.windup||0)),16);
- const route=[start,...pts.map(p=>grid(p.x,p.y))],points=[start];
- // Join the current body anchor to the retained homing trail without changing physics.
+ const source=m.source||pts[0],start=grid(source.x,source.y),age=Math.max(0,m.age-(m.windup||0)),step=tickOf(age,16);
+ const route=[start,...pts.map(p=>[p.x/PIXEL,p.y/PIXEL])],segments=[],points=[start];
+ let total=0;
+ // Resample by distance, not by simulation tick or incoming control-point count.
  for(let i=1;i<route.length;i++){
   const a=route[i-1],b=route[i],dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy);
-  if(length<.5)continue;
-  const count=Math.max(1,Math.ceil(length/7));
-  for(let j=1;j<=count;j++){
-   const u=j/count,side=j===count?0:(nse(step*13+i*7+j*17)-.5)*9;
-   points.push([Math.round(a[0]+dx*u-dy/length*side),Math.round(a[1]+dy*u+dx/length*side)]);
-  }
+  if(length<.00001)continue;
+  segments.push({a,dx,dy,length,from:total});total+=length;
  }
+ let segment=0,sample=0;
+ for(let distance=6;distance<total-1;distance+=6){
+  while(segment+1<segments.length&&distance>segments[segment].from+segments[segment].length)segment++;
+  const part=segments[segment],u=(distance-part.from)/part.length;
+  const taper=Math.min(1,distance/10,(total-distance)/10);
+  const side=(sample%2?1:-1)*(2+nse(step*13+sample*17)*3.5)*taper;
+  points.push([Math.round(part.a[0]+part.dx*u-part.dy/part.length*side),
+   Math.round(part.a[1]+part.dy*u+part.dx/part.length*side)]);sample++;
+ }
+ points.push(grid(pts.at(-1).x,pts.at(-1).y));
  // The body crackle and forward stroke share an origin, so the bolt never floats away.
- aura(cells,{x:source.x,y:source.y,age:m.age,element:'electric'});
+ aura(cells,{x:source.x,y:source.y,age,element:'electric'});
  for(let i=1;i<points.length;i++){
   const a=points[i-1],b=points[i],seg=linePoints(...a,...b),vertical=Math.abs(b[1]-a[1])>Math.abs(b[0]-a[0]);
   for(let j=0;j<seg.length;j+=2){

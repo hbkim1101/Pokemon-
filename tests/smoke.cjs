@@ -12,7 +12,7 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=45'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=48'), 'Motion Studio not linked');
 assert(html.includes('emitter-anchors.js?v=30'), 'Sprite anchor data not linked');
 
 function fakeContext(){
@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=47'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=48'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -360,3 +360,18 @@ for(const scale of [1.43,4.2])for(let dir=0;dir<8;dir++){
  assert(shifted.some(([x,y])=>x===40&&y===20),'Moving the caster must move the visible source');
 }
 console.log('PASS: body-origin lightning remains attached and connected in all directions');
+
+// The same trajectory must produce identical art in the studio and in the battle loop.
+for(const scale of [1.43,4.2])for(const quality of ['high','low'])for(const [vx,vy] of [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]]){
+ sandbox.ArenaFX.setPixel(scale);
+ const origin={x:0,y:0},target={x:vx*120*scale,y:vy*120*scale};
+ const sparse=sandbox.ArenaFX.cells('thunder',{path:[origin,target],age:.3},quality);
+ for(const count of [12,30,60]){
+  const path=Array.from({length:count+1},(_,i)=>({x:target.x*i/count,y:target.y*i/count}));
+  const dense=sandbox.ArenaFX.cells('thunder',{path,age:.3},quality);
+  assert.equal(JSON.stringify(dense),JSON.stringify(sparse),'Trajectory sampling density must not change the lightning art');
+ }
+ const battle=sandbox.ArenaFX.cells('thunder',{path:[origin,target],age:.46,windup:.16},quality);
+ assert.equal(JSON.stringify(battle),JSON.stringify(sparse),'Battle windup must not shift the visual animation phase');
+}
+console.log('PASS: battle and studio lightning match across path densities, scales and headings');

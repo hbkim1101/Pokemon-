@@ -301,12 +301,8 @@
     if(age<windup){ArenaFX.charge(ctx,{...m,element:move==='energyball'?'grass':'electric',windup});return;}
     age-=windup;m.age=age;
     if(move==='thunderbolt'){
-      const dist=300*Math.min(1,age/.3),steps=Math.max(2,Math.ceil(dist/18));
-      m.path=Array.from({length:steps+1},(_,i)=>{
-        const seed=Math.sin(i*127.1+Math.floor(age*16)*19.7)*43758.5453;
-        const side=i===0||i===steps?0:((seed-Math.floor(seed))-.5)*38;
-        return {x:origin.x+vx*dist*i/steps+nx*side,y:origin.y+vy*dist*i/steps+ny*side};
-      });
+      const dist=300*Math.min(1,age/.3);
+      m.path=[origin,{x:origin.x+vx*dist,y:origin.y+vy*dist}];
       ArenaFX.thunder(ctx,m);
     }else if(move==='flamethrower'){
       m.stream=Math.min(300,age*820)*Math.max(0,Math.min(1,(1.4-age)/.25));

@@ -215,8 +215,8 @@ function drawStudioEffects(x,y,a,clock,scale){
    if(age<.7)drawProjectileSprite(q);
    if(age>=.7)ArenaFX.impact(ctx,{...q,basic:true,age:age-.7,life:.4});
  }else if(m.type==='thunderbolt'){
-   const reach=Math.min(1,age/.57),dist=520*reach,steps=Math.max(2,Math.floor(dist/19)),path=[];
-   for(let i=0;i<=steps;i++){let d=dist*i/steps;path.push({x:baseX+vx*d+nx*(i===steps?0:Math.sin(i*2.8+age*19)*15),y:baseY+vy*d+ny*(i===steps?0:Math.sin(i*2.8+age*19)*15)});}
+   const reach=Math.min(1,age/.57),dist=520*reach;
+   const path=[{x:baseX,y:baseY},{x:baseX+vx*dist,y:baseY+vy*dist}];
    if(age<.85){
      if(window.ArenaFX)ArenaFX.setPixel(scale);
      drawThunderbolt({type:'thunderbolt',path,age,life:.9,x:baseX+vx*dist,y:baseY+vy*dist});
