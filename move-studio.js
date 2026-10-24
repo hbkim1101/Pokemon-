@@ -21,6 +21,7 @@
   const state = {
     kind: 1,
     move: 'special',
+    vfxVariant: 0,
     dir: 0,
     frame: 0,
     portIndex: 0,
@@ -132,9 +133,11 @@
     const pokemonGroup = $('pokemonGroup');
     const moveGroup = $('moveGroup');
     const dirGroup = $('dirGroup');
+    const variantGroup = $('variantGroup');
     pokemonGroup.innerHTML = '';
     moveGroup.innerHTML = '';
     dirGroup.innerHTML = '';
+    variantGroup.innerHTML = '';
     ROSTER.forEach((mon, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -166,6 +169,21 @@
         moveGroup.append(btn);
       });
     }
+    state.vfxVariant = 0;
+    const source = state.move === 'basic'
+      ? {electric: [3873, '전기쇼크'], fire: [1022, '불꽃세례'], water: [4070, '물대포'], grass: [2844, '잎날가르기']}[mon.type]
+      : {thunderbolt: [3888, '10만볼트'], flamethrower: [1272, '화염방사'], surf: [3669, '파도타기'], energyball: [1042, '에너지볼']}[mon.moveId];
+    const reference = document.createElement('a');
+    reference.className = 'chip active';
+    reference.textContent = 'BW2 ' + source[1] + ' 원작 영상 ↗';
+    reference.href = 'https://www.youtube.com/watch?v=bNW2L2DtPIg&t=' + source[0] + 's';
+    reference.target = '_blank';reference.rel = 'noopener noreferrer';
+    variantGroup.append(reference);
+    $('variantNote').textContent = state.move === 'basic' && mon.type === 'grass'
+      ? '풀 기본기는 BW2 잎날가르기의 연출을 사용합니다.'
+      : mon.moveId === 'thunderbolt' && state.move !== 'basic'
+        ? 'BW2의 전기 색감을 바탕으로 몸에서 뻗어 나가도록 변경했습니다.'
+        : '블랙·화이트 2의 해당 기술 장면을 기준으로 제작했습니다.';
     DIRS.forEach((dir) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -249,96 +267,50 @@
     const f = Math.max(0, Math.min(frame, anim.frames - 1));
     const d = Math.max(0, Math.min(dir, anim.dirs - 1));
     const dw = anim.w * scale, dh = anim.h * scale;
-    ctx.drawImage(anim.image, f * anim.w, d * anim.h, anim.w, anim.h, x - dw / 2, y - dh + 8, dw, dh);
-    return { anim, f, d, dw, dh, x, y, scale };
+    anim.feet ||= new Map();
+    const key=d+','+f;
+    if(!anim.feet.has(key)){
+      const scan=document.createElement('canvas');scan.width=anim.w;scan.height=anim.h;
+      const sc=scan.getContext('2d',{willReadFrequently:true});
+      sc.drawImage(anim.image,f*anim.w,d*anim.h,anim.w,anim.h,0,0,anim.w,anim.h);
+      const pixels=sc.getImageData(0,0,anim.w,anim.h).data;
+      let bottom=0;
+      for(let yy=0;yy<anim.h;yy++)for(let xx=0;xx<anim.w;xx++)if(pixels[(yy*anim.w+xx)*4+3]>128)bottom=yy+1;
+      anim.feet.set(key,bottom);
+    }
+    const left=Math.round(x/scale-anim.w/2)*scale,top=Math.round(y/scale-anim.feet.get(key))*scale;
+    ctx.drawImage(anim.image,f*anim.w,d*anim.h,anim.w,anim.h,left,top,dw,dh);
+    return { anim, f, d, dw, dh, x, y, scale, left, top };
   }
 
-  function drawFx(mon, origin, angle, age) {
+  function drawFx(mon, origin, angle, age, scale) {
     const vx = Math.cos(angle), vy = Math.sin(angle);
     const nx = -vy, ny = vx;
     const move = state.move === 'basic' ? 'basic' : mon.moveId;
     if (move === 'basic') {
-      const d = 24 + Math.min(age, 1) * 280;
-      ctx.fillStyle = mon.tone === 'fire' ? '#ff9a55' : mon.tone === 'water' ? '#7ad8ff' : mon.tone === 'leaf' ? '#9be37a' : '#ffe56b';
-      ctx.fillRect(origin.x + vx * d - 4, origin.y + vy * d - 4, 8, 8);
+      ArenaFX.setPixel(scale);
+      const d = 24 + Math.min(age, .7) * 280;
+      if(age>.7){ArenaFX.impact(ctx,{x:origin.x+vx*d,y:origin.y+vy*d,element:mon.type,basic:true,age:age-.7,life:.35});return;}
+      ArenaFX.projectile(ctx,{x:origin.x+vx*d,y:origin.y+vy*d,vx,vy,age,element:mon.type});
       return;
     }
-    if (move === 'thunderbolt') {
-      const reach = Math.min(1, age / 0.55);
-      const dist = 420 * reach;
-      const steps = Math.max(2, Math.floor(dist / 18));
-      ctx.lineCap = 'round';
-      for (let layer = 0; layer < 3; layer++) {
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          const t = i / steps;
-          const wobble = i === steps ? 0 : Math.sin(i * 2.7 + age * 18) * (12 - layer * 2);
-          const x = origin.x + vx * dist * t + nx * wobble;
-          const y = origin.y + vy * dist * t + ny * wobble;
-          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = layer === 0 ? '#8e5d15' : layer === 1 ? '#fff1a0' : '#ffffff';
-        ctx.lineWidth = layer === 0 ? 7 : layer === 1 ? 4 : 2;
-        ctx.globalAlpha = 0.9;
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.beginPath();
-      ctx.arc(origin.x, origin.y, 28 + Math.sin(age * 26) * 5, 0, Math.PI * 2);
-      ctx.strokeStyle = '#ffdf55';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      return;
-    }
-    if (move === 'flamethrower') {
-      const length = Math.min(300, Math.max(0, age * 820)) * Math.min(1, (1.4 - age) / 0.25);
-      for (let layer = 0; layer < 3; layer++) {
-        let px = origin.x, py = origin.y;
-        const quality = 20;
-        for (let i = 1; i <= quality; i++) {
-          const u = i / quality;
-          const d = u * length;
-          const curve = Math.sin(u * 18 - age * 22 + layer) * ((5 + u * 18) * (layer === 0 ? -1 : layer === 1 ? 1 : 0.2));
-          const x = origin.x + vx * d + nx * curve;
-          const y = origin.y + vy * d + ny * curve;
-          ctx.strokeStyle = layer === 2 ? '#fff9d1' : layer === 1 ? '#ffca5c' : '#df4628';
-          ctx.lineWidth = layer === 2 ? 3 : layer === 1 ? 5 : 8;
-          ctx.globalAlpha = 0.85;
-          ctx.beginPath();
-          ctx.moveTo(px, py);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-          px = x; py = y;
-        }
-      }
-      ctx.globalAlpha = 1;
-      return;
-    }
-    if (move === 'surf') {
-      const d = Math.min(280, age * 300);
-      const cx = origin.x + vx * (20 + d), cy = origin.y + vy * (20 + d);
-      for (let i = 0; i < 16; i++) {
-        const u = i / 15 * 2 - 1;
-        const x = cx + nx * u * 70 + vx * (20 + Math.sin(age * 16 + i) * 8);
-        const y = cy + ny * u * 70 + vy * (20 + Math.sin(age * 16 + i) * 8);
-        ctx.fillStyle = i % 2 ? '#b6f6ff' : '#6bd9f1';
-        ctx.fillRect(x - 6, y - 5, 12, 10);
-      }
-      return;
-    }
-    if (move === 'energyball') {
-      const d = Math.min(360, age * 380);
-      const cx = origin.x + vx * d, cy = origin.y + vy * d;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 16 + Math.sin(age * 12) * 2, 0, Math.PI * 2);
-      ctx.fillStyle = '#7bea77';
-      ctx.fill();
-      for (let i = 0; i < 10; i++) {
-        const a = i / 10 * Math.PI * 2 + age * 8;
-        const r = 22 + 5 * Math.sin(a * 2 + age * 10);
-        ctx.fillStyle = i % 2 ? '#f9ffce' : '#43c882';
-        ctx.fillRect(cx + Math.cos(a) * r - 2, cy + Math.sin(a) * r * 0.75 - 2, 5, 5);
-      }
+    ArenaFX.setPixel(scale);
+    const m={...origin,vx,vy,age,life:1.4,type:move,variant:state.vfxVariant};
+    if(move==='surf')return;
+    const windup=move==='energyball'?.18:move==='thunderbolt'?.12:0;
+    if(age<windup){ArenaFX.charge(ctx,{...m,element:move==='energyball'?'grass':'electric',windup});return;}
+    age-=windup;m.age=age;
+    if(move==='thunderbolt'){
+      const dist=300*Math.min(1,age/.3);
+      m.path=[origin,{x:origin.x+vx*dist,y:origin.y+vy*dist}];
+      ArenaFX.thunder(ctx,m);
+    }else if(move==='flamethrower'){
+      m.stream=Math.min(300,age*820)*Math.max(0,Math.min(1,(1.4-age)/.25));
+      ArenaFX.flame(ctx,m);
+    }else{
+      const dist=move==='surf'?42+Math.sin(age*5)*8:Math.min(360,age*380);
+      m.x+=vx*dist;m.y+=vy*dist;
+      if(age>.75){m.x=origin.x+vx*285;m.y=origin.y+vy*285;ArenaFX.impact(ctx,{...m,element:'grass',age:age-.75,life:.45});}else ArenaFX.orb(ctx,m);
     }
   }
 
@@ -362,38 +334,47 @@
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
     }
 
-    const cx = w * 0.38, cy = h * 0.62;
+    let cx = w * 0.36, cy = h * 0.62;
     const angle = FACES[state.dir];
     const shoot = pack?.anims?.Shoot;
     const scale = shoot ? Math.min(4.2, 210 / Math.max(shoot.w, shoot.h)) : 3.2;
     let drawn = null;
+    const riding=state.move==='special'&&mon.moveId==='surf'&&state.playFx&&state.previewing;
+    const rideBob=riding?-ArenaFX.rideLift(state.previewAge,state.vfxVariant)*scale:0;
+    if(riding){cx+=Math.cos(angle)*Math.sin(state.previewAge/1.2*Math.PI*2)*22;cy+=Math.sin(angle)*Math.sin(state.previewAge/1.2*Math.PI*2)*12;}
+    const wave={x:cx,y:cy,vx:Math.cos(angle),vy:Math.sin(angle),age:state.previewAge,life:1.2,variant:state.vfxVariant};
     if (pack?.loaded) {
       ctx.fillStyle = '#0005';
       ctx.beginPath();
       ctx.ellipse(cx, cy + 10, 28, 8, 0, 0, Math.PI * 2);
       ctx.fill();
-      drawn = drawSprite(pack, 'Shoot', cx, cy, state.dir, state.frame, scale);
+      if(riding){
+        ArenaFX.setPixel(scale);
+        ArenaFX.ride(ctx,wave);
+      }
+      drawn = drawSprite(pack, 'Shoot', cx, cy+rideBob, state.dir, state.frame, scale);
+      if(riding)ArenaFX.rideFoam(ctx,wave);
     }
 
     const port = currentPort(mon);
     const pt = pointAt(mon, port, state.dir, state.frame);
     let world = null;
     if (drawn && pt) {
-      const ox = cx - drawn.dw / 2 + pt[0] * scale;
-      const oy = cy - drawn.dh + 8 + pt[1] * scale;
+      const ox = drawn.left + pt[0] * scale;
+      const oy = drawn.top + pt[1] * scale;
       world = { x: ox, y: oy };
       if (state.showMarker) {
         ctx.fillStyle = '#22eeff';
         ctx.fillRect(Math.round(ox) - 2, Math.round(oy) - 2, 4, 4);
       }
-      if (state.playFx && state.previewing) drawFx(mon, world, angle, state.previewAge);
+      if (state.playFx && state.previewing) drawFx(mon, world, angle, state.previewAge, scale);
     }
 
     // Zoomed editable cell on the right half
     if (shoot) {
       const zoom = Math.min(8, Math.floor(220 / Math.max(shoot.w, shoot.h)));
       const zw = shoot.w * zoom, zh = shoot.h * zoom;
-      const zx = w * 0.68 - zw / 2, zy = h * 0.42 - zh / 2;
+      const zx = w * 0.68 - zw / 2, zy = h * 0.23 - zh / 2;
       state.zoomCell = { zx, zy, zw, zh, zoom, shoot };
       ctx.fillStyle = '#0b1f27';
       ctx.fillRect(zx - 10, zy - 28, zw + 20, zh + 44);

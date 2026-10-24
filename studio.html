@@ -32,12 +32,16 @@ main{display:grid;grid-template-columns:minmax(220px,280px) 1fr minmax(240px,320
 .sheetRail{border-right:0;border-left:1px solid #2a5a5233}
 .rail h2,.sheetRail h2{margin:0 0 8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-family:Syne,sans-serif}
 .group{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-button.chip{border:1px solid #3c6f66;background:var(--panel2);color:var(--ink);border-radius:9px;padding:9px 11px;font-weight:800;font-size:12px;cursor:pointer}
-button.chip.active{background:var(--accent);color:#173028;border-color:#f4ffb0}
+button.chip,a.chip{border:1px solid #3c6f66;background:var(--panel2);color:var(--ink);border-radius:9px;padding:9px 11px;font-weight:800;font-size:12px;cursor:pointer}
+button.chip.active,a.chip.active{background:var(--accent);color:#173028;border-color:#f4ffb0}
 button.chip.fire.active{background:var(--fire);color:#2a1208;border-color:#ffd0ad}
 button.chip.volt.active{background:var(--volt);color:#2a2308;border-color:#fff3ad}
 button.chip.water.active{background:var(--water);color:#082232;border-color:#c8f0ff}
 button.chip.leaf.active{background:var(--leaf);color:#163014;border-color:#d8ffb8}
+#variantGroup a.chip{text-decoration:none;display:inline-block}
+#variantGroup a.chip:focus-visible{outline:2px solid white;outline-offset:3px}
+#variantGroup .chip{font-size:11px;padding:8px 9px}
+.variantNote{margin:-8px 0 14px;color:var(--mute);font-size:10px;line-height:1.5}
 .stageWrap{position:relative;min-height:0;display:grid;place-items:center;padding:10px}
 #stage{width:min(100%,920px);height:min(70dvh,620px);max-height:100%;background:
   linear-gradient(180deg,#163744,#214f48 55%,#1a4038);border:1px solid #3d7a6e66;border-radius:16px;image-rendering:pixelated;cursor:crosshair;box-shadow:0 20px 50px #0007}
@@ -76,6 +80,9 @@ textarea#jsonOut{width:100%;min-height:110px;margin-top:8px;background:#07151b;c
       <div class="group" id="pokemonGroup"></div>
       <h2>기술</h2>
       <div class="group" id="moveGroup"></div>
+      <h2>원작 참고</h2>
+      <div class="group" id="variantGroup" aria-label="기술 원작 참고"></div>
+      <p class="variantNote" id="variantNote">선택한 기술의 BW2 원작 장면을 확인하세요.</p>
       <h2>방향</h2>
       <div class="group" id="dirGroup"></div>
       <h2>도구</h2>
@@ -111,6 +118,7 @@ textarea#jsonOut{width:100%;min-height:110px;margin-top:8px;background:#07151b;c
   </footer>
 </div>
 <script src="./emitter-anchors.js?v=30"></script>
-<script src="./move-studio.js?v=30"></script>
+<script src="./combat-fx.js?v=48"></script>
+<script src="./move-studio.js?v=48"></script>
 </body>
 </html>

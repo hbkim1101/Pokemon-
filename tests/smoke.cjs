@@ -12,7 +12,7 @@ const addon = fs.readFileSync(path.join(root, 'battle-studio.js'), 'utf8');
 const anchors = fs.readFileSync(path.join(root, 'emitter-anchors.js'), 'utf8');
 const main = html.split('<script>')[1]?.split('</script>')[0];
 assert(main, 'Missing main JavaScript');
-assert(html.includes('battle-studio.js?v=31'), 'Motion Studio not linked');
+assert(html.includes('battle-studio.js?v=48'), 'Motion Studio not linked');
 assert(html.includes('emitter-anchors.js?v=30'), 'Sprite anchor data not linked');
 
 function fakeContext(){
@@ -248,7 +248,7 @@ for(let direction=0;direction<8;direction++){
  assert.equal(charizardPorts[direction][13][1],heldFacePoints[direction][1],'Incorrect 13th held-fire mouth Y coordinate');
 }
 assert(addon.includes("A single pixel-sized DOT"),'Studio must mark the saved mouth with a plain dot');
-assert(html.includes('combat-fx.js?v=34'),'Shared combat renderer must load');
+assert(html.includes('combat-fx.js?v=48'),'Shared combat renderer must load');
 assert(!addon.includes('const originalThunder='),'Studio must not stack legacy renderers');
 assert(!addon.match(/function drawStudioAnchors\([\s\S]+?function drawStudioEffects/)[0].includes('pxRing('),
  'Studio mouth marker must not use a ring');
@@ -300,5 +300,78 @@ assert(flameCells.every(([x,y])=>Number.isInteger(x)&&Number.isInteger(y)),'Effe
 const shotCells=sandbox.ArenaFX.cells('projectile',{x:0,y:0,vx:1,vy:0,element:'fire',pulse:0,delay:0},'high');
 const shotW=Math.max(...shotCells.map(c=>c[0]))-Math.min(...shotCells.map(c=>c[0]))+1;
 const shotH=Math.max(...shotCells.map(c=>c[1]))-Math.min(...shotCells.map(c=>c[1]))+1;
-assert(shotW<=12&&shotH<=12,'Basic projectile pixels must stay within a few sprite pixels');
+assert(shotW<=22&&shotH<=12,'Basic cores and short tails must remain smaller than signature attacks');
 assert(!html.includes('ctx.rotate(tilt)'),'Character sprites must not be rotated off the pixel grid');
+
+// Cardinal shots must remain centered on the emitter, especially vx === 0.
+for(const quality of ['high','low']){
+ const vertical=sandbox.ArenaFX.cells('flame',{x:0,y:0,vx:0,vy:1,age:.3,stream:140},quality);
+ assert(Math.max(...vertical.map(p=>Math.abs(p[0])))<22,'Vertical flame must not drift diagonally');
+ for(const kind of ['flame','surf','orb']){
+  const move={x:0,y:0,vx:1,vy:0,age:.1,stream:140};
+  const first=sandbox.ArenaFX.cells(kind,move,quality);
+  const next=sandbox.ArenaFX.cells(kind,{...move,age:.35},quality);
+  assert.notDeepEqual(first,next,kind+' must animate');
+  assert.deepEqual(first,sandbox.ArenaFX.cells(kind,move,quality),kind+' must be deterministic');
+ }
+}
+console.log('PASS: vertical emitter alignment and deterministic animated pixel art');
+
+// Regression: ride origin must be converted to effect cells exactly once at every scale.
+for(const scale of [1.43,3,4.2])for(let dir=0;dir<8;dir++){
+ sandbox.ArenaFX.setPixel(scale);
+ for(const kind of ['ride','rideFoam']){
+  const move={x:0,y:0,vx:Math.cos(dir*Math.PI/4),vy:Math.sin(dir*Math.PI/4),age:.35};
+  const base=sandbox.ArenaFX.cells(kind,move);
+  const shifted=sandbox.ArenaFX.cells(kind,{...move,x:100*scale,y:80*scale});
+  assert.equal(JSON.stringify(base),JSON.stringify(shifted.map(([x,y,c])=>[x-100,y-80,c])),kind+' must follow its rider at enlarged scale');
+ }
+}
+console.log('PASS: Surf follows its rider in 8 directions at battle and studio scales');
+
+// Every basic element must remain compact, directional and invisible before release.
+for(const element of ['electric','fire','water','grass'])for(let dir=0;dir<8;dir++){
+ const m={x:0,y:0,vx:Math.cos(dir*Math.PI/4),vy:Math.sin(dir*Math.PI/4),element,age:.3};
+ const cells=sandbox.ArenaFX.cells('projectile',m);
+ assert(cells.length>15,element+' needs a readable core');
+ assert(cells.every(([x,y])=>Math.hypot(x,y)<18),element+' basic attack must stay compact');
+ assert.equal(sandbox.ArenaFX.cells('projectile',{...m,delay:.1}).length,0,'Basic shots must wait for release');
+ assert.notDeepEqual(cells,sandbox.ArenaFX.cells('projectile',{...m,age:.4}),element+' must animate');
+}
+console.log('PASS: four basic attack designs in all eight directions');
+
+// Body-origin lightning must remain connected even when the gameplay trail is trimmed.
+for(const scale of [1.43,4.2])for(let dir=0;dir<8;dir++){
+ sandbox.ArenaFX.setPixel(scale);
+ const a=dir*Math.PI/4,source={x:10*scale,y:20*scale};
+ const tail={x:Math.round(10+Math.cos(a)*50)*scale,y:Math.round(20+Math.sin(a)*50)*scale};
+ const target={x:Math.round(10+Math.cos(a)*100)*scale,y:Math.round(20+Math.sin(a)*100)*scale};
+ const cells=sandbox.ArenaFX.cells('thunder',{source,path:[tail,target],age:.3});
+ const keys=new Set(cells.map(([x,y])=>x+','+y));
+ assert(keys.has('10,20'),'Lightning must originate at the current body anchor');
+ assert(keys.has(Math.round(target.x/scale)+','+Math.round(target.y/scale)),'Lightning must reach the moving endpoint');
+ const visited=new Set(['10,20']),queue=[[10,20]];
+ for(let i=0;i<queue.length;i++)for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){
+  const x=queue[i][0]+dx,y=queue[i][1]+dy,key=x+','+y;
+  if(keys.has(key)&&!visited.has(key)){visited.add(key);queue.push([x,y]);}
+ }
+ assert(visited.has(Math.round(target.x/scale)+','+Math.round(target.y/scale)),'Body and target must have a continuous pixel connection');
+ const shifted=sandbox.ArenaFX.cells('thunder',{source:{x:source.x+30*scale,y:source.y},path:[tail,target],age:.3});
+ assert(shifted.some(([x,y])=>x===40&&y===20),'Moving the caster must move the visible source');
+}
+console.log('PASS: body-origin lightning remains attached and connected in all directions');
+
+// The same trajectory must produce identical art in the studio and in the battle loop.
+for(const scale of [1.43,4.2])for(const quality of ['high','low'])for(const [vx,vy] of [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]]){
+ sandbox.ArenaFX.setPixel(scale);
+ const origin={x:0,y:0},target={x:vx*120*scale,y:vy*120*scale};
+ const sparse=sandbox.ArenaFX.cells('thunder',{path:[origin,target],age:.3},quality);
+ for(const count of [12,30,60]){
+  const path=Array.from({length:count+1},(_,i)=>({x:target.x*i/count,y:target.y*i/count}));
+  const dense=sandbox.ArenaFX.cells('thunder',{path,age:.3},quality);
+  assert.equal(JSON.stringify(dense),JSON.stringify(sparse),'Trajectory sampling density must not change the lightning art');
+ }
+ const battle=sandbox.ArenaFX.cells('thunder',{path:[origin,target],age:.46,windup:.16},quality);
+ assert.equal(JSON.stringify(battle),JSON.stringify(sparse),'Battle windup must not shift the visual animation phase');
+}
+console.log('PASS: battle and studio lightning match across path densities, scales and headings');
