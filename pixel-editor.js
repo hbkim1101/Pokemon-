@@ -111,12 +111,18 @@ $('undo').onclick=()=>history(undo,redo);$('redo').onclick=()=>history(redo,undo
 $('copyFrame').onclick=()=>{if(doc.frames.length>=16)return;checkpoint();doc.frames.splice(frame+1,0,doc.frames[frame].slice());frame++;edited();};
 $('deleteFrame').onclick=()=>{if(doc.frames.length<=1)return;checkpoint();doc.frames.splice(frame,1);frame=Math.min(frame,doc.frames.length-1);edited();};
 $('clear').onclick=()=>{checkpoint();doc.frames[frame].fill(0);edited();message('프레임을 비웠습니다. 실행 취소로 되돌릴 수 있습니다.');};
-$('mirror').onclick=()=>{
- checkpoint();const old=doc.frames[frame].slice(),next=new Uint8Array(W*H);let min=W,max=0;
- for(let i=0;i<old.length;i++)if(old[i]){min=Math.min(min,i%W);max=Math.max(max,i%W);}
- for(let y=0;y<H;y++)for(let x=min;x<=max;x++)next[y*W+min+max-x]=old[y*W+x];
- doc.frames[frame]=next;edited();
-};
+function transformFrames(operation){
+ try{
+  const indices=$('transformAll').checked?doc.frames.map((_,i)=>i):[frame];
+  const updates=indices.map(i=>[i,window.ArenaPixelTransform(doc.frames[i],W,H,doc.anchor,operation)]);
+  checkpoint();for(const [i,pixels] of updates)doc.frames[i]=pixels;edited();
+  message(indices.length+'개 프레임을 변환했습니다. 실행 취소로 되돌릴 수 있습니다.');
+ }catch(error){message(error.message);}
+}
+$('mirror').onclick=()=>transformFrames('horizontal');
+$('flipVertical').onclick=()=>transformFrames('vertical');
+$('rotateCW').onclick=()=>transformFrames('cw');
+$('rotateCCW').onclick=()=>transformFrames('ccw');
 $('restoreFrame').onclick=()=>{
  const base=unpack(original(doc.id)),pixels=base.frames[frame%base.frames.length];
  const needed=base.palette.slice(1).filter(c=>!doc.palette.includes(c));
@@ -137,7 +143,51 @@ $('exportPng').onclick=()=>{
 };
 $('play').onclick=()=>{playing=!playing;playStarted=performance.now();previewDirty=true;$('play').textContent=playing?'Ⅱ 일시정지':'▶ 재생';$('play').setAttribute('aria-pressed',String(playing));};
 $('direction').onchange=()=>{previewDirty=true;};
+let aiCandidate=null,aiBusy=false;
+async function checkAI(){
+ try{const response=await fetch('/api/ai/status',{cache:'no-store'});if(!response.ok)throw Error();const data=await response.json();
+  $('aiStatus').textContent=data.configured?'연결 준비됨 · '+data.model:'API 키 미설정 · 아래 연결 방법을 확인하세요.';
+  $('aiRequest').disabled=!data.configured||aiBusy;
+ }catch{$('aiStatus').textContent='AI 서버가 꺼져 있습니다. python server.py로 실행하세요.';$('aiRequest').disabled=true;}
+}
+$('aiRefresh').onclick=checkAI;
+function drawComparison(before,after){
+ let minX=W,maxX=0,minY=H,maxY=0;
+ for(let i=0;i<W*H;i++)if(before[i]||after[i]){minX=Math.min(minX,i%W);maxX=Math.max(maxX,i%W);minY=Math.min(minY,Math.floor(i/W));maxY=Math.max(maxY,Math.floor(i/W));}
+ if(minX===W){minX=doc.anchor.x;maxX=minX;minY=doc.anchor.y;maxY=minY;}
+ const scale=Math.min(10,Math.floor( Math.min(384/(maxX-minX+7),288/(maxY-minY+7))));
+ for(const [id,pixels] of [['aiBefore',before],['aiAfter',after]]){
+  const c=$(id),g=c.getContext('2d');g.fillStyle='#132630';g.fillRect(0,0,c.width,c.height);g.imageSmoothingEnabled=false;
+  const ox=Math.floor((c.width-(maxX-minX+1)*scale)/2),oy=Math.floor((c.height-(maxY-minY+1)*scale)/2);
+  for(let i=0;i<pixels.length;i++)if(pixels[i]){g.fillStyle=doc.palette[pixels[i]];g.fillRect(ox+(i%W-minX)*scale,oy+(Math.floor(i/W)-minY)*scale,scale,scale);}
+ }
+}
+$('aiRequest').onclick=async()=>{
+ if(aiBusy)return;const prompt=$('aiPrompt').value.trim();if(!prompt){message('어떻게 보정할지 입력하세요.');$('aiPrompt').focus();return;}
+ const asset=pack(),signature=JSON.stringify(asset),selected=frame;aiBusy=true;$('aiRequest').disabled=true;$('aiStatus').textContent='AI가 현재 프레임을 보정 중입니다…';
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),100000);
+ try{
+  const response=await fetch('/api/ai/refine',{method:'POST',headers:{'Content-Type':'application/json','X-Arena-Editor':'1'},body:JSON.stringify({asset,frame:selected,prompt}),signal:controller.signal});
+  const result=await response.json();if(!response.ok)throw Error(result.error||'보정 요청에 실패했습니다.');
+  if(JSON.stringify(pack())!==signature)throw Error('요청 중 도트가 변경되어 보정안을 적용하지 않았습니다. 현재 도트로 다시 요청하세요.');
+  if(!Array.isArray(result.edits)||result.edits.length>512)throw Error('올바르지 않은 AI 결과입니다.');
+  const before=doc.frames[selected].slice(),after=before.slice();
+  for(const e of result.edits){if(!e||!Number.isInteger(e.x)||e.x<0||e.x>=W||!Number.isInteger(e.y)||e.y<0||e.y>=H||!Number.isInteger(e.colorIndex)||e.colorIndex<0||e.colorIndex>=doc.palette.length)throw Error('올바르지 않은 AI 픽셀입니다.');after[e.y*W+e.x]=e.colorIndex;}
+  const count=after.reduce((n,v,i)=>n+(v!==before[i]),0);if(!count){message('AI가 변경할 픽셀을 제안하지 않았습니다. 보정 요청을 구체적으로 바꿔보세요.');return;}
+  aiCandidate={signature,selected,after};drawComparison(before,after);$('aiResult').textContent=(selected+1)+'번 프레임 · '+count+'개 픽셀 변경 제안';$('aiDialog').showModal();
+ }catch(error){message(error.name==='AbortError'?'응답 대기 시간이 지났습니다. 원본은 유지됩니다.':error.message);}
+ finally{clearTimeout(timeout);aiBusy=false;checkAI();}
+};
+$('aiAccept').onclick=()=>{
+ if(!aiCandidate)return;
+ if(JSON.stringify(pack())!==aiCandidate.signature){message('원본이 변경되어 보정안을 적용하지 않았습니다.');$('aiDialog').close();aiCandidate=null;return;}
+ checkpoint();frame=aiCandidate.selected;doc.frames[frame]=aiCandidate.after;edited();draftSave();$('aiDialog').close();aiCandidate=null;message('AI 보정안을 초안에 적용했습니다. 실행 취소할 수 있습니다.');
+};
+$('aiDiscard').onclick=()=>{$('aiDialog').close();aiCandidate=null;message('원본을 유지했습니다.');};
+$('aiDialog').addEventListener('close',()=>{aiCandidate=null;});
+checkAI();
 window.addEventListener('keydown',event=>{
+ if($('aiDialog').open)return;
  if(/INPUT|SELECT|TEXTAREA/.test(event.target.tagName))return;
  if(event.code==='Space'){space=true;event.preventDefault();}
  if(event.ctrlKey||event.metaKey){if(event.key.toLowerCase()==='z'){event.preventDefault();history(event.shiftKey?redo:undo,event.shiftKey?undo:redo);}else if(event.key.toLowerCase()==='y'){event.preventDefault();history(redo,undo);}else if(event.key.toLowerCase()==='s'){event.preventDefault();$('apply').click();}return;}

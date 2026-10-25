@@ -276,3 +276,16 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 구현: `pixel-art.js`는 검증된 RLE 팔레트 프레임과 브라우저 저장소, 공통 렌더러 적용을 담당한다. 사용자 도트가 없는 기술은 기존 렌더링을 유지한다. 사용자 파도는 원본의 발 접촉 포말을 중복으로 쌓지 않는다. `pixel-editor.js`와 `pixel-editor.css`는 편집 UI를 담당한다.
 
 검증: `node tests/smoke.cjs`, `node tests/pixel-art.cjs`. Chromium에서 그리기·지우기·채우기·실행 취소/다시 실행·프레임 관리·JSON 왕복·투명 PNG·새로고침 후 초안 복원·열린 배틀 탭 적용/해제·잘못된 파일 거부를 확인했다.
+
+
+## v51 · 변환 도구와 AI 보정 API
+
+- 좌우/위아래 뒤집기, 발사점 중심 좌/우 90도 회전. 현재 프레임 또는 전체 프레임에 적용하고 실행 취소할 수 있습니다. 범위를 벗어나는 회전은 픽셀을 버리지 않고 거부합니다.
+- AI는 현재 프레임과 양옆 프레임의 도트 좌표·팔레트·요청을 OpenAI에 보내 현재 프레임의 최대 512개 픽셀 변경안을 받습니다. 색상/프레임 크기는 유지됩니다. 원본/결과 비교 후 초안에 적용하며 배틀 적용은 별도입니다.
+- 기존 `python -m http.server` 대신 `python server.py`를 사용하세요. 기본 주소는 http://127.0.0.1:8000 입니다. 별도 Python 패키지는 필요 없습니다.
+- 서버를 실행할 터미널의 `OPENAI_API_KEY` 환경변수에 본인의 API 키를 설정하세요. 선택적으로 `OPENAI_MODEL`을 설정할 수 있습니다(기본 `gpt-4.1`). 키는 브라우저나 저장소에 넣지 않습니다. 서버 재시작 후 작업실의 ‘API 연결 다시 확인’을 누릅니다. `.env` 파일은 자동으로 읽지 않습니다.
+- API 사용료가 발생합니다. 키가 없으면 보정 버튼이 비활성화됩니다. ChatGPT 구독과 별도의 API 키가 필요합니다. 응답 오류/시간 초과/작업 중 원본 변경 시 원본을 보존합니다.
+- `GET /api/ai/status`, `POST /api/ai/refine`을 제공합니다. 로컬 동일 출처 요청만 허용하며 키·Python 소스·숨김 파일은 제공하지 않습니다. 공용 배포용 서버가 아닙니다.
+- 검증: `node tests/pixel-transform.cjs`, `python tests/test_ai_server.py`(가짜 API 응답으로 검증; 유료 호출 없음).
+
+구현 참고: [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
