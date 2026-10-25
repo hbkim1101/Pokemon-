@@ -2,7 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARENA · 도트 작업실</title>
 <link rel="stylesheet" href="./pixel-editor.css?v=49">
 </head><body>
-<header><div class="brand">ARENA <span>PIXEL LAB</span><small>8개 기술 · 본체 프레임 편집</small></div><nav><a href="./studio.html?rev=49" target="_blank" rel="noopener">스튜디오 ↗</a><a href="./index.html?rev=49" target="_blank" rel="noopener">배틀 ↗</a><button id="apply" class="primary">배틀에 적용</button></nav></header>
+<header><div class="brand">ARENA <span>PIXEL LAB</span><small>8개 기술 · 본체 프레임 편집</small></div><nav><a href="./studio.html?rev=50" target="_blank" rel="noopener">스튜디오 ↗</a><a href="./index.html?rev=50" target="_blank" rel="noopener">배틀 ↗</a><button id="apply" class="primary">배틀에 적용</button></nav></header>
 <main>
 <aside class="left"><section><h2>기술 선택 <span>8 MOVES</span></h2><div id="moves"></div></section>
 <section><h2>그리기 도구</h2><div id="tools" class="toolgrid"><button data-tool="pencil" class="selected" aria-pressed="true">✎ 연필 <kbd>B</kbd></button><button data-tool="eraser" aria-pressed="false">▱ 지우개 <kbd>E</kbd></button><button data-tool="fill" aria-pressed="false">▧ 채우기 <kbd>G</kbd></button><button data-tool="picker" aria-pressed="false">⌖ 색 추출 <kbd>I</kbd></button></div><label>브러시 <select id="brush"><option value="1">1 px</option><option value="2">2 px</option><option value="3">3 px</option><option value="5">5 px</option></select></label></section>
@@ -18,5 +18,5 @@
 <section><h2>프레임 편집</h2><div class="stack"><button id="mirror">좌우 뒤집기</button><button id="clear">현재 프레임 비우기</button><button id="restoreFrame">현재 프레임 원본으로</button></div></section>
 <section><h2>작업 상태</h2><p id="saveState" class="saveState">원본 도트</p><p class="hint">초안은 이 브라우저에 자동 저장됩니다. ‘배틀에 적용’을 누르면 같은 주소로 열린 배틀과 스튜디오에 반영됩니다.</p><p class="hint">긴 기술은 사거리에 맞춰 길이가 조절됩니다. 다른 기기에서 쓰려면 JSON 파일을 옮겨주세요.</p><button id="resetApplied" class="danger">이 기술의 배틀 적용 해제</button></section></aside>
 </main><footer><span id="status" role="status" aria-live="polite">도트를 준비하고 있습니다…</span><span>1 CELL = 1 PIXEL · LOCAL WORKSPACE</span></footer>
-<script src="./pixel-art.js?v=49"></script><script src="./combat-fx.js?v=49"></script><script src="./pixel-editor.js?v=49"></script>
+<script src="./pixel-presets.js?v=50"></script><script src="./pixel-art.js?v=50"></script><script src="./combat-fx.js?v=49"></script><script src="./pixel-editor.js?v=49"></script>
 </body></html>

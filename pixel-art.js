@@ -58,6 +58,7 @@ function save(asset){const clean=validate(asset);persist({...saved,[clean.id]:cl
 function reset(id){const next={...saved};delete next[id];persist(next);}
 function template(id){
  const spec=byId[id];if(!spec)throw Error('알 수 없는 기술입니다.');
+ if(root.ArenaPixelPresets?.[id])return validate(root.ArenaPixelPresets[id]);
  const width=128,height=96,anchor={x:spec.mode==='ribbon'?24:64,y:48},palette=[null],frames=[];
  const old=root.ArenaFX.PIXEL;root.ArenaFX.setPixel(1);
  try{for(let i=0;i<8;i++){
@@ -116,7 +117,7 @@ function renderAsset(asset,kind,m,pixel,frames){
 }
 function render(kind,m,pixel){
  if(kind==='rideFoam'&&saved.surf)return [];
- const id=identify(kind,m),asset=saved[id];if(!asset)return null;
+ const id=identify(kind,m),asset=saved[id]||root.ArenaPixelPresets?.[id];if(!asset)return null;
  if(!cache.has(id))cache.set(id,prepared(asset));return renderAsset(asset,kind,m,pixel,cache.get(id));
 }
 root.ArenaPixelArt={KEY,specs,validate,encode,decode,get,has:id=>Object.hasOwn(saved,id),save,reset,template,render,

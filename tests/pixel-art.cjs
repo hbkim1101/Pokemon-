@@ -1,9 +1,9 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const root=path.resolve(__dirname,'..'),data=new Map();
-function environment(){
+function environment(presets=false){
  const events={},context={Uint8Array,Map,Math,JSON,Object,Error,Number,Array,Infinity,localStorage:{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)},addEventListener:(name,fn)=>events[name]=fn};
- context.window=context;vm.createContext(context);for(const file of ['pixel-art.js','combat-fx.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);return {art:context.ArenaPixelArt,fx:context.ArenaFX,events};
+ context.window=context;vm.createContext(context);for(const file of [...(presets?['pixel-presets.js']:[]),'pixel-art.js','combat-fx.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);return {art:context.ArenaPixelArt,fx:context.ArenaFX,events};
 }
 const {art,fx,events}=environment();
 for(const spec of art.specs){
@@ -37,3 +37,24 @@ for(const mutate of [a=>a.id='__proto__',a=>a.width=999999,a=>a.frames[0].runs=[
  const bad=JSON.parse(JSON.stringify(asset));mutate(bad);assert.throws(()=>art.validate(bad));
 }
 console.log('PASS: eight editable templates, RLE/import validation, alpha, scale/direction, blank frames, persistence and live-tab updates');
+data.clear();
+const completed=environment(true);
+for(const id of ['ember','thundershock','watergun']){
+ const doc=completed.art.template(id),draft=JSON.parse(fs.readFileSync(path.join(root,'assets/pixel-moves/user-drafts',id+'.json'),'utf8'));
+ assert.deepEqual(JSON.parse(JSON.stringify(doc.frames[0])),draft.frames[0],'Preserve the user-authored key frame');
+ assert(doc.frames.length>=8);assert(new Set(doc.frames.map(f=>JSON.stringify(f))).size>=4);
+ const spec=completed.art.specs.find(s=>s.id===id);
+ for(let frame=0;frame<doc.frames.length;frame++)for(let direction=0;direction<8;direction++){
+  const angle=direction*Math.PI/4;
+  const cells=completed.fx.cells('projectile',{element:spec.element,x:0,y:0,vx:Math.cos(angle),vy:Math.sin(angle),age:frame/doc.fps});
+  assert(cells.length>0,'No blank animation beats');assert(cells.every(([x,y])=>Number.isInteger(x)&&Number.isInteger(y)));
+ }
+ const blank=JSON.parse(JSON.stringify(doc));blank.frames.forEach(f=>f.runs=[0,128*96]);completed.art.save(blank);
+ assert.equal(completed.fx.cells('projectile',{element:spec.element}).length,0,'User edits override bundled defaults');
+ completed.art.reset(id);assert(completed.fx.cells('projectile',{element:spec.element}).length>0,'Reset returns the finished default');
+}
+for(const page of ['index.html','studio.html','pixel-editor.html']){
+ const text=fs.readFileSync(path.join(root,page),'utf8');
+ assert(text.indexOf('pixel-presets.js?v=50')>=0&&text.indexOf('pixel-presets.js?v=50')<text.indexOf('pixel-art.js?v=50'));
+}
+console.log('PASS: user keyframes preserved, finished loops, 8 directions, bundled defaults and custom override/reset');
