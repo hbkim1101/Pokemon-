@@ -406,7 +406,8 @@ const BUILD={
  jet:(cells,m,quality)=>jet(cells,m,m.ports||m.emitters||[],quality),
  contact:(cells,m)=>flame(cells,{...m,stream:0,renderStream:0,contact:m.contact||{x:m.x,y:m.y}},'high')
 };
-function cellsOf(kind,m,quality){
+function cellsOf(kind,m,quality,original=false){
+ if(!original){const custom=root.ArenaPixelArt?.render(kind,m,PIXEL);if(custom!==null&&custom!==undefined)return custom;}
  const cells=new Map();
  const fn=BUILD[kind];
  if(fn)fn(cells,m,quality||'high');
@@ -448,17 +449,17 @@ function blit(g,cells,alpha){
 }
 function run(kind,g,m,quality,alpha){
  const cells=new Map();
- const fn=BUILD[kind];
- if(fn)fn(cells,m,quality||'high');
+ for(const [x,y,c] of cellsOf(kind,m,quality))place(cells,x,y,c);
  blit(g,cells,alpha);
 }
+
 function fadeOf(m){
  if(m&&m.type==='boltEcho')return clamp(1-(m.age||0)/Math.max(.001,m.life||.24),0,1);
  if(m&&m.type==='surf')return clamp(((m.life||1)-(m.age||0))/.22,0,1);
  return 1;
 }
 root.ArenaFX={
- get PIXEL(){return PIXEL;},setPixel,cells:cellsOf,stamp:(g,entries,alpha)=>{
+ get PIXEL(){return PIXEL;},setPixel,cells:cellsOf,originalCells:(kind,m,q)=>cellsOf(kind,m,q,true),stamp:(g,entries,alpha)=>{
   const cells=new Map();
   for(const [x,y,c] of entries)place(cells,x,y,c);
   blit(g,cells,alpha);

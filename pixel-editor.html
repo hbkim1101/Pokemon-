@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARENA · 도트 작업실</title>
+<link rel="stylesheet" href="./pixel-editor.css?v=49">
+</head><body>
+<header><div class="brand">ARENA <span>PIXEL LAB</span><small>8개 기술 · 본체 프레임 편집</small></div><nav><a href="./studio.html?rev=49" target="_blank" rel="noopener">스튜디오 ↗</a><a href="./index.html?rev=49" target="_blank" rel="noopener">배틀 ↗</a><button id="apply" class="primary">배틀에 적용</button></nav></header>
+<main>
+<aside class="left"><section><h2>기술 선택 <span>8 MOVES</span></h2><div id="moves"></div></section>
+<section><h2>그리기 도구</h2><div id="tools" class="toolgrid"><button data-tool="pencil" class="selected" aria-pressed="true">✎ 연필 <kbd>B</kbd></button><button data-tool="eraser" aria-pressed="false">▱ 지우개 <kbd>E</kbd></button><button data-tool="fill" aria-pressed="false">▧ 채우기 <kbd>G</kbd></button><button data-tool="picker" aria-pressed="false">⌖ 색 추출 <kbd>I</kbd></button></div><label>브러시 <select id="brush"><option value="1">1 px</option><option value="2">2 px</option><option value="3">3 px</option><option value="5">5 px</option></select></label></section>
+<section><h2>색상</h2><div class="colorline"><input id="color" type="color" value="#ffffff" aria-label="그리기 색상"><input id="hex" value="#ffffff" maxlength="9" aria-label="색상 HEX 코드" spellcheck="false"></div><label>불투명도 <input id="alpha" type="range" min="1" max="100" value="100"><output id="alphaValue">100%</output></label><div id="palette" aria-label="프레임 팔레트"></div><p class="hint">투명하게 지우려면 지우개를 사용하세요.</p></section>
+<section><h2>파일</h2><div class="stack"><button id="exportJson">JSON 작업 파일 내보내기</button><button id="importJson">JSON 작업 파일 불러오기</button><button id="exportPng">PNG 스프라이트 시트</button><input id="file" type="file" accept="application/json,.json" hidden></div></section></aside>
+<section class="workspace"><div class="canvasbar"><div><strong id="moveTitle">10만볼트</strong><span id="dimensions">128 × 96 px</span></div><div class="row"><button id="undo" title="Ctrl+Z" aria-label="실행 취소">↶</button><button id="redo" title="Ctrl+Shift+Z" aria-label="다시 실행">↷</button><button id="fit" title="캔버스 전체 보기">맞춤</button><label class="compact">확대 <input id="zoom" type="range" min="2" max="12" value="5"><output id="zoomValue">5×</output></label></div></div>
+<div class="viewoptions"><label><input id="grid" type="checkbox" checked> 픽셀 격자</label><label><input id="onion" type="checkbox"> 이전 프레임 겹쳐보기</label><label><input id="origin" type="checkbox" checked> 발사점 표시</label><span id="coords">—, —</span></div>
+<div id="viewport"><canvas id="board" width="640" height="480" aria-label="도트 편집 캔버스" tabindex="0"></canvas></div>
+<div class="canvasfoot"><span>드래그: 그리기 · Space+드래그: 이동 · 휠: 확대 · 우클릭: 지우기</span><span id="pixelCount"></span></div>
+<div class="timeline"><div class="timelinebar"><h2>애니메이션 <span id="frameLabel">FRAME 01 / 08</span></h2><div class="row"><button id="copyFrame">프레임 복제</button><button id="deleteFrame">프레임 삭제</button></div></div><div id="frames" aria-label="애니메이션 프레임"></div></div>
+</section>
+<aside class="right"><section><h2>재생 미리보기</h2><canvas id="preview" width="256" height="224" aria-label="기술 애니메이션 미리보기"></canvas><div class="row spread"><button id="play" aria-pressed="true">Ⅱ 일시정지</button><label><input id="fps" type="number" min="1" max="24" value="16"> FPS</label></div><label>공격 방향 <select id="direction"><option value="0">→ 동</option><option value="45">↘ 남동</option><option value="90">↓ 남</option><option value="135">↙ 남서</option><option value="180">← 서</option><option value="225">↖ 북서</option><option value="270">↑ 북</option><option value="315">↗ 북동</option></select></label><p class="hint">노란 십자가는 몸·발사점입니다. 그림은 이 점을 기준으로 배틀에 배치됩니다.</p></section>
+<section><h2>프레임 편집</h2><div class="stack"><button id="mirror">좌우 뒤집기</button><button id="clear">현재 프레임 비우기</button><button id="restoreFrame">현재 프레임 원본으로</button></div></section>
+<section><h2>작업 상태</h2><p id="saveState" class="saveState">원본 도트</p><p class="hint">초안은 이 브라우저에 자동 저장됩니다. ‘배틀에 적용’을 누르면 같은 주소로 열린 배틀과 스튜디오에 반영됩니다.</p><p class="hint">긴 기술은 사거리에 맞춰 길이가 조절됩니다. 다른 기기에서 쓰려면 JSON 파일을 옮겨주세요.</p><button id="resetApplied" class="danger">이 기술의 배틀 적용 해제</button></section></aside>
+</main><footer><span id="status" role="status" aria-live="polite">도트를 준비하고 있습니다…</span><span>1 CELL = 1 PIXEL · LOCAL WORKSPACE</span></footer>
+<script src="./pixel-art.js?v=49"></script><script src="./combat-fx.js?v=49"></script><script src="./pixel-editor.js?v=49"></script>
+</body></html>
