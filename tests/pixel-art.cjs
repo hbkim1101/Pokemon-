@@ -55,6 +55,6 @@ for(const id of ['ember','thundershock','watergun']){
 }
 for(const page of ['index.html','studio.html','pixel-editor.html']){
  const text=fs.readFileSync(path.join(root,page),'utf8');
- assert(text.indexOf('pixel-presets.js?v=50')>=0&&text.indexOf('pixel-presets.js?v=50')<text.indexOf('pixel-art.js?v=50'));
+ assert(text.indexOf('pixel-presets.js?v=50')>=0&&text.indexOf('pixel-presets.js?v=50')<text.indexOf('pixel-art.js?v=53'));
 }
 console.log('PASS: user keyframes preserved, finished loops, 8 directions, bundled defaults and custom override/reset');

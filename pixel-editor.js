@@ -4,6 +4,7 @@ const Art=window.ArenaPixelArt,$=id=>document.getElementById(id),board=$('board'
 const DRAFT='pokemon-arena-pixel-draft-v1:',W=128,H=96;
 let doc,frame=0,tool='pencil',zoom=5,color='#ffffff',alpha=100,playing=true,space=false,drag=null,lastPoint=null;
 let undo=[],redo=[],draftTimer,changed=false,previewDirty=true,lastPreview=-1,playStarted=performance.now();
+let exactColor=null;
 const originals=new Map();
 function message(text){$('status').textContent=text;}
 function original(id){if(!originals.has(id))originals.set(id,Art.template(id));return originals.get(id);}
@@ -50,15 +51,31 @@ function renderFrames(){
  $('frameLabel').textContent='FRAME '+String(frame+1).padStart(2,'0')+' / '+String(doc.frames.length).padStart(2,'0');
  $('deleteFrame').disabled=doc.frames.length===1;$('copyFrame').disabled=doc.frames.length>=16;
 }
-function selectedColor(){return color+(alpha<100?Math.round(alpha/100*255).toString(16).padStart(2,'0'):'');}
+function selectedColor(){return exactColor||color+(alpha<100?Math.round(alpha/100*255).toString(16).padStart(2,'0'):'');}
 function setColor(value){
+ exactColor=value.toLowerCase();
  color=value.slice(0,7);alpha=value.length===9?Math.round(parseInt(value.slice(7),16)/255*100):100;
  $('color').value=color;$('hex').value=value;$('alpha').value=alpha;$('alphaValue').textContent=alpha+'%';renderPalette();
 }
 function renderPalette(){
  $('palette').replaceChildren();
  doc.palette.slice(1).forEach((c,i)=>{const b=document.createElement('button');b.className='swatch'+(c.toLowerCase()===selectedColor().toLowerCase()?' selected':'');b.style.background=c;b.title=c+(i<9?' · '+(i+1):'');b.setAttribute('aria-label','색상 '+c);b.onclick=()=>setColor(c);$('palette').append(b);});
+ const selected=doc.palette.findIndex(c=>c?.toLowerCase()===selectedColor().toLowerCase());
+ $('addColor').disabled=selected>0||doc.palette.length>=256;
+ $('deleteColor').disabled=selected<1;
+ $('paletteCount').textContent=(doc.palette.length-1)+' / 255색';
 }
+$('addColor').onclick=()=>{
+ const c=selectedColor().toLowerCase();if(doc.palette.includes(c)||doc.palette.length>=256)return;
+ checkpoint();doc.palette.push(c);edited();draftSave();message('선택한 색을 팔레트에 추가했습니다.');
+};
+$('deleteColor').onclick=()=>{
+ const index=doc.palette.findIndex(c=>c?.toLowerCase()===selectedColor().toLowerCase());if(index<1)return;
+ checkpoint();let removed=0;
+ doc.frames=doc.frames.map(pixels=>pixels.map(v=>{if(v===index){removed++;return 0;}return v>index?v-1:v;}));
+ doc.palette.splice(index,1);setColor(doc.palette[Math.min(index,doc.palette.length-1)]||'#ffffff');
+ edited();draftSave();message('팔레트 색과 모든 프레임의 해당 도트 '+removed+'개를 삭제했습니다. Ctrl+Z로 복원할 수 있습니다.');
+};
 function render(){
  const spec=Art.specs.find(s=>s.id===doc.id);$('moveTitle').textContent=spec.name;
  $('saveState').textContent=changed?'초안 작업 중 · 적용 대기':Art.has(doc.id)?'배틀에 적용된 도트':'원본 도트';
@@ -131,8 +148,8 @@ $('viewport').addEventListener('wheel',event=>{if(event.ctrlKey||event.metaKey)r
 $('zoom').oninput=event=>setZoom(event.target.value);
 $('fit').onclick=()=>{const view=$('viewport');setZoom(Math.floor(Math.min((view.clientWidth-64)/W,(view.clientHeight-64)/H)));view.scrollLeft=0;view.scrollTop=0;};
 for(const id of ['grid','onion','origin'])$(id).onchange=renderBoard;
-$('color').oninput=event=>{color=event.target.value;$('hex').value=selectedColor();renderPalette();};
-$('alpha').oninput=event=>{alpha=Number(event.target.value);$('alphaValue').textContent=alpha+'%';$('hex').value=selectedColor();renderPalette();};
+$('color').oninput=event=>{exactColor=null;color=event.target.value;$('hex').value=selectedColor();renderPalette();};
+$('alpha').oninput=event=>{exactColor=null;alpha=Number(event.target.value);$('alphaValue').textContent=alpha+'%';$('hex').value=selectedColor();renderPalette();};
 $('hex').onchange=event=>{const c=event.target.value;if(/^#[\da-f]{6}([\da-f]{2})?$/i.test(c))setColor(c);else{event.target.value=selectedColor();message('색상은 #RRGGBB 또는 #RRGGBBAA로 입력하세요.');}};
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>chooseTool(b.dataset.tool));
 function history(from,to){if(!from.length)return;to.push({asset:pack(),frame});const entry=from.pop();doc=unpack(entry.asset);frame=Math.min(entry.frame,doc.frames.length-1);$('fps').value=doc.fps;edited();}
@@ -226,7 +243,7 @@ window.addEventListener('keydown',event=>{
   event.preventDefault();const step=event.shiftKey?5:1,state=movement();movePixels(state,event.key==='ArrowLeft'?-step:event.key==='ArrowRight'?step:0,event.key==='ArrowUp'?-step:event.key==='ArrowDown'?step:0);commitMovement(state);return;
  }
  if(/^[1-9]$/.test(event.key)){const c=doc.palette[Number(event.key)];if(c){event.preventDefault();setColor(c);}return;}
- if(event.key==='['||event.key===']'){event.preventDefault();let i=doc.palette.findIndex(c=>c?.toLowerCase()===selectedColor().toLowerCase());const n=doc.palette.length-1;i=i<1?1:((i-1+(event.key===']'?1:-1)+n)%n)+1;setColor(doc.palette[i]);return;}
+ if(event.key==='['||event.key===']'){event.preventDefault();let i=doc.palette.findIndex(c=>c?.toLowerCase()===selectedColor().toLowerCase());const n=doc.palette.length-1;if(!n)return;i=i<1?1:((i-1+(event.key===']'?1:-1)+n)%n)+1;setColor(doc.palette[i]);return;}
  if(event.key.toLowerCase()==='c'){event.preventDefault();$('color').click();return;}
  const t={b:'pencil',e:'eraser',g:'fill',i:'picker',v:'move',r:'replace'}[event.key.toLowerCase()];if(t)chooseTool(t);
 });

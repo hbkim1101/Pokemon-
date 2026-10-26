@@ -34,7 +34,7 @@ function validate(asset){
  if(!asset||asset.version!==1||typeof asset.id!=='string'||!Object.hasOwn(byId,asset.id))throw Error('지원하지 않는 도트 파일입니다.');
  const {width,height,anchor,palette,frames,fps}=asset;
  if(width!==128||height!==96||!anchor||!Number.isInteger(anchor.x)||!Number.isInteger(anchor.y)||anchor.x<0||anchor.x>=width||anchor.y<0||anchor.y>=height)throw Error('캔버스 또는 발사점이 올바르지 않습니다.');
- if(!Array.isArray(palette)||palette.length<2||palette.length>256||palette[0]!==null||palette.slice(1).some(c=>typeof c!=='string'||!colorPattern.test(c)))throw Error('팔레트가 올바르지 않습니다.');
+ if(!Array.isArray(palette)||palette.length<1||palette.length>256||palette[0]!==null||palette.slice(1).some(c=>typeof c!=='string'||!colorPattern.test(c)))throw Error('팔레트가 올바르지 않습니다.');
  if(!Number.isInteger(fps)||fps<1||fps>24||!Array.isArray(frames)||frames.length<1||frames.length>16)throw Error('프레임은 1–16개, 속도는 1–24 FPS여야 합니다.');
  const clean={version:1,id:asset.id,width,height,anchor:{x:anchor.x,y:anchor.y},fps,palette:[...palette],frames:frames.map(frame=>{decode(frame.runs,width*height,palette.length);return {runs:[...frame.runs]};})};
  return clean;

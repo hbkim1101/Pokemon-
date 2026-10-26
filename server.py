@@ -21,7 +21,7 @@ def validate_request(body):
     if not isinstance(a, dict) or a.get('id') not in IDS or a.get('version') != 1 or a.get('width') != 128 or a.get('height') != 96:
         raise ValueError('지원하지 않는 도트입니다.')
     palette, frames = a.get('palette'), a.get('frames')
-    if not isinstance(palette, list) or not 2 <= len(palette) <= 256 or palette[0] is not None or any(not isinstance(c,str) or not re.fullmatch(r'#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?',c) for c in palette[1:]):
+    if not isinstance(palette, list) or not 1 <= len(palette) <= 256 or palette[0] is not None or any(not isinstance(c,str) or not re.fullmatch(r'#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?',c) for c in palette[1:]):
         raise ValueError('팔레트 오류입니다.')
     if not isinstance(frames,list) or not 1 <= len(frames) <= 16 or type(frame) is not int or not 0 <= frame < len(frames):
         raise ValueError('프레임 오류입니다.')
