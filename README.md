@@ -289,3 +289,8 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 - 검증: `node tests/pixel-transform.cjs`, `python tests/test_ai_server.py`(가짜 API 응답으로 검증; 유료 호출 없음).
 
 구현 참고: [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+
+
+### Windows 암호화 키 저장
+
+`local_credentials.py`는 `%LOCALAPPDATA%/PokemonArena/openai-key.dpapi`에서 Windows 사용자에 묶인 DPAPI 암호화 키를 읽습니다. 키 파일은 프로젝트 밖에 보관하며 HTTP로 제공하지 않습니다. 서버 재시작 후 자동으로 읽습니다. `OPENAI_API_KEY` 환경변수가 있으면 해당 값이 우선합니다. 전용 키는 30일 만료로 발급했으며, 만료 후 재발급이 필요합니다.

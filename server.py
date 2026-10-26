@@ -8,6 +8,7 @@ import urllib.request
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
+from local_credentials import api_key
 
 ROOT = Path(__file__).resolve().parent
 BUSY = threading.Lock()
@@ -54,7 +55,7 @@ def validate_edits(result, palette_size):
 
 def correct(body):
     asset, frame, prompt, decoded = validate_request(body)
-    key = os.environ.get('OPENAI_API_KEY','').strip()
+    key = api_key()
     if not key:
         raise RuntimeError('OPENAI_API_KEY가 설정되지 않았습니다. 서버 환경변수를 설정하고 다시 실행하세요.')
     context = []
@@ -101,7 +102,7 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if not self.host_ok(): return self.reply(403,{'error':'허용되지 않은 호스트입니다.'})
         if self.path=='/api/ai/status':
-            return self.reply(200,{'configured':bool(os.environ.get('OPENAI_API_KEY','').strip()),'model':os.environ.get('OPENAI_MODEL','gpt-4.1')})
+            return self.reply(200,{'configured':bool(api_key()),'model':os.environ.get('OPENAI_MODEL','gpt-4.1')})
         if not self.static_ok(): return self.reply(404,{'error':'파일을 찾을 수 없습니다.'})
         super().do_GET()
 
