@@ -57,7 +57,7 @@ function setColor(value){
 }
 function renderPalette(){
  $('palette').replaceChildren();
- doc.palette.slice(1).forEach(c=>{const b=document.createElement('button');b.className='swatch'+(c.toLowerCase()===selectedColor().toLowerCase()?' selected':'');b.style.background=c;b.title=c;b.setAttribute('aria-label','색상 '+c);b.onclick=()=>setColor(c);$('palette').append(b);});
+ doc.palette.slice(1).forEach((c,i)=>{const b=document.createElement('button');b.className='swatch'+(c.toLowerCase()===selectedColor().toLowerCase()?' selected':'');b.style.background=c;b.title=c+(i<9?' · '+(i+1):'');b.setAttribute('aria-label','색상 '+c);b.onclick=()=>setColor(c);$('palette').append(b);});
 }
 function render(){
  const spec=Art.specs.find(s=>s.id===doc.id);$('moveTitle').textContent=spec.name;
@@ -74,13 +74,40 @@ function inside(p){return p.x>=0&&p.x<W&&p.y>=0&&p.y<H;}
 function dab(p,index){const size=Number($('brush').value),start=-Math.floor((size-1)/2);for(let y=start;y<start+size;y++)for(let x=start;x<start+size;x++){const a=p.x+x,b=p.y+y;if(a>=0&&a<W&&b>=0&&b<H)doc.frames[frame][b*W+a]=index;}}
 function line(a,b,index){let x=a.x,y=a.y,dx=Math.abs(b.x-x),sx=x<b.x?1:-1,dy=-Math.abs(b.y-y),sy=y<b.y?1:-1,err=dx+dy;for(let n=0;n<2048;n++){dab({x,y},index);if(x===b.x&&y===b.y)break;const e=2*err;if(e>=dy){err+=dy;x+=sx;}if(e<=dx){err+=dx;y+=sy;}}}
 function flood(p,index){const pixels=doc.frames[frame],old=pixels[p.y*W+p.x];if(old===index)return;const stack=[p.y*W+p.x];pixels[stack[0]]=index;while(stack.length){const i=stack.pop(),x=i%W,y=Math.floor(i/W);for(const n of [x>0?i-1:-1,x<W-1?i+1:-1,y>0?i-W:-1,y<H-1?i+W:-1])if(n>=0&&pixels[n]===old){pixels[n]=index;stack.push(n);}}}
-function chooseTool(name){tool=name;document.querySelectorAll('[data-tool]').forEach(b=>{const selected=b.dataset.tool===name;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});board.style.cursor=name==='picker'?'copy':'crosshair';}
+function chooseTool(name){tool=name;document.querySelectorAll('[data-tool]').forEach(b=>{const selected=b.dataset.tool===name;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});board.style.cursor=name==='move'?'move':name==='picker'?'copy':'crosshair';}
+function movement(){
+ const indices=$('transformAll').checked?doc.frames.map((_,i)=>i):[frame];
+ const bases=indices.map(i=>[i,doc.frames[i].slice()]);let minX=W,maxX=-1,minY=H,maxY=-1;
+ for(const [,pixels] of bases)pixels.forEach((v,i)=>{if(v){minX=Math.min(minX,i%W);maxX=Math.max(maxX,i%W);minY=Math.min(minY,Math.floor(i/W));maxY=Math.max(maxY,Math.floor(i/W));}});
+ return {bases,minX,maxX,minY,maxY,dx:0,dy:0};
+}
+function movePixels(state,dx,dy){
+ if(state.maxX<0)return;
+ state.dx=Math.max(-state.minX,Math.min(W-1-state.maxX,dx));state.dy=Math.max(-state.minY,Math.min(H-1-state.maxY,dy));
+ for(const [i,pixels] of state.bases){const next=new Uint8Array(W*H);pixels.forEach((v,j)=>{if(v)next[j+state.dy*W+state.dx]=v;});doc.frames[i]=next;}
+ previewDirty=true;renderBoard();
+}
+function commitMovement(state,cancel=false){
+ const updates=state.bases.map(([i])=>[i,doc.frames[i]]);
+ for(const [i,pixels] of state.bases)doc.frames[i]=pixels;
+ if(!cancel&&(state.dx||state.dy)){checkpoint();for(const [i,pixels] of updates)doc.frames[i]=pixels;edited();draftSave();message('도트를 '+state.dx+', '+state.dy+' px 이동했습니다. 발사점은 유지됩니다.');}
+ else{previewDirty=true;render();if(cancel)draftSave();}
+}
 board.addEventListener('contextmenu',event=>event.preventDefault());
 board.addEventListener('pointerdown',event=>{
  if(event.button>2)return;event.preventDefault();board.focus();board.setPointerCapture(event.pointerId);
  if(space||event.button===1){drag={pan:true,x:event.clientX,y:event.clientY,left:$('viewport').scrollLeft,top:$('viewport').scrollTop};return;}
  const p=point(event);if(!inside(p))return;
  if(tool==='picker'||event.altKey){const index=doc.frames[frame][p.y*W+p.x];if(index)setColor(doc.palette[index]);message(index?'색상을 가져왔습니다.':'투명한 픽셀입니다.');return;}
+ if(tool==='move'&&event.button===0){drag={move:true,start:p,...movement()};return;}
+ if(tool==='replace'&&event.button===0){
+  const old=doc.frames[frame][p.y*W+p.x];if(!old){message('색을 바꿀 도트를 클릭하세요. 투명 배경은 유지됩니다.');return;}
+  if(doc.palette[old].toLowerCase()===selectedColor().toLowerCase())return;
+  try{checkpoint();const replacement=indexForColor(),source=doc.palette[old].toLowerCase();const indices=$('colorAll').checked?doc.frames.map((_,i)=>i):[frame];
+   for(const i of indices)doc.frames[i]=doc.frames[i].map(v=>v&&doc.palette[v].toLowerCase()===source?replacement:v);
+   edited();draftSave();message('같은 색의 도트를 변경했습니다. 실행 취소할 수 있습니다.');
+  }catch(error){message(error.message);}return;
+ }
  try{checkpoint();const index=event.button===2||tool==='eraser'?0:indexForColor();
   if(tool==='fill'){flood(p,index);edited();return;}
   drag={index};lastPoint=p;dab(p,index);edited();
@@ -90,10 +117,12 @@ board.addEventListener('pointermove',event=>{
  const p=point(event);$('coords').textContent=inside(p)?p.x+', '+p.y:'—, —';
  if(!drag)return;
  if(drag.pan){$('viewport').scrollLeft=drag.left-event.clientX+drag.x;$('viewport').scrollTop=drag.top-event.clientY+drag.y;return;}
+ if(drag.move){movePixels(drag,p.x-drag.start.x,p.y-drag.start.y);return;}
  if(!inside(p)){lastPoint=null;return;}if(lastPoint)line(lastPoint,p,drag.index);else dab(p,drag.index);lastPoint=p;edited();
 });
-function finishStroke(){if(drag&&!drag.pan)draftSave();drag=null;lastPoint=null;}
-board.addEventListener('pointerup',finishStroke);board.addEventListener('pointercancel',finishStroke);board.addEventListener('lostpointercapture',finishStroke);
+function finishStroke(){if(drag?.move)commitMovement(drag);else if(drag&&!drag.pan)draftSave();drag=null;lastPoint=null;}
+function cancelStroke(){if(drag?.move){commitMovement(drag,true);drag=null;lastPoint=null;}else finishStroke();}
+board.addEventListener('pointerup',finishStroke);board.addEventListener('pointercancel',cancelStroke);board.addEventListener('lostpointercapture',finishStroke);
 function setZoom(value){
  const view=$('viewport'),x=(view.scrollLeft+view.clientWidth/2-32)/zoom,y=(view.scrollTop+view.clientHeight/2-32)/zoom;
  zoom=Math.min(12,Math.max(2,Number(value)));$('zoom').value=zoom;$('zoomValue').textContent=zoom+'×';renderBoard();view.scrollLeft=x*zoom-view.clientWidth/2+32;view.scrollTop=y*zoom-view.clientHeight/2+32;
@@ -189,9 +218,17 @@ checkAI();
 window.addEventListener('keydown',event=>{
  if($('aiDialog').open)return;
  if(/INPUT|SELECT|TEXTAREA/.test(event.target.tagName))return;
+ if(drag?.move){if(event.key==='Escape'){event.preventDefault();cancelStroke();}return;}
  if(event.code==='Space'){space=true;event.preventDefault();}
  if(event.ctrlKey||event.metaKey){if(event.key.toLowerCase()==='z'){event.preventDefault();history(event.shiftKey?redo:undo,event.shiftKey?undo:redo);}else if(event.key.toLowerCase()==='y'){event.preventDefault();history(redo,undo);}else if(event.key.toLowerCase()==='s'){event.preventDefault();$('apply').click();}return;}
- const t={b:'pencil',e:'eraser',g:'fill',i:'picker'}[event.key.toLowerCase()];if(t)chooseTool(t);
+ if(event.altKey)return;
+ if(tool==='move'&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){
+  event.preventDefault();const step=event.shiftKey?5:1,state=movement();movePixels(state,event.key==='ArrowLeft'?-step:event.key==='ArrowRight'?step:0,event.key==='ArrowUp'?-step:event.key==='ArrowDown'?step:0);commitMovement(state);return;
+ }
+ if(/^[1-9]$/.test(event.key)){const c=doc.palette[Number(event.key)];if(c){event.preventDefault();setColor(c);}return;}
+ if(event.key==='['||event.key===']'){event.preventDefault();let i=doc.palette.findIndex(c=>c?.toLowerCase()===selectedColor().toLowerCase());const n=doc.palette.length-1;i=i<1?1:((i-1+(event.key===']'?1:-1)+n)%n)+1;setColor(doc.palette[i]);return;}
+ if(event.key.toLowerCase()==='c'){event.preventDefault();$('color').click();return;}
+ const t={b:'pencil',e:'eraser',g:'fill',i:'picker',v:'move',r:'replace'}[event.key.toLowerCase()];if(t)chooseTool(t);
 });
 window.addEventListener('keyup',event=>{if(event.code==='Space')space=false;});window.addEventListener('blur',()=>{space=false;finishStroke();});window.addEventListener('beforeunload',draftSave);
 function preview(now){
