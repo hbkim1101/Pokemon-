@@ -55,6 +55,21 @@ for(const id of ['ember','thundershock','watergun']){
 }
 for(const page of ['index.html','studio.html','pixel-editor.html']){
  const text=fs.readFileSync(path.join(root,page),'utf8');
- assert(text.indexOf('pixel-presets.js?v=50')>=0&&text.indexOf('pixel-presets.js?v=50')<text.indexOf('pixel-art.js?v=53'));
+ assert(text.indexOf('pixel-presets.js?v=50')>=0&&text.indexOf('pixel-presets.js?v=50')<text.indexOf('pixel-art.js?v=54'));
 }
 console.log('PASS: user keyframes preserved, finished loops, 8 directions, bundled defaults and custom override/reset');
+
+// Every authored basic sprite rotates around its unchanged emitter anchor.
+for(const id of ['ember','thundershock','watergun','leaf']){
+ const a=completed.art.template(id);const pixels=new Uint8Array(128*96);
+ pixels[(a.anchor.y+2)*128+a.anchor.x+7]=1;a.frames=[{runs:completed.art.encode(pixels)}];completed.art.save(a);
+ const spec=completed.art.specs.find(s=>s.id===id);
+ for(let i=0;i<8;i++){
+  const angle=i*Math.PI/4,vx=Math.cos(angle),vy=Math.sin(angle);
+  const expected=[[Math.round(7*vx-2*vy),Math.round(7*vy+2*vx),a.palette[1]]];
+  const cells=completed.fx.cells('projectile',{x:0,y:0,vx,vy,age:0,element:spec.element});
+  assert.equal(JSON.stringify(cells),JSON.stringify(expected),id+' direction '+i);
+  assert.equal(JSON.stringify(completed.art.preview(a,0,angle)),JSON.stringify(expected));
+ }
+}
+console.log('PASS: all four authored basic sprites match battle/preview headings in eight directions');

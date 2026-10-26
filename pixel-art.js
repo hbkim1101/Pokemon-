@@ -8,8 +8,8 @@ const specs=[
  {id:'surf',name:'파도타기',mon:'거북왕',element:'water',kind:'ride',mode:'ground'},
  {id:'energyball',name:'에너지볼',mon:'이상해꽃',element:'grass',kind:'orb',mode:'heading'},
  {id:'leaf',name:'나뭇잎',mon:'이상해꽃',element:'grass',kind:'projectile',mode:'heading'},
- {id:'ember',name:'불꽃세례',mon:'리자몽',element:'fire',kind:'projectile',mode:'screen'},
- {id:'thundershock',name:'전기쇼크',mon:'라이츄',element:'electric',kind:'projectile',mode:'screen'},
+ {id:'ember',name:'불꽃세례',mon:'리자몽',element:'fire',kind:'projectile',mode:'heading'},
+ {id:'thundershock',name:'전기쇼크',mon:'라이츄',element:'electric',kind:'projectile',mode:'heading'},
  {id:'watergun',name:'물대포',mon:'거북왕',element:'water',kind:'projectile',mode:'heading'}
 ];
 const byId=Object.fromEntries(specs.map(s=>[s.id,s]));
