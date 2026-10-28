@@ -298,10 +298,11 @@
     const m={...origin,vx,vy,age,life:1.4,type:move,variant:state.vfxVariant};
     if(move==='surf')return;
     const windup=move==='energyball'?.18:move==='thunderbolt'?.12:0;
-    if(age<windup){ArenaFX.charge(ctx,{...m,element:move==='energyball'?'grass':'electric',windup});return;}
+    if(age<windup){if(move!=='thunderbolt')ArenaFX.charge(ctx,{...m,element:'grass',windup});return;}
     age-=windup;m.age=age;
     if(move==='thunderbolt'){
-      const dist=300*Math.min(1,age/.3);
+      if(age>.88)return;
+      const dist=300;
       m.path=[origin,{x:origin.x+vx*dist,y:origin.y+vy*dist}];
       ArenaFX.thunder(ctx,m);
     }else if(move==='flamethrower'){
@@ -367,7 +368,13 @@
         ctx.fillStyle = '#22eeff';
         ctx.fillRect(Math.round(ox) - 2, Math.round(oy) - 2, 4, 4);
       }
-      if (state.playFx && state.previewing) drawFx(mon, world, angle, state.previewAge, scale);
+      if (state.playFx && state.previewing){
+        const thunder=state.move==='special'&&mon.moveId==='thunderbolt',active=thunder&&state.previewAge<1;
+        if(thunder)world={x:cx,y:cy-24*scale/2};
+        if(active)ThunderboltArt.stamp(ctx,ThunderboltArt.corona(Math.floor(state.previewAge*18)),world.x,world.y,scale*.7);
+        drawFx(mon,world,angle,state.previewAge,scale);
+        if(active)ThunderboltArt.caster(ctx,drawn.anim.image,[drawn.f*drawn.anim.w,drawn.d*drawn.anim.h,drawn.anim.w,drawn.anim.h],[drawn.left,drawn.top,drawn.dw,drawn.dh],state.previewAge<.12?state.previewAge/.12:(state.previewAge-.12)/.88,state.previewAge<.12);
+      }
     }
 
     // Zoomed editable cell on the right half

@@ -15,9 +15,21 @@
 - Validation: `node tests/smoke.cjs` covers anatomy, preparation/release, sustained fire, 30/60/120 Hz locomotion and canvas state balance in both quality modes.
 - Reference: the user-supplied 122-second trailer MP4 was inspected with frame sequences. The Charizard/Blastoise duel informed rolling flame lobes, twin bright cannon jets, impact sparks/steam and compact comet projectiles. The small-step attack/recovery animation and stationary ground shadows informed the motion changes. Existing playable moves are retained; trailer-only characters, beam-clash gameplay and arenas are outside this change.
 
-# Pokémon Arena — Four Moves & Motion Studio (v30)
+# Pokémon Arena — PMD Starter Rival Battle & Motion Studio
 
 비상업용 팬 프로젝트입니다. Pokémon 및 관련 캐릭터의 권리는 각 원저작자에게 있습니다.
+
+## 로컬 Arena 첫 라이벌전
+
+로컬 첫 플레이 구간은 PMD 8방향 스프라이트와 직접 만든 기술 효과를 사용하는 실시간 Arena입니다. 이상해씨·파이리·꼬부기 중 하나를 고르면 상성 스타터를 가진 라이벌이 자동으로 나옵니다. 앱은 `http://127.0.0.1:8000/`에서 열 수 있습니다.
+
+## 브라우저 RPG 플레이
+
+`python server.py`를 실행한 뒤 `http://127.0.0.1:8000/rpg-game.html`을 열면 웹에서 연구소를 걷고, 오박사와 대화하고, 스타터를 고른 뒤 같은 화면 안에서 라이벌과 실시간 Arena 전투를 할 수 있습니다. 진행 상태는 브라우저 로컬 저장소에 저장됩니다. 체크포인트 버튼은 주소 뒤에 `?debug=1`을 붙이면 표시됩니다.
+
+웹 화면은 현재 게임의 첫 플레이 구간을 브라우저 기술로 구현한 버전입니다. RPG Maker XP/Essentials의 RGSS 런타임을 브라우저에서 직접 실행하는 형태는 아니며, 나머지 XP 프로젝트는 RPG Maker XP에서 계속 편집·실행합니다. 현재 PC의 XP 프로젝트는 체험판으로 만든 파일과 권리자가 별도인 게임 리소스를 포함하므로 이 공개 저장소에는 넣지 않습니다. RPG Maker XP 체험판의 공식 조건은 체험판으로 만든 게임의 인터넷 배포를 허용하지 않습니다([공식 조건](https://www.rpgmakerofficial.com/support/trial/)).
+
+PMD 리소스는 출처와 재배포 조건을 확인한 Rockruff 액션 스프라이트만 `assets/pmd/0744/`에 포함합니다. 이 파일은 PMDCollab SpriteCollab의 CC BY-NC 4.0 제출물이며 작가 표기는 해당 폴더의 README와 credits.txt에 있습니다. 다른 Pokémon/PMD 리소스는 별도 라이선스가 확인되지 않아 공개 저장소에서 제외합니다.
 
 ## 원본 게임플레이 참고 영상 추가 방법
 
@@ -47,10 +59,9 @@ bash scripts/upload-reference-video.sh "/path/to/Pokemon Arena 2D by Big Kid Nat
 
 | 포켓몬 | 기본 공격 | 고유 기술 |
 | --- | --- | --- |
-| 라이츄 | 전기쇼크 | 10만볼트 |
-| 리자몽 | 불꽃세례 | 화염방사 |
-| 거북왕 | 물대포 | 파도타기 |
-| 이상해꽃 | 나뭇잎 | 에너지볼 |
+| 이상해씨 | 나뭇잎 | 에너지볼 |
+| 파이리 | 불꽃세례 | 화염방사 |
+| 꼬부기 | 물대포 | 파도타기 |
 
 **키보드**: WASD/방향키 이동, 1 기본 공격, 2 고유 기술, Space 또는 5 회피, P 일시정지. 추가 기술에 사용하던 3, 4는 비활성화됩니다. 모바일에서는 화면상의 기본/고유 기술 버튼으로 공격합니다. 화염방사는 누르고 있는 동안 방출하며 자원을 소모합니다.
 
@@ -262,18 +273,18 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 
 ### v49: 직접 그리는 도트 작업실
 
-`pixel-editor.html`에서 8개 기술의 본체 도트를 수정할 수 있다. 배틀 메뉴와 기존 스튜디오에 작업실 링크가 있다.
+`pixel-editor.html`에서 12개 기술의 본체 도트를 수정할 수 있다. 배틀 메뉴와 스튜디오에 작업실 링크가 있다.
 
 1. 왼쪽에서 기술을 고르고, 아래 타임라인에서 편집할 프레임을 선택한다.
 2. 연필(B), 지우개(E), 채우기(G), 색 추출(I)로 그린다. 우클릭은 지우기, Space+드래그는 캔버스 이동, 휠은 확대다. 색상과 불투명도를 지정할 수 있다.
 3. 실행 취소/다시 실행(Ctrl+Z / Ctrl+Shift+Z), 프레임 복제·삭제, 좌우 뒤집기와 원본 프레임 복원을 지원한다. 이전 프레임 겹쳐보기와 방향별 애니메이션 미리보기도 제공한다.
-4. ‘배틀에 적용’을 누르면 해당 기술의 편집본이 같은 출처(origin)의 배틀과 두 스튜디오에 반영된다. 다른 열린 탭은 storage 이벤트로 갱신된다. 긴 기술은 사거리에 맞춰 길이를 조정하며 캐릭터의 발사점과 방향을 따른다.
-5. 초안은 브라우저에 자동 저장된다. 적용본과 초안은 분리되어 있다. ‘이 기술의 배틀 적용 해제’는 편집 초안을 지우지 않고 기본 렌더러로 되돌린다.
-6. JSON 작업 파일은 팔레트·투명도·프레임·FPS를 포함하고 다른 기기로 옮길 수 있다. PNG는 투명 배경의 가로 스프라이트 시트다. 저장소 파일을 직접 덮어쓰거나 GitHub로 자동 업로드하지 않는다.
+4. 도트를 편집하고 약 0.7초 멈추면 편집본이 로컬 공용 저장소와 RPG 프로젝트의 실제 PNG 애니메이션 시트까지 자동 반영된다. 상단 ‘배틀에 적용’은 기다리지 않고 즉시 다시 내보내는 기능이다. 같은 PC에서 여러 포트나 프로젝트 복사본으로 서버를 실행해도 같은 기술 데이터를 쓴다.
+5. 초안은 브라우저에 즉시 저장되고, 자동 반영 결과는 작업 상태에 표시된다. HTML 배틀은 변경을 최대 3초 안에 읽으며, RPG 전투는 다음 발사체 생성 시 갱신된 PNG를 읽는다. ‘이 기술의 배틀 적용 해제’는 초안을 남기고 기본 렌더러로 되돌린다.
+6. JSON 작업 파일은 팔레트·투명도·프레임·FPS를 포함하고 다른 기기로 옮길 수 있다. PNG는 투명 배경의 가로 스프라이트 시트다. 공용 적용본은 Windows의 `%LOCALAPPDATA%\PokemonArena\pixel-art.json`(다른 OS는 `~/.local/share/PokemonArena/pixel-art.json`)에 저장되며 GitHub로 자동 업로드하지 않는다.
 
 원본 이펙트를 128×96 픽셀, 8프레임으로 가져오며 프레임은 1–16개, 재생 속도는 1–24 FPS로 편집할 수 있다. 노란 십자가는 도트의 기준 발사점이다. 캐릭터 스프라이트와 별도의 명중 효과는 본체 프레임에 포함되지 않는다.
 
-구현: `pixel-art.js`는 검증된 RLE 팔레트 프레임과 브라우저 저장소, 공통 렌더러 적용을 담당한다. 사용자 도트가 없는 기술은 기존 렌더링을 유지한다. 사용자 파도는 원본의 발 접촉 포말을 중복으로 쌓지 않는다. `pixel-editor.js`와 `pixel-editor.css`는 편집 UI를 담당한다.
+구현: `server.py`는 검증된 RLE 프레임을 사용자 로컬 공용 JSON 파일에 원자적으로 기록한다. `pixel-art.js`는 공용 API 동기화와 공통 렌더러 적용을 담당한다. 첫 실행 시 `assets/pixel-moves/shared.json`의 기본 스프라이트와 기존 브라우저 적용본을 가져온다. 사용자 도트가 없는 기술은 기존 렌더링을 유지한다. 사용자 파도는 원본의 발 접촉 포말을 중복으로 쌓지 않는다. `pixel-editor.js`와 `pixel-editor.css`는 편집 UI를 담당한다.
 
 검증: `node tests/smoke.cjs`, `node tests/pixel-art.cjs`. Chromium에서 그리기·지우기·채우기·실행 취소/다시 실행·프레임 관리·JSON 왕복·투명 PNG·새로고침 후 초안 복원·열린 배틀 탭 적용/해제·잘못된 파일 거부를 확인했다.
 
@@ -282,7 +293,7 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 
 - 좌우/위아래 뒤집기, 발사점 중심 좌/우 90도 회전. 현재 프레임 또는 전체 프레임에 적용하고 실행 취소할 수 있습니다. 범위를 벗어나는 회전은 픽셀을 버리지 않고 거부합니다.
 - AI는 현재 프레임과 양옆 프레임의 도트 좌표·팔레트·요청을 OpenAI에 보내 현재 프레임의 최대 512개 픽셀 변경안을 받습니다. 색상/프레임 크기는 유지됩니다. 원본/결과 비교 후 초안에 적용하며 배틀 적용은 별도입니다.
-- 기존 `python -m http.server` 대신 `python server.py`를 사용하세요. 기본 주소는 http://127.0.0.1:8000 입니다. 별도 Python 패키지는 필요 없습니다.
+- 적용본 공용 저장 기능을 쓰려면 `python server.py`로 실행하세요. 기본 주소는 http://127.0.0.1:8000 이며 `python server.py 8001`처럼 포트를 지정할 수 있습니다. 동일 PC의 프로젝트 복사본도 사용자 공용 저장 파일을 사용합니다. 단순 정적 서버(`python -m http.server`)에서는 공용 저장 API를 쓸 수 없습니다. 별도 Python 패키지는 필요 없습니다.
 - 서버를 실행할 터미널의 `OPENAI_API_KEY` 환경변수에 본인의 API 키를 설정하세요. 선택적으로 `OPENAI_MODEL`을 설정할 수 있습니다(기본 `gpt-4.1`). 키는 브라우저나 저장소에 넣지 않습니다. 서버 재시작 후 작업실의 ‘API 연결 다시 확인’을 누릅니다. `.env` 파일은 자동으로 읽지 않습니다.
 - API 사용료가 발생합니다. 키가 없으면 보정 버튼이 비활성화됩니다. ChatGPT 구독과 별도의 API 키가 필요합니다. 응답 오류/시간 초과/작업 중 원본 변경 시 원본을 보존합니다.
 - `GET /api/ai/status`, `POST /api/ai/refine`을 제공합니다. 로컬 동일 출처 요청만 허용하며 키·Python 소스·숨김 파일은 제공하지 않습니다. 공용 배포용 서버가 아닙니다.
@@ -313,3 +324,7 @@ GitHub에 반영된 본 변경은 JS 구문 검사 및 소스 정적 검사(플�
 ### v54 · 직접 그린 기본 기술의 방향
 
 불꽃세례와 전기쇼크도 물대포·나뭇잎처럼 발사 속도 벡터를 따라 회전합니다. 편집 캔버스에서는 오른쪽(→)을 기준으로 그리며, 발사점은 유지합니다. 저장된 사용자 그림은 변경하지 않습니다. 실제 조준·투사체 이동·피해 판정은 기존 동작을 유지합니다. 네 기본 기술 모두 8방향에서 배틀과 미리보기의 픽셀 좌표가 일치함을 검증합니다.
+
+## RPG Maker XP + Pokémon Essentials 작업 환경
+
+RPG Maker XP 체험판을 설치하고 Essentials v21.1 프로젝트를 `rpg-maker-xp/projects/MyPokemonGame`에 구성해 편집기에서 열었습니다. 기존에 사용자가 만든 불꽃세례·전기쇼크·물대포 프레임도 Essentials 5×5 애니메이션 시트로 내보내 프로젝트 `Graphics/Animations/`에 넣었습니다. 편집/가져오기 절차는 [작업 환경 안내](rpg-maker-xp/README.md)와 프로젝트별 안내를 참고하세요. `scripts/export-essentials-move-sheets.py`는 이 시트를 다시 생성하고, `scripts/prepare-essentials.ps1`는 새 게임 프로젝트를 복사합니다. 프로젝트 게임 폴더는 대용량 에셋이 기존 Arena 저장소에 섞이지 않도록 로컬 전용으로 제외됩니다.

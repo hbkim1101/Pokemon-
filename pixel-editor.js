@@ -2,9 +2,20 @@
 'use strict';
 const Art=window.ArenaPixelArt,$=id=>document.getElementById(id),board=$('board'),ctx=board.getContext('2d');
 const DRAFT='pokemon-arena-pixel-draft-v1:',W=128,H=96;
+const STALE_THUNDERSHOCK_PALETTE=['#d49a1b','#f1c52b','#ffe652','#fff4ad'];
+function draftKey(id){return (id==='thunderbolt'?'pokemon-arena-pixel-draft-v4:':id==='tackle'||id==='quickattack'?'pokemon-arena-pixel-draft-v2:':DRAFT)+id;}
 let doc,frame=0,tool='pencil',zoom=5,color='#ffffff',alpha=100,playing=true,space=false,drag=null,lastPoint=null;
-let undo=[],redo=[],draftTimer,changed=false,previewDirty=true,lastPreview=-1,playStarted=performance.now();
+let undo=[],redo=[],draftTimer,autoApplyTimer,changed=false,previewDirty=true,lastPreview=-1,playStarted=performance.now();
+let autoApplying=false;const pendingAutoApply=new Map(),moveRevisions=new Map(),autoApplyDelay=700;
 let exactColor=null;
+let rushPreviewData=null;
+const thunderSprite=new Image();thunderSprite.onload=()=>{previewDirty=true;};
+thunderSprite.src='/rpg-maker-xp/projects/MyPokemonGame/Graphics/Arena/0025/Shoot.png';
+const rushSprite=new Image();
+rushSprite.onload=()=>{previewDirty=true;};
+rushSprite.src='/rpg-maker-xp/projects/MyPokemonGame/Graphics/Arena/0025/Attack.png';
+fetch('/rpg-maker-xp/projects/MyPokemonGame/Plugins/Lappet%20Opening/arena-action.json',{cache:'no-store'})
+ .then(r=>r.json()).then(data=>{rushPreviewData=data;previewDirty=true;}).catch(()=>{});
 const originals=new Map();
 function message(text){$('status').textContent=text;}
 function original(id){if(!originals.has(id))originals.set(id,Art.template(id));return originals.get(id);}
@@ -12,23 +23,53 @@ function unpack(asset){const a=Art.validate(asset);return {...a,frames:a.frames.
 function pack(){return {...doc,frames:doc.frames.map(pixels=>({runs:Art.encode(pixels)}))};}
 function draftSave(){
  clearTimeout(draftTimer);if(!doc)return;
- try{localStorage.setItem(DRAFT+doc.id,JSON.stringify(pack()));if(changed)$('saveState').textContent='초안 저장됨 · 배틀 적용 대기';}
+ try{localStorage.setItem(draftKey(doc.id),JSON.stringify(pack()));if(changed)$('saveState').textContent=pendingAutoApply.has(doc.id)||autoApplying?'자동 반영 대기 · RPG 파일 갱신 중':'자동 반영 대기 · 잠시 후 RPG에도 적용';}
  catch{message('초안 저장 공간이 부족합니다. JSON 작업 파일로 내보내 주세요.');}
 }
 function checkpoint(){undo.push({asset:pack(),frame});if(undo.length>40)undo.shift();redo=[];}
-function edited(){changed=true;previewDirty=true;clearTimeout(draftTimer);draftTimer=setTimeout(draftSave,350);render();}
+function queueAutoApply(asset,delay=autoApplyDelay){
+ const revision=(moveRevisions.get(asset.id)||0)+1;moveRevisions.set(asset.id,revision);
+ pendingAutoApply.set(asset.id,{asset:JSON.parse(JSON.stringify(asset)),revision});
+ clearTimeout(autoApplyTimer);autoApplyTimer=setTimeout(flushAutoApply,delay);
+ if(doc?.id===asset.id)$('saveState').textContent='자동 반영 대기 · 잠시 후 RPG에도 적용';
+}
+async function flushAutoApply(){
+ clearTimeout(autoApplyTimer);if(autoApplying||!pendingAutoApply.size)return;
+ autoApplying=true;if(doc&&pendingAutoApply.has(doc.id))render();
+ try{
+  while(pendingAutoApply.size){
+   const [id,entry]=pendingAutoApply.entries().next().value;pendingAutoApply.delete(id);
+   try{
+    const result=await Art.save(entry.asset),latest=moveRevisions.get(id)===entry.revision;
+    if(latest)lastApplyStatus.set(id,result.rpgExport?.ok?'RPG 파일 자동 반영 완료':'배틀에는 저장됨 · RPG 파일 내보내기 실패: '+(result.rpgExport?.error||'알 수 없는 오류'));
+    if(doc?.id===id&&latest){changed=JSON.stringify(pack())!==JSON.stringify(Art.get(id)||original(id));draftSave();render();}
+    if(latest)message(result.rpgExport?.ok?Art.specs.find(spec=>spec.id===id).name+' 이펙트를 RPG 파일까지 자동 반영했습니다.':'배틀 공용 파일은 저장했지만 RPG 파일 갱신에 실패했습니다. '+(result.rpgExport?.error||''));
+   }catch(error){
+    if(moveRevisions.get(id)===entry.revision){lastApplyStatus.set(id,'자동 반영 실패 · '+error.message);if(doc?.id===id){changed=true;render();message('자동 반영에 실패했습니다. 서버 연결을 확인한 뒤 상단 버튼으로 다시 적용하세요. '+error.message);}}
+   }
+  }
+ }finally{autoApplying=false;if(pendingAutoApply.size)autoApplyTimer=setTimeout(flushAutoApply,0);}
+}
+const lastApplyStatus=new Map();
+function edited(){changed=true;previewDirty=true;clearTimeout(draftTimer);draftTimer=setTimeout(draftSave,350);queueAutoApply(pack());render();}
 function loadMove(id,provided){
  if(doc)draftSave();let asset=provided;
- if(!asset){try{const raw=localStorage.getItem(DRAFT+id);if(raw){asset=Art.validate(JSON.parse(raw));if(asset.id!==id)asset=null;}}catch{}}
- asset=asset||Art.get(id)||original(id);doc=unpack(asset);frame=0;undo=[];redo=[];changed=JSON.stringify(pack())!==JSON.stringify(Art.get(id)||original(id));previewDirty=true;
- $('fps').value=doc.fps;render();message('도트를 클릭하거나 드래그해 수정하세요.');
+ if(!asset){try{const raw=localStorage.getItem(draftKey(id));if(raw){const savedDraft=JSON.parse(raw);
+  const staleThunderShock=id==='thundershock'&&savedDraft.frames?.length===4&&
+   JSON.stringify(savedDraft.palette?.slice(1).map(color=>color.toLowerCase()))===JSON.stringify(STALE_THUNDERSHOCK_PALETTE);
+  if(staleThunderShock){const restored=Art.get(id)||original(id);if(restored.frames.length===8){asset=restored;localStorage.setItem(draftKey(id),JSON.stringify(restored));}}
+  if(!asset){asset=Art.validate(savedDraft);if(asset.id!==id)asset=null;}
+ }}catch{}}
+ asset=asset||Art.get(id)||original(id);doc=unpack(asset);setColor(color);frame=0;undo=[];redo=[];changed=JSON.stringify(pack())!==JSON.stringify(Art.get(id)||original(id));previewDirty=true;
+ $('fps').value=doc.fps;render();if(changed)queueAutoApply(pack());message('도트를 수정하면 잠시 후 배틀과 RPG 프로젝트에 자동 반영됩니다.');
 }
+
 function renderMoves(){
  $('moves').replaceChildren();
- const tones={electric:'#ffe27b',fire:'#ff9b70',water:'#86d9ff',grass:'#abe681'};
+ const tones={electric:'#ffe27b',fire:'#ff9b70',water:'#86d9ff',grass:'#abe681',normal:'#f0d5a1',rock:'#c9b58b',dark:'#d5a7c2'};
  for(const spec of Art.specs){const b=document.createElement('button');b.className='move'+(spec.id===doc.id?' selected':'');b.setAttribute('aria-pressed',String(spec.id===doc.id));b.dataset.move=spec.id;
   const strong=document.createElement('strong'),dot=document.createElement('span');dot.className='dot';dot.style.background=tones[spec.element];strong.append(dot,document.createTextNode(spec.name));
-  const small=document.createElement('small');small.textContent=spec.mon+(Art.has(spec.id)?' · 적용됨':'');b.append(strong,small);b.onclick=()=>loadMove(spec.id);$('moves').append(b);
+  const small=document.createElement('small'),saved=Art.get(spec.id);small.textContent=`${spec.mon} · ${spec.attackClass==='basic'?'기본 4색':'기술 5색'}${Art.has(spec.id)?' · 적용됨':saved?' · 저장됨 · 적용 대기':''}`;b.append(strong,small);b.onclick=()=>loadMove(spec.id);$('moves').append(b);
  }
 }
 function paintFrame(target,pixels,scale=1,opacity=1){
@@ -53,17 +94,20 @@ function renderFrames(){
 }
 function selectedColor(){return exactColor||color+(alpha<100?Math.round(alpha/100*255).toString(16).padStart(2,'0'):'');}
 function setColor(value){
- exactColor=value.toLowerCase();
- color=value.slice(0,7);alpha=value.length===9?Math.round(parseInt(value.slice(7),16)/255*100):100;
- $('color').value=color;$('hex').value=value;$('alpha').value=alpha;$('alphaValue').textContent=alpha+'%';renderPalette();
+ const available=doc?.palette?.slice(1)||[];let picked=value.slice(0,7).toLowerCase();
+ if(available.length&&!available.includes(picked)){
+  const rgb=parseInt(picked.slice(1),16),r=rgb>>16,g=(rgb>>8)&255,b=rgb&255;
+  picked=available.reduce((best,c)=>{const n=parseInt(c.slice(1),16),dr=r-(n>>16),dg=g-((n>>8)&255),db=b-(n&255);return dr*dr+dg*dg+db*db < best.distance?{color:c,distance:dr*dr+dg*dg+db*db}:best;},{color:available[0],distance:Infinity}).color;
+ }
+ exactColor=picked;color=picked;alpha=100;
+ $('color').value=color;$('hex').value=color;$('alpha').value=100;$('alphaValue').textContent='100%';renderPalette();
 }
 function renderPalette(){
  $('palette').replaceChildren();
  doc.palette.slice(1).forEach((c,i)=>{const b=document.createElement('button');b.className='swatch'+(c.toLowerCase()===selectedColor().toLowerCase()?' selected':'');b.style.background=c;b.title=c+(i<9?' · '+(i+1):'');b.setAttribute('aria-label','색상 '+c);b.onclick=()=>setColor(c);$('palette').append(b);});
  const selected=doc.palette.findIndex(c=>c?.toLowerCase()===selectedColor().toLowerCase());
- $('addColor').disabled=selected>0||doc.palette.length>=256;
- $('deleteColor').disabled=selected<1;
- $('paletteCount').textContent=(doc.palette.length-1)+' / 255색';
+ $('addColor').disabled=true;$('deleteColor').disabled=true;
+ const spec=Art.specs.find(s=>s.id===doc.id);$('paletteCount').textContent=`${spec.colors.length}색 고정 팔레트 · 투명 배경 제외`;
 }
 $('addColor').onclick=()=>{
  const c=selectedColor().toLowerCase();if(doc.palette.includes(c)||doc.palette.length>=256)return;
@@ -78,13 +122,14 @@ $('deleteColor').onclick=()=>{
 };
 function render(){
  const spec=Art.specs.find(s=>s.id===doc.id);$('moveTitle').textContent=spec.name;
- $('saveState').textContent=changed?'초안 작업 중 · 적용 대기':Art.has(doc.id)?'배틀에 적용된 도트':'원본 도트';
+ $('saveState').textContent=changed?(lastApplyStatus.get(doc.id)?.startsWith('자동 반영 실패')?lastApplyStatus.get(doc.id):pendingAutoApply.has(doc.id)||autoApplying?'RPG 자동 반영 대기 중…':'편집 내용 저장 중…'):lastApplyStatus.get(doc.id)||(Art.has(doc.id)?'배틀에 적용된 도트':Art.get(doc.id)?'저장된 도트 · 배틀 적용 대기':'원본 도트');
  $('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('resetApplied').disabled=!Art.has(doc.id);
  renderMoves();renderBoard();renderFrames();renderPalette();
 }
 function indexForColor(){
  const c=selectedColor().toLowerCase();let index=doc.palette.findIndex(p=>p?.toLowerCase()===c);
- if(index<0){if(doc.palette.length>=256)throw Error('팔레트가 가득 찼습니다. 기존 색상을 선택해 주세요.');index=doc.palette.length;doc.palette.push(c);}return index;
+ if(index<0){setColor(c);index=doc.palette.findIndex(p=>p?.toLowerCase()===selectedColor().toLowerCase());}
+ if(index<1)throw Error('이 기술에 지정된 색상 팔레트에서 골라 주세요.');return index;
 }
 function point(event){const r=board.getBoundingClientRect();return {x:Math.floor((event.clientX-r.left-1)/zoom),y:Math.floor((event.clientY-r.top-1)/zoom)};}
 function inside(p){return p.x>=0&&p.x<W&&p.y>=0&&p.y<H;}
@@ -148,8 +193,8 @@ $('viewport').addEventListener('wheel',event=>{if(event.ctrlKey||event.metaKey)r
 $('zoom').oninput=event=>setZoom(event.target.value);
 $('fit').onclick=()=>{const view=$('viewport');setZoom(Math.floor(Math.min((view.clientWidth-64)/W,(view.clientHeight-64)/H)));view.scrollLeft=0;view.scrollTop=0;};
 for(const id of ['grid','onion','origin'])$(id).onchange=renderBoard;
-$('color').oninput=event=>{exactColor=null;color=event.target.value;$('hex').value=selectedColor();renderPalette();};
-$('alpha').oninput=event=>{exactColor=null;alpha=Number(event.target.value);$('alphaValue').textContent=alpha+'%';$('hex').value=selectedColor();renderPalette();};
+ $('color').oninput=event=>setColor(event.target.value);
+ $('alpha').oninput=()=>{ $('alpha').value=100;$('alphaValue').textContent='100%'; };
 $('hex').onchange=event=>{const c=event.target.value;if(/^#[\da-f]{6}([\da-f]{2})?$/i.test(c))setColor(c);else{event.target.value=selectedColor();message('색상은 #RRGGBB 또는 #RRGGBBAA로 입력하세요.');}};
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>chooseTool(b.dataset.tool));
 function history(from,to){if(!from.length)return;to.push({asset:pack(),frame});const entry=from.pop();doc=unpack(entry.asset);frame=Math.min(entry.frame,doc.frames.length-1);$('fps').value=doc.fps;edited();}
@@ -178,12 +223,12 @@ $('restoreFrame').onclick=()=>{
  doc.frames[frame]=next;edited();
 };
 $('fps').onchange=event=>{const n=Number(event.target.value);if(!Number.isInteger(n)||n<1||n>24){event.target.value=doc.fps;return;}checkpoint();doc.fps=n;edited();};
-$('apply').onclick=()=>{try{Art.save(pack());changed=false;draftSave();render();message('배틀에 적용했습니다. 같은 주소로 열린 배틀·스튜디오에 자동 반영됩니다.');}catch(error){message('적용하지 못했습니다: '+error.message);}};
-$('resetApplied').onclick=()=>{try{Art.reset(doc.id);changed=true;render();message('배틀은 원본으로 돌아갔습니다. 편집 중인 초안은 남아 있습니다.');}catch(error){message(error.message);}};
+$('apply').onclick=()=>{if(!doc)return;queueAutoApply(pack(),0);message('현재 기술을 즉시 배틀과 RPG 프로젝트에 반영합니다…');};
+$('resetApplied').onclick=async()=>{try{const result=await Art.reset(doc.id);changed=true;render();message(result?.ok?'공용 적용을 해제하고 RPG Maker 이펙트를 기본 스프라이트로 갱신했습니다.':'공용 스프라이트 적용을 해제했습니다. 편집 중인 초안은 남아 있습니다.');}catch(error){message(error.message);}};
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
 $('exportJson').onclick=()=>download(new Blob([JSON.stringify(pack())],{type:'application/json'}),'arena-'+doc.id+'.json');
 $('importJson').onclick=()=>$('file').click();
-$('file').onchange=async event=>{const file=event.target.files[0];event.target.value='';if(!file)return;try{if(file.size>4*1024*1024)throw Error('4MB 이하의 작업 파일을 선택하세요.');const asset=Art.validate(JSON.parse(await file.text()));if(doc.id!==asset.id)loadMove(asset.id);checkpoint();doc=unpack(asset);frame=0;$('fps').value=doc.fps;edited();message('작업 파일을 불러왔습니다. 확인 후 배틀에 적용해 주세요.');}catch(error){message('불러오지 못했습니다: '+error.message);}};
+$('file').onchange=async event=>{const file=event.target.files[0];event.target.value='';if(!file)return;try{if(file.size>4*1024*1024)throw Error('4MB 이하의 작업 파일을 선택하세요.');const asset=Art.validate(JSON.parse(await file.text()));if(doc.id!==asset.id)loadMove(asset.id);checkpoint();doc=unpack(asset);frame=0;$('fps').value=doc.fps;edited();message('작업 파일을 불러왔습니다. 잠시 후 배틀과 RPG 프로젝트에 자동 반영됩니다.');}catch(error){message('불러오지 못했습니다: '+error.message);}};
 $('exportPng').onclick=()=>{
  const c=document.createElement('canvas');c.width=W*doc.frames.length;c.height=H;const g=c.getContext('2d');doc.frames.forEach((pixels,i)=>{g.save();g.translate(i*W,0);paintFrame(g,pixels);g.restore();});c.toBlob(blob=>{if(blob)download(blob,'arena-'+doc.id+'-'+doc.fps+'fps.png');},'image/png');
 };
@@ -231,6 +276,7 @@ $('aiAccept').onclick=()=>{
 };
 $('aiDiscard').onclick=()=>{$('aiDialog').close();aiCandidate=null;message('원본을 유지했습니다.');};
 $('aiDialog').addEventListener('close',()=>{aiCandidate=null;});
+window.addEventListener('arena-pixel-art-change',()=>{if(doc&&!changed){doc=unpack(Art.get(doc.id)||original(doc.id));frame=Math.min(frame,doc.frames.length-1);$('fps').value=doc.fps;previewDirty=true;render();}});
 checkAI();
 window.addEventListener('keydown',event=>{
  if($('aiDialog').open)return;
@@ -249,15 +295,52 @@ window.addEventListener('keydown',event=>{
 });
 window.addEventListener('keyup',event=>{if(event.code==='Space')space=false;});window.addEventListener('blur',()=>{space=false;finishStroke();});window.addEventListener('beforeunload',draftSave);
 function preview(now){
- if(doc){const age=playing?(now-playStarted)/1000:frame/doc.fps,index=Math.floor(age*doc.fps)%doc.frames.length;
+ if(doc){const physical=doc.id==='tackle'||doc.id==='quickattack',electric=doc.id==='thunderbolt';
+  const age=playing?(now-playStarted)/1000:frame/doc.fps,index=physical?Math.floor(age*30):Math.floor(age*doc.fps)%doc.frames.length;
   if(previewDirty||index!==lastPreview){
    const c=$('preview'),g=c.getContext('2d');g.fillStyle='#0b151e';g.fillRect(0,0,c.width,c.height);g.fillStyle='#172c35';for(let x=0;x<c.width;x+=16)g.fillRect(x,0,1,c.height);for(let y=0;y<c.height;y+=16)g.fillRect(0,y,c.width,1);
-   const scale=1.5,cx=c.width/2,cy=c.height/2;const cells=Art.preview(pack(),age,Number($('direction').value)*Math.PI/180);
+   const angle=Number($('direction').value)*Math.PI/180;
+   let scale=1.5,cx=c.width/2,cy=c.height/2,fxAge=age;
+   let rushPose=null;
+   if(electric&&rushPreviewData&&thunderSprite.complete&&thunderSprite.naturalWidth){
+    const cycle=playing?age%1.6:.17+frame/doc.fps,charging=cycle<.17,active=cycle<1.05;
+    const progress=charging?cycle/.17:Math.min(1,(cycle-.17)/.88);
+    cx=c.width/2-Math.cos(angle)*45;cy=c.height/2-Math.sin(angle)*45;scale=1.5;
+    fxAge=active&&!charging?(playing?cycle-.17:frame/doc.fps):null;
+    const row=(2-Math.round(angle/(Math.PI/4))+8)%8,pose=charging?Math.min(3,Math.floor(progress*3)):3;
+    const anchor=rushPreviewData.frameAnchors['0025'].Shoot[row][pose],ox=(rushPreviewData.frameOriginsX['0025'].Shoot?.[row]?.[pose]??20);
+    const dst=[Math.round(cx-ox*1.5),Math.round(cy+18-anchor*1.5),60,84],crop=[pose*40,row*56,40,56];
+    if(active)ThunderboltArt.stamp(g,ThunderboltArt.corona(Math.floor(progress*16)),cx,cy,1.1,charging?progress:Math.min(1,(1-progress)*6));
+    rushPose=()=>{if(active)ThunderboltArt.caster(g,thunderSprite,crop,dst,progress,charging);else g.drawImage(thunderSprite,...crop,...dst);};
+    g.font='11px sans-serif';g.fillStyle='#fff4ad';g.fillText(charging?'몸에 전기 모으기':active?'몸에서 전류 방출':'잔광 · 회복',10,17);
+   }
+   if(physical&&rushPreviewData&&rushSprite.complete&&rushSprite.naturalWidth){
+    const move=rushPreviewData.moves[doc.id==='tackle'?'ArenaStudio_Tackle':'ArenaStudio_QuickAttack'];
+    const cycle=age%1.25,u=Math.max(0,Math.min(1,(cycle-move.cast)/move.duration));
+    const distance=move.distance*.65,travel=distance*(1-(1-u)**2),row=(2-Math.round(angle/(Math.PI/4))+8)%8;
+    const pose=cycle<move.cast?1:u<1?3:9;
+    cx=c.width/2+Math.cos(angle)*(travel-distance/2);cy=c.height/2+Math.sin(angle)*(travel-distance/2);
+    scale=.9;fxAge=Math.max(0,cycle-move.cast);
+    const drawMon=(x,y,alpha)=>{
+     const anchor=rushPreviewData.frameAnchors['0025'].Attack[row][pose];
+     const ox=rushPreviewData.frameOriginsX['0025'].Attack[row][pose];
+     g.globalAlpha=alpha;g.drawImage(rushSprite,pose*80,row*80,80,80,Math.round(x-ox*1.5),Math.round(y+16-anchor*1.5),120,120);g.globalAlpha=1;
+    };
+    g.imageSmoothingEnabled=false;g.fillStyle='#426055';g.fillRect(Math.round(cx-10),Math.round(cy+13),20,4);
+    if(cycle>move.cast&&u<1)for(let i=3;i>=1;i--)drawMon(cx-Math.cos(angle)*i*9,cy-Math.sin(angle)*i*9,.24*(1-i/4));
+    rushPose=()=>drawMon(cx,cy,1);
+    g.fillStyle='#d6e5c4';g.font='11px sans-serif';g.fillText(doc.id==='tackle'?'몸통과 함께 짧게 돌진':'몸통과 함께 빠르게 돌진',10,17);
+    if(cycle<move.cast||u>=1)fxAge=null;
+   }
+   const cells=fxAge===null?[]:Art.preview(pack(),fxAge,angle);
    g.imageSmoothingEnabled=false;for(const [x,y,c] of cells){g.fillStyle=c;g.fillRect(Math.round(cx+x*scale),Math.round(cy+y*scale),Math.ceil(scale),Math.ceil(scale));}
-   g.fillStyle='#e1ef88';g.fillRect(cx-4,cy,9,1);g.fillRect(cx,cy-4,1,9);g.font='10px monospace';g.fillStyle='#91a7b4';g.fillText(String(index+1).padStart(2,'0')+' / '+String(doc.frames.length).padStart(2,'0'),10,c.height-10);
+   if(rushPose)rushPose();
+   else {g.fillStyle='#e1ef88';g.fillRect(cx-4,cy,9,1);g.fillRect(cx,cy-4,1,9);}
+   g.font='10px monospace';g.fillStyle='#91a7b4';g.fillText(String(Math.floor(age*doc.fps)%doc.frames.length+1).padStart(2,'0')+' / '+String(doc.frames.length).padStart(2,'0'),10,c.height-10);
    lastPreview=index;previewDirty=false;
   }
  }requestAnimationFrame(preview);
 }
-try{const requested=new URLSearchParams(location.search).get('move');loadMove(Art.specs.some(s=>s.id===requested)?requested:'thunderbolt');requestAnimationFrame(preview);}catch(error){message('작업실을 열지 못했습니다: '+error.message);console.error(error);}
+async function startEditor(){await Art.refresh();try{const requested=new URLSearchParams(location.search).get('move');loadMove(Art.specs.some(s=>s.id===requested)?requested:'thunderbolt');requestAnimationFrame(preview);}catch(error){message('작업실을 열지 못했습니다: '+error.message);console.error(error);}}
+startEditor();
 })();

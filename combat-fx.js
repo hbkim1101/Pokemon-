@@ -7,7 +7,7 @@ const PAL={
  fire:['#9c2921','#e74921','#ff8429','#ffce52','#fff7bd'],
  water:['#294a9c','#427be7','#73bdff','#c6efff','#ffffff'],
  grass:['#315a29','#52a539','#94d64a','#d6ef84','#f7ffce'],
- electric:['#9c6321','#e7a529','#ffde42','#fff794','#ffffff'],
+ electric:['#754214','#c77a18','#f2b91f','#ffdf45','#ffffff'],
  neutral:['#243038','#6a8490','#c5d8de','#ffffff','#ffffff']
 };
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -145,53 +145,26 @@ function lightningStroke(cells,points,strong,step){
   const seg=linePoints(...points[i-1],...points[i]);
   for(let k=0;k<seg.length;k+=2){
    const x=seg[k],y=seg[k+1];
-   if(strong){place(cells,x-1,y,'#b7b02e');place(cells,x+1,y,'#dfe54b');}
-   place(cells,x,y,step%3?'#f1ff86':'#ffffff');
+   if(strong){place(cells,x-1,y,'#754214');place(cells,x+1,y,'#f2b91f');}
+   place(cells,x,y,step%3?'#ffdf45':'#ffffff');
   }
  }
 }
 function bolt(cells,m,quality){
- const pts=m.path||[];if(pts.length<2)return;
- const source=m.source||pts[0],start=grid(source.x,source.y),age=Math.max(0,m.age-(m.windup||0)),step=tickOf(age,16);
- const route=[start,...pts.map(p=>[p.x/PIXEL,p.y/PIXEL])],segments=[],points=[start];
- let total=0;
- // Resample by distance, not by simulation tick or incoming control-point count.
- for(let i=1;i<route.length;i++){
-  const a=route[i-1],b=route[i],dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy);
-  if(length<.00001)continue;
-  segments.push({a,dx,dy,length,from:total});total+=length;
- }
- let segment=0,sample=0;
- for(let distance=6;distance<total-1;distance+=6){
-  while(segment+1<segments.length&&distance>segments[segment].from+segments[segment].length)segment++;
-  const part=segments[segment],u=(distance-part.from)/part.length;
-  const taper=Math.min(1,distance/10,(total-distance)/10);
-  const side=(sample%2?1:-1)*(2+nse(step*13+sample*17)*3.5)*taper;
-  points.push([Math.round(part.a[0]+part.dx*u-part.dy/part.length*side),
-   Math.round(part.a[1]+part.dy*u+part.dx/part.length*side)]);sample++;
- }
- points.push(grid(pts.at(-1).x,pts.at(-1).y));
- // The body crackle and forward stroke share an origin, so the bolt never floats away.
- aura(cells,{x:source.x,y:source.y,age,element:'electric'});
+ const pts=m.path||[];if(pts.length<2||!root.ThunderboltArt)return;
+ const points=[m.source||pts[0],...pts.slice(1)],segments=[];let length=0;
  for(let i=1;i<points.length;i++){
-  const a=points[i-1],b=points[i],seg=linePoints(...a,...b),vertical=Math.abs(b[1]-a[1])>Math.abs(b[0]-a[0]);
-  for(let j=0;j<seg.length;j+=2){
-   const x=seg[j],y=seg[j+1];
-   place(cells,x+(vertical?1:0),y+(vertical?0:1),'#dfe54b');
-   place(cells,x-(vertical?1:0),y-(vertical?0:1),'#b7b02e');
-   place(cells,x,y,'#f8ffb1');
-  }
-  if(i>1&&i%(quality==='low'?7:4)===step%3){
-   const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1,sign=i%2?1:-1;
-   const nx=-dy/len*sign,ny=dx/len*sign;
-   lightningStroke(cells,[a,[a[0]+Math.round(nx*5+dx/len*2),a[1]+Math.round(ny*5+dy/len*2)],
-    [a[0]+Math.round(nx*9),a[1]+Math.round(ny*9)]],false,step);
-  }
+  const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+  if(d>.001){segments.push({a,dx,dy,d,from:length});length+=d;}
  }
- const [cx,cy]=points.at(-1),r=m.type==='boltEcho'?6:3+step%2;
- for(let i=0;i<8;i++){
-  const a=i*TAU/8+step*.1;
-  lightningStroke(cells,[[cx,cy],[cx+Math.round(Math.cos(a)*r),cy+Math.round(Math.sin(a)*r)]],false,step);
+ if(!length)return;
+ const age=Math.max(0,(m.age||0)-(m.windup||0)),frame=2+Math.floor(age*18)%12;
+ for(const [x,y,c] of root.ThunderboltArt.beam(frame)){
+  const start=x/64*length,end=Math.min(length,(x+1)/64*length);
+  for(let d=start;d<=end;d+=PIXEL){
+   const s=segments.find(s=>d<=s.from+s.d)||segments.at(-1),u=(d-s.from)/s.d;
+   place(cells,Math.round((s.a.x+s.dx*u)/PIXEL-s.dy/s.d*y),Math.round((s.a.y+s.dy*u)/PIXEL+s.dx/s.d*y),c);
+  }
  }
 }
 
@@ -241,6 +214,28 @@ function projectile(cells,m){
   }return;
  }
  stampArt(cells,gx-2,gy,v.x,v.y,['..1..','.232.','12341','.232.','..1..'],PAL.neutral);
+}
+
+function tackle(cells,m){
+ const v=unit(m),[cx,cy]=grid(m.x,m.y),u=clamp((m.age||0)/(m.life||.32),0,1),step=tickOf(m.age,16);
+ const reach=7+Math.round(u*9),pal=['#fff3c7','#f2cc74','#b78245'];
+ for(let i=0;i<3;i++){
+  const y=(i-1)*3+((step+i)%2);
+  const a=at(cx,cy,v,-reach,y);const b=at(cx,cy,v,reach,y);
+  const pts=linePoints(...a,...b);for(let j=0;j<pts.length;j+=2)if(j%4===0)place(cells,pts[j],pts[j+1],pal[i]);
+ }
+ ring(cells,cx+Math.round(v.x*reach),cy+Math.round(v.y*reach),Math.max(2,Math.round(3+u*6)),pal[0]);
+ for(let i=0;i<5;i++){const side=(i%2?1:-1)*(3+Math.floor(i/2)*3),p=at(cx,cy,v,reach,side);place(cells,p[0],p[1],pal[i%pal.length]);}
+}
+
+function dash(cells,m){
+ const v=unit(m),[cx,cy]=grid(m.x,m.y),step=tickOf(m.age,18),pal=['#fffde0','#ffe45c','#e2a627','#fff5b0'];
+ for(let i=0;i<5;i++){
+  const side=i-2,tail=8+(i%3)*4+(step%3),head=1+(i%2)*2;
+  const a=at(cx,cy,v,-tail,side*2),b=at(cx,cy,v,-head,side);
+  const pts=linePoints(...a,...b);for(let j=0;j<pts.length;j+=2)place(cells,pts[j],pts[j+1],pal[i%pal.length]);
+ }
+ const tip=at(cx,cy,v,2,0);place(cells,tip[0],tip[1],'#ffffff');place(cells,tip[0]+Math.round(v.y),tip[1]-Math.round(v.x),'#fff5b0');
 }
 
 function charge(cells,m){
@@ -402,7 +397,7 @@ function particle(cells,p){
  else place(cells,gx,gy,p.color||pal[3]);
 }
 const BUILD={
- flame,thunder:bolt,orb,surf,ride,rideFoam,impact,projectile,charge,aura,particle,
+ flame,thunder:bolt,orb,surf,ride,rideFoam,impact,projectile,charge,aura,particle,tackle,dash,
  jet:(cells,m,quality)=>jet(cells,m,m.ports||m.emitters||[],quality),
  contact:(cells,m)=>flame(cells,{...m,stream:0,renderStream:0,contact:m.contact||{x:m.x,y:m.y}},'high')
 };

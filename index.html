@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena | Motion Studio v22</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Pokémon Arena | Motion Studio v23</title>
 <style>
 :root{--ink:#071823;--glass:#0a2636e0;--line:#9bd9df45;--gold:#ffd667;--sky:#92eeff}*{box-sizing:border-box}html,body{margin:0;min-height:100%;width:100%;height:100%;overflow:hidden;background:#071822;color:#e9fcff;font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;touch-action:none}button{font:inherit;cursor:pointer}#stage{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 32%,#03101868 100%)}#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 16px 0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:8px}.glass{background:var(--glass);border:1px solid var(--line);box-shadow:0 8px 28px #07121c55;backdrop-filter:blur(8px);border-radius:13px}.stats{padding:10px 12px;min-width:180px;max-width:245px}.stats .name{display:flex;justify-content:space-between;font-weight:900;font-size:13px;gap:15px}.stats .name span:last-child{color:#c5ecf8;font-size:11px}.track{position:relative;height:10px;background:#17323b;border-radius:20px;margin-top:6px;overflow:hidden;border:1px solid #6a92924a}.track>i{height:100%;display:block;width:100%;transition:width .1s linear}.track.hp i{background:linear-gradient(90deg,#52be77,#b8f28b)}.track.xp{height:5px;margin-top:5px}.track.xp i{background:#6cdbf8}.rightHud{display:flex;gap:8px}.hudpill{padding:10px 13px;min-width:78px;text-align:center;font-size:11px;color:#bfe9ed}.hudpill b{font-size:19px;display:block;color:white;line-height:1.15}.pause{padding:10px 13px;font-weight:900;background:var(--glass);color:white;pointer-events:auto;min-width:42px}.controls{position:absolute;left:0;bottom:0;right:0;padding:0 max(18px,env(safe-area-inset-left)) calc(20px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-right));display:flex;align-items:end;justify-content:space-between;pointer-events:none;gap:14px;isolation:isolate}.controls:before{content:'';position:absolute;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:calc(7px + env(safe-area-inset-bottom));height:126px;border-radius:34px;background:linear-gradient(180deg,#0f2a39f5,#081c29ef);border:1px solid #c9f0ff22;box-shadow:0 18px 45px #020b1245,inset 0 1px 0 #ffffff10,inset 0 -12px 30px #00000038;backdrop-filter:blur(10px);z-index:-1}#joy{height:136px;width:136px;position:relative;border:2px solid #d2edff45;background:radial-gradient(circle at 35% 30%,#ecffff30,#9bdaf511 55%,#7ebad20e 100%);border-radius:50%;box-shadow:0 10px 24px #01091355,inset 0 0 20px #c6f5ff14,inset 0 2px 0 #ffffff1f;pointer-events:auto;touch-action:none;flex-shrink:0;margin:0 0 8px 8px}.joyShell{position:relative}.joyShell:after{content:'';position:absolute;left:18px;right:18px;bottom:4px;height:16px;border-radius:50%;background:#0008;filter:blur(10px)}#joy:before{content:'MOVE';font-weight:900;letter-spacing:2.5px;position:absolute;top:auto;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:#d3f6ffb8;background:#071c2abf;padding:2px 8px;border-radius:999px;border:1px solid #ffffff18}.nub{width:59px;height:59px;position:absolute;left:calc(50% - 29.5px);top:calc(50% - 29.5px);border-radius:50%;background:linear-gradient(145deg,#d5f8ffcf,#85bdda96);box-shadow:0 5px 19px #020d176b;border:2px solid #ecffffb8;pointer-events:none}.buttons{display:flex;align-items:end;gap:11px;pointer-events:auto;padding:14px 14px 14px 16px;border-radius:28px;border:1px solid #cbf4ff24;background:linear-gradient(180deg,#123043f0,#0a2130ef);box-shadow:0 12px 30px #0007,inset 0 1px 0 #ffffff10,inset 0 -10px 24px #00000024;position:relative;margin:0 8px 10px 0}.buttons:before{content:'SKILLS';position:absolute;left:16px;top:-11px;padding:2px 8px;border-radius:999px;background:#0c2635f7;border:1px solid #cbf4ff24;color:#d2f6ffcc;font-size:9px;font-weight:900;letter-spacing:2.2px}.skill{--c:#ffd45c;position:relative;display:flex;align-items:center;justify-content:center;width:69px;height:69px;border:2px solid color-mix(in srgb,var(--c) 60%,white);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 40%,#193848),#0a2231 72%);box-shadow:0 5px 16px #0008,inset 0 0 18px color-mix(in srgb,var(--c) 18%,transparent),inset 0 2px 0 #ffffff1a;color:white;border-radius:50%;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}.skill.main{width:86px;height:86px}.skill .glyph{font-size:25px;transform:translateY(-7px);filter:drop-shadow(0 2px 1px #0007)}.skill.main .glyph{font-size:35px;transform:translateY(-9px)}.skill small{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:850;text-shadow:none;background:#081f2dcc;padding:2px 7px;border-radius:999px;border:1px solid #ffffff1b;color:#f3fbff}.skill .cooldown{position:absolute;inset:0;border-radius:50%;background:#08131dd7;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:900}.skill.selected{box-shadow:0 0 0 5px #e9fbff1e,0 0 28px var(--c),inset 0 0 16px color-mix(in srgb,var(--c) 20%,white);transform:translateY(-2px) scale(1.03)}.screen{position:absolute;inset:0;z-index:10;background:radial-gradient(ellipse at 50% 35%,#1d4458ef 0%,#071824f7 70%);display:flex;justify-content:center;align-items:center;overflow-y:auto;padding:20px 12px calc(20px + env(safe-area-inset-bottom));pointer-events:auto}.panel{width:min(620px,100%);padding:26px 23px 21px;text-align:center;border:1px solid #98ddf252;background:linear-gradient(155deg,#153449fa,#0a1d2cf9);border-radius:24px;box-shadow:0 20px 100px #020e1baf}.eyebrow{font-weight:900;font-size:10px;letter-spacing:4px;color:#9ce6f3;margin-bottom:6px}.panel h1{margin:0;color:#fff5c5;font-size:clamp(30px,5.5vw,48px);letter-spacing:-2px;line-height:1.1;text-shadow:0 5px #0d3242}.panel h1 em{font-style:normal;color:#ffe26a}.desc{font-size:13px;line-height:1.65;color:#bedae3;margin:12px auto 13px}.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0 19px}.choice{border:1px solid #8acee34d;border-radius:13px;min-width:0;padding:10px 2px 8px;background:#173648;color:#d8eaf3;transition:transform .13s,border-color .13s}.choice.on{border-color:#ffe69b;box-shadow:0 0 0 2px #ffd26833;background:#39516a;transform:translateY(-3px)}.choice canvas{display:block;width:72px;height:72px;margin:0 auto 1px;image-rendering:pixelated;max-width:100%}.choice b{display:block;font-size:12px}.choice small{display:block;color:#99c9d3;font-size:10px;margin-top:3px}.primary{background:linear-gradient(180deg,#ffeb91,#ffbd50);border:0;color:#2d2b2e;font-weight:950;padding:15px 25px;min-width:195px;border-radius:13px;font-size:16px;box-shadow:0 6px 0 #a96924}.primary:active{transform:translateY(4px);box-shadow:0 2px 0 #a96924}.status{min-height:18px;font-size:11px;color:#c4e0e8;margin:10px 0 1px}.credit{font-size:10px;line-height:1.5;color:#9bc0cf;margin-top:14px}.credit a{color:#a9eaf4}.explain{margin:11px 0;font-size:12px;color:#bcd7d8;line-height:1.8}.hidden{display:none!important}#floating{position:absolute;inset:0;pointer-events:none;overflow:hidden}#floating .floater{position:absolute;transform:translate(-50%,-50%);font-weight:900;text-shadow:0 2px #071821,0 0 6px #071821;animation:floatup .7s forwards}@keyframes floatup{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -38px}}#toast{position:absolute;top:22%;width:100%;text-align:center;pointer-events:none;font-weight:1000;font-size:25px;color:#fff3af;text-shadow:0 4px #09242b,0 0 20px #091820;opacity:0;transition:opacity .2s}#toast.show{opacity:1}#tips{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);color:#c9dce68e;white-space:nowrap;font-size:10px;pointer-events:none}#aimHelp{position:absolute;bottom:calc(165px + env(safe-area-inset-bottom));right:20px;color:#eaf7fd9c;font-size:10px;pointer-events:none}@media(max-width:700px){#hud{padding:calc(env(safe-area-inset-top) + 7px) 9px 0}.stats{min-width:137px;padding:8px}.stats .name{font-size:11px}.rightHud{gap:5px}.hudpill{min-width:57px;padding:8px;font-size:10px}.hudpill b{font-size:16px}.pause{padding:8px}.controls{padding-left:12px;padding-right:12px;bottom:4px}.controls:before{height:112px;border-radius:28px}#joy{height:117px;width:117px;margin:0 0 6px 4px}.joyShell:after{left:12px;right:12px}#joy:before{font-size:8px;bottom:7px;padding:2px 7px}.nub{width:52px;height:52px;left:calc(50% - 26px);top:calc(50% - 26px)}.buttons{gap:8px;padding:11px 10px 11px 12px;margin:0 4px 7px 0}.buttons:before{left:12px;font-size:8px}.skill{width:56px;height:56px}.skill.main{width:70px;height:70px}.skill .glyph{font-size:21px;transform:translateY(-5px)}.skill.main .glyph{font-size:29px;transform:translateY(-7px)}.skill small{font-size:8px;bottom:5px;padding:1px 5px}.choices{gap:6px}.panel{padding:22px 13px 15px}.choice canvas{width:60px;height:60px}#aimHelp{bottom:calc(130px + env(safe-area-inset-bottom));font-size:9px}#tips{font-size:8px}}@media(max-width:370px){#joy{height:96px;width:96px}.controls:before{height:102px}.buttons{gap:5px;padding:9px 8px 9px 10px}.skill{width:49px;height:49px}.skill.main{width:61px;height:61px}.skill small{font-size:7px;bottom:4px}.hudpill{min-width:47px}.rightHud{gap:3px}.stats{min-width:120px}}@media(max-height:480px){.panel{padding:14px}.panel h1{font-size:26px}.desc{margin:6px}.choices{margin:7px 0}.choice canvas{width:45px;height:45px}.controls{padding-bottom:15px}#joy{width:92px;height:92px}.skill{width:52px;height:52px}.skill.main{width:65px;height:65px}#aimHelp{display:none}}
 
@@ -25,6 +25,7 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #hud .track.hp i{background:linear-gradient(90deg,#56c777,#b6f5a3);box-shadow:inset 0 -2px #0003}
 #hud .enemyStats .track.hp i{background:linear-gradient(90deg,#ff786e,#f6a16d)}
 #hud .versus{color:#fff4d1;text-shadow:0 2px #071a23,0 0 13px #eeb7686e;letter-spacing:1px}
+.rivalPicker,#ivSetup,#loadoutSetup,#moveDex{display:none!important}
 #roundBadge{position:absolute;top:calc(env(safe-area-inset-top) + 70px);left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:2px;font-weight:900;color:#f2e4baac;text-shadow:0 2px 5px #041419;text-align:center;white-space:nowrap;pointer-events:none;z-index:2}
 #comboBadge{position:absolute;top:calc(env(safe-area-inset-top) + 95px);right:16px;border-radius:10px;padding:5px 9px;background:#071e2ad9;border:1px solid #f9da9369;color:#ffe1a3;font-size:13px;font-weight:950;letter-spacing:1px;opacity:0;transform:translateY(-7px);transition:opacity .16s,transform .16s;pointer-events:none;z-index:4}
 #comboBadge.show{opacity:1;transform:translateY(0)}
@@ -100,18 +101,18 @@ html,body{height:100dvh;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #toast{font-family:system-ui,sans-serif;font-weight:1000;letter-spacing:.5px;filter:drop-shadow(0 2px #0b2637)}
 .studioLink{display:inline-flex;align-items:center;justify-content:center;margin:2px auto 12px;padding:12px 18px;border-radius:999px;background:#123f46;color:#e9fff6;border:1px solid #8ee0c8;font-weight:900;text-decoration:none}
 </style></head><body>
-<canvas id="stage"></canvas><div class="vignette"></div><div id="impactFlash"></div><div id="roundBadge">ANCIENT GROVE · ROUND 01</div><div id="comboBadge"></div><div id="hud"><div class="stats glass"><div class="name"><span id="playerName">⚡ 라이츄</span><span id="healthText">120/120</span></div><div class="track hp"><i id="hpBar"></i></div><div class="condition" id="playerCondition"></div><div class="fuelHud" id="fuelHud" hidden><div class="fuelHeading"><span>🔥 화염방사 에너지</span><span id="fuelValue">100%</span></div><div class="fuelGauge"><i id="fuelFill"></i></div></div></div><div class="versus">VS</div><div class="stats glass enemyStats"><div class="name"><span id="enemyName">상대 포켓몬</span><span id="enemyHealthText">—</span></div><div class="track hp"><i id="enemyHpBar"></i></div><div class="condition" id="enemyCondition"></div></div><button class="pause glass" id="pause" aria-label="일시정지">Ⅱ</button></div>
-<div id="floating"></div><div id="toast"></div><div id="aimHelp">PIXEL STUDIO v29 · 발사점 전진 / 적정 도트 비율</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
+<canvas id="stage"></canvas><div class="vignette"></div><div id="impactFlash"></div><div id="roundBadge">LAPPET TOWN · FIRST DUEL</div><div id="comboBadge"></div><div id="hud"><div class="stats glass"><div class="name"><span id="playerName">🍃 이상해씨</span><span id="healthText">—</span></div><div class="track hp"><i id="hpBar"></i></div><div class="condition" id="playerCondition"></div><div class="fuelHud" id="fuelHud" hidden><div class="fuelHeading"><span>🔥 화염방사 에너지</span><span id="fuelValue">100%</span></div><div class="fuelGauge"><i id="fuelFill"></i></div></div></div><div class="versus">VS</div><div class="stats glass enemyStats"><div class="name"><span id="enemyName">상대 포켓몬</span><span id="enemyHealthText">—</span></div><div class="track hp"><i id="enemyHpBar"></i></div><div class="condition" id="enemyCondition"></div></div><button class="pause glass" id="pause" aria-label="일시정지">Ⅱ</button></div>
+<div id="floating"></div><div id="toast"></div><div id="aimHelp">LOCAL ARENA · PMD 8방향 / 직접 만든 기술 스프라이트</div><div id="tips">PC: WASD 이동 · 1 기본 공격 · 2 고유 기술 · Space 회피 · P 일시정지</div>
 <div class="controls" id="controls"><div class="joyShell"><div id="joy" aria-label="이동 조이스틱"><div class="nub" id="nub"></div></div></div><div class="buttons"><div class="skill" data-n="3" style="--c:#b7d6ff"><span class="glyph" id="extraGlyph3">✦</span><small id="extraLabel3">추가 1</small><span class="cooldown"></span></div><div class="skill" data-n="1" style="--c:#fa9d6a"><span class="glyph" id="bigSkill">✹</span><small id="bigLabel">강화 기술</small><span class="fuelButton" id="fuelButton" hidden><i id="fuelButtonFill"></i></span><span class="cooldown"></span></div><div class="skill dash" data-n="2" style="--c:#96deff"><span class="glyph">➤</span><small>회피</small><span class="cooldown"></span></div><div class="skill main" data-n="0" style="--c:#ffdd6c"><span class="glyph" id="basicSkill">⚡</span><small id="basicLabel">기본 기술</small><span class="cooldown"></span></div><div class="skill" data-n="4" style="--c:#b7ffd6"><span class="glyph" id="extraGlyph4">✧</span><small id="extraLabel4">추가 2</small><span class="cooldown"></span></div></div></div>
-<div class="screen" id="menu"><div class="panel"><div class="eyebrow">PMD 8-WAY · MOTION STUDIO v29</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">ELEMENTAL SHOWDOWN</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>최종 진화형 라이츄 · 리자몽 · 거북왕 · 이상해꽃으로 맞붙으세요.<br>Lv.50 공식 능력치 · 기본 공격 + 포켓몬별 고유 기술 1개 · 8방향 모션 테스트 · HP 2배 · PvP 피해 80%</p><a class="studioLink" href="./studio.html">기술 스프라이트 스튜디오 · 화염방사 / 10만볼트</a><a class="studioLink" href="./pixel-editor.html">✎ 도트 작업실 · 직접 칠하고 배틀에 적용</a><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상대 포켓몬</span><select id="rivalSelect" aria-label="상대 포켓몬 선택"><option value="-1">랜덤 (나와 다른 포켓몬)</option><option value="0">⚡ 라이츄</option><option value="1">🔥 리자몽</option><option value="2">💧 거북왕</option><option value="3">🍃 이상해꽃</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
-  <div class="ivTop"><strong>포켓몬 능력치 · Lv.50</strong><button type="button" id="ivReroll">IV 랜덤</button><button type="button" id="ivPerfect">6V (전부 31)</button></div>
+<div class="screen" id="menu"><div class="panel"><div class="eyebrow">LOCAL PMD 8-WAY · FIRST RIVAL BATTLE</div><h1>POKÉMON <em>ARENA</em><span style="font-size:11px;display:block;letter-spacing:4px;color:#b5eada;font-weight:750;margin-top:5px">LAPPET TOWN · FIRST DUEL</span></h1><p class="desc">지형에 흔적이 남는 <b>1 VS 1 실시간 시네마틱 배틀</b>.<br>이상해씨 · 파이리 · 꼬부기 중 스타터를 선택하세요.<br>라이벌은 당신의 스타터에 상성인 포켓몬으로 자동 대결합니다. PMD 8방향 동작과 직접 만든 기술 이펙트로 싸우세요.</p><a class="studioLink" href="./studio.html">기술 스프라이트 스튜디오 · 화염방사 / 10만볼트</a><a class="studioLink" href="./pixel-editor.html">✎ 도트 작업실 · 직접 칠하고 배틀에 적용</a><a class="studioLink" href="./rpg-game.html">🎮 RPG 모험 · 연구소에서 첫 라이벌전까지</a><div id="jsWarning" style="border:1px solid #ffc36c;background:#583920;color:#fff0ca;border-radius:12px;padding:12px 10px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:800">⚠️ 이 화면에서 포켓몬 선택란이 나타나지 않는다면 파일 미리보기에서 JavaScript 실행이 차단된 것입니다. 이 파일을 웹사이트에 올린 뒤 Safari에서 HTTPS 주소로 열어야 플레이할 수 있습니다.</div><div class="choices" id="choices"></div><div class="rivalPicker"><span>상성 라이벌</span><select id="rivalSelect" aria-label="상성 라이벌"><option value="1">파이리</option><option value="2">꼬부기</option><option value="0">이상해씨</option></select></div><section class="ivSetup" id="ivSetup" aria-label="종족값과 개체값 설정">
+  <div class="ivTop"><strong>포켓몬 능력치 · Lv.5</strong><button type="button" id="ivReroll">IV 랜덤</button><button type="button" id="ivPerfect">6V (전부 31)</button></div>
   <label class="naturePicker">성격 <select id="natureSelect" aria-label="성격 선택"></select></label>
   <div class="ivGrid" id="ivGrid"></div>
-  <p class="ivNote">최종 진화형 종족값·IV·성격은 원작 기준 · EV 0 · PvP HP 2배 · 기술 피해 80% · 상대 IV는 무작위</p>
-</section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">왼쪽 이동 · 오른쪽 기본 공격 + 고유 기술 + 회피 · 4가지 고유 기술(포켓몬별 1개) · 터치/드래그 조준 · 모션 스튜디오에서 8방향 프레임 테스트<br>상대 포켓몬의 HP를 0으로 만들면 승리합니다. (종족값·개체값·타입 상성 반영, 동시 등장 상대 1명)</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">HGSS 4방향 animated overworld sprites + PokéAPI/PMDCollab fallback<br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 4방향 포켓몬 스프라이트는 인터넷 연결이 필요하며, 실패 시 대체 스프라이트로 계속 플레이할 수 있습니다.<br><a href="https://github.com/teobz/pkmn-hgss-animated-overworld-sprites" target="_blank" rel="noopener">HGSS directional sprite source</a> · <a href="https://pokeapi.github.io/sprites/" target="_blank" rel="noopener">PokéAPI</a> · <a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">PMDCollab fallback</a></div></div></div>
-<script src="./emitter-anchors.js?v=30"></script><script src="./pixel-presets.js?v=50"></script><script src="./pixel-art.js?v=54"></script><script src="./combat-fx.js?v=49"></script><script>
+  <p class="ivNote">스타터 종족값은 원작 기준 · Lv.5 · 기술 피해 80%</p>
+</section><section class="loadoutSetup" id="loadoutSetup" aria-label="장착 기술 선택"><div class="loadoutHeading">기술 편성 <small>기본기·고유기는 고정, 추가 슬롯 2개 선택</small></div><div class="loadoutGrid"><label>기술 3<select id="extraSelect3" aria-label="기술 3 선택"></select></label><label>기술 4<select id="extraSelect4" aria-label="기술 4 선택"></select></label></div></section><div id="moveDex" class="moveDex"></div><button class="primary" id="start">배틀 시작 →</button><div><button id="fxMode" type="button">✦ 이펙트: 고화질</button></div><div class="status" id="assetStatus">스프라이트 서버 연결 대기 중 (게임 시작은 별도로 가능)</div><div class="explain" id="menuExplain">스타터를 선택하면 라이벌이 상성 포켓몬을 내보냅니다. Arena에서 직접 움직이고 공격해 상대 HP를 먼저 0으로 만드세요.</div><div class="credit">Sprite assets © respective artists via <a href="https://github.com/PMDCollab/SpriteCollab" target="_blank" rel="noopener">HGSS 4방향 animated overworld sprites + PokéAPI/PMDCollab fallback<br>비상업용 팬게임 · Nintendo / Pokémon의 공식 게임이 아닙니다. 4방향 포켓몬 스프라이트는 인터넷 연결이 필요하며, 실패 시 대체 스프라이트로 계속 플레이할 수 있습니다.<br><a href="https://github.com/teobz/pkmn-hgss-animated-overworld-sprites" target="_blank" rel="noopener">HGSS directional sprite source</a> · <a href="https://pokeapi.github.io/sprites/" target="_blank" rel="noopener">PokéAPI</a> · <a href="https://sprites.pmdcollab.org/" target="_blank" rel="noopener">PMDCollab fallback</a></div></div></div>
+<script src="./emitter-anchors.js?v=30"></script><script src="./thunderbolt-art.js?v=mirror-1"></script><script src="./pixel-presets.js?v=thundershock-original-restore-1"></script><script src="./rockruff-bite-art.js?v=bite-aseprite-1"></script><script src="./pixel-art.js?v=bite-aseprite-1"></script><script src="./combat-fx.js?v=mirror-1"></script><script>
 'use strict';
-const BUILD_VERSION='v29-muzzle-offset-proportional-vfx';
+const BUILD_VERSION='v30-local-pmd-starter-rival-arena';
 const EXTRA_SKILLS_ENABLED=false; // Advanced moves remain archived in the database but cannot be used in this build.
 const $=id=>document.getElementById(id),CV=$('stage'),ctx=CV.getContext('2d');let W=innerWidth,H=innerHeight,dpr=1;
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,2);CV.width=Math.round(W*dpr);CV.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false}addEventListener('resize',resize);resize();
@@ -124,18 +125,17 @@ const HGSS_GIF='https://raw.githubusercontent.com/teobz/pkmn-hgss-animated-overw
 document.getElementById('jsWarning').classList.add('hidden');
 document.getElementById('assetStatus').textContent='PMD 8방향 스프라이트 연결 확인 중 · 게임은 바로 시작할 수 있습니다.';
 const roster=[
- {id:'0026',name:'라이츄',type:'electric',icon:'⚡',color:'#f6d36c',basic:'전기쇼크',special:'10만볼트',types:['electric'],base:{hp:60,atk:90,def:55,spa:90,spd:80,spe:110}},
- {id:'0006',name:'리자몽',type:'fire',icon:'🔥',color:'#ff9863',basic:'불꽃세례',special:'화염방사',types:['fire','flying'],base:{hp:78,atk:84,def:78,spa:109,spd:85,spe:100}},
- {id:'0009',name:'거북왕',type:'water',icon:'💧',color:'#84caff',basic:'물대포',special:'파도타기',types:['water'],base:{hp:79,atk:83,def:100,spa:85,spd:105,spe:78}},
- {id:'0003',name:'이상해꽃',type:'grass',icon:'🍃',color:'#91dd96',basic:'나뭇잎',special:'에너지볼',types:['grass','poison'],base:{hp:80,atk:82,def:83,spa:100,spd:100,spe:80}}
+ {id:'0001',name:'이상해씨',type:'grass',icon:'🍃',color:'#91dd96',basic:'나뭇잎',special:'에너지볼',types:['grass','poison'],base:{hp:45,atk:49,def:49,spa:65,spd:65,spe:45}},
+ {id:'0004',name:'파이리',type:'fire',icon:'🔥',color:'#ff9863',basic:'불꽃세례',special:'화염방사',types:['fire'],base:{hp:39,atk:52,def:43,spa:60,spd:50,spe:65}},
+ {id:'0007',name:'꼬부기',type:'water',icon:'💧',color:'#84caff',basic:'물대포',special:'파도타기',types:['water'],base:{hp:44,atk:48,def:65,spa:50,spd:64,spe:43}}
 ];
 
 
-// Mainline Pokémon stat formula, Gen III onward. The battle starts at Lv.50,
+// Mainline Pokémon stat formula, Gen III onward. The first rival duel starts at Lv.5,
 // EV=0, selectable nature, and independent IV=0..31 for the six stats.
 const STAT_KEYS=['hp','atk','def','spa','spd','spe'];
 const STAT_LABELS={hp:'HP',atk:'공격',def:'방어',spa:'특공',spd:'특방',spe:'스피드'};
-const BATTLE_LEVEL=50;
+const BATTLE_LEVEL=5;
 // Arcade conversion ONLY. Actual PvP ability stats and damage rolls use official mainline equations.
 const ARENA_BALANCE=Object.freeze({hp:2,damage:.8,basicInterval:.5,channelMoveSeconds:.9,
  burnSeconds:9,paralysisSeconds:8,spdefDropSeconds:8,burnTickSeconds:2.5,paralysisSlow:.5});
@@ -472,7 +472,17 @@ async function preload(id){
  if(roster.some(p=>p.id===id))refreshChoicePreviews();
 }
 $('fxMode').onclick=()=>{fxQuality=fxQuality==='high'?'low':'high';$('fxMode').textContent=fxQuality==='high'?'✦ 이펙트: 고화질':'⚙ 이펙트: 절전';};
-let chosen=0;const choices=$('choices');for(let i=0;i<roster.length;i++){let o=roster[i],b=document.createElement('button');b.className='choice'+(!i?' on':'');b.innerHTML=`<canvas width="72" height="72" data-preview="${i}"></canvas><b>${o.name}</b><small>${o.icon} ${o.basic}</small>`;b.onclick=()=>{chosen=i;document.querySelectorAll('.choice').forEach((c,k)=>c.classList.toggle('on',k===i));refreshStatPanel();refreshLoadout();};choices.appendChild(b)}
+const RIVAL_MATCHUP=[1,2,0];
+const RPG_ARENA_QUERY=new URLSearchParams(location.search);
+const RPG_ARENA_EMBEDDED=RPG_ARENA_QUERY.has('embedded');
+if(RPG_ARENA_EMBEDDED)document.body.classList.add('embedded');
+const RPG_ARENA_STARTERS={'0001':0,'0004':1,'0007':2};
+const RPG_ARENA_STARTER=RPG_ARENA_QUERY.get('starter');
+const RPG_ARENA_TICKET=RPG_ARENA_QUERY.get('ticket')||'';
+const RPG_ARENA_MODE=RPG_ARENA_QUERY.get('mode')==='rpg'&&!!RPG_ARENA_TICKET.match(/^[0-9a-f]{32}$/)&&Object.prototype.hasOwnProperty.call(RPG_ARENA_STARTERS,RPG_ARENA_STARTER);
+let rpgArenaResultSent=false,rpgArenaResult=null;
+let chosen=RPG_ARENA_MODE?RPG_ARENA_STARTERS[RPG_ARENA_STARTER]:0;const choices=$('choices');for(let i=0;i<roster.length;i++){let o=roster[i],b=document.createElement('button');b.className='choice'+(i===chosen?' on':'');b.innerHTML=`<canvas width="72" height="72" data-preview="${i}"></canvas><b>${o.name}</b><small>${o.icon} ${o.basic}</small>`;b.onclick=()=>{if(RPG_ARENA_MODE)return;chosen=i;document.querySelectorAll('.choice').forEach((c,k)=>c.classList.toggle('on',k===i));$('rivalSelect').value=String(RIVAL_MATCHUP[i]);const rival=roster[RIVAL_MATCHUP[i]];$('menuExplain').innerHTML=`<b>${o.name} 선택 · 라이벌 ${rival.name}</b><br>Lv.5 실시간 액션 대결 · 방향키/WASD 이동 · 1 기본기 · 2 고유 기술 · Space 대시`;refreshStatPanel();refreshLoadout();};choices.appendChild(b)}
+$('rivalSelect').value=String(RIVAL_MATCHUP[chosen]);
 const ivGrid=$('ivGrid');
 $('natureSelect').innerHTML=NATURE_LIST.map(k=>`<option value="${k}">${NATURES[k].name}</option>`).join('');
 $('natureSelect').addEventListener('change',e=>{selectedNature=e.target.value;refreshStatPanel()});
@@ -520,7 +530,7 @@ function refreshChoicePreviews(){document.querySelectorAll('[data-preview]').for
  }
 })}refreshChoicePreviews();
 Promise.allSettled(unique.map(async id=>{await Promise.allSettled([preloadOverworld(id),preload(id),preloadBattle(id)])})).then(()=>{const count=unique.filter(id=>overworldSprites[id]?.loaded||battleSprites[id]?.loaded||sprites[id]?.loaded).length;$('assetStatus').textContent=count?`연결 확인 완료 · ${count}/${unique.length}종 PMD 8방향 sprite 사용`:'스프라이트 서버 접속 불가 · 대체 캐릭터로 계속 플레이 가능'; refreshChoicePreviews();});
-const map={w:2400,h:1800};let player,enemies=[],projectiles=[],specialEffects=[],particles=[],gems=[],areas=[],kills=0,wave=1,time=0,spawnTimer=0,gameState='menu',last=0,shake=0,idCounter=0;let decals=[],damageTexts=[],shockwaves=[],hitstop=0,flashLevel=0,flashColor='#fff5cf',comboCount=0,comboClock=0,fxQuality='high',cameraKick={x:0,y:0};const ARENA={cx:map.w/2,cy:map.h/2,r:455};const mobileDevice=/iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);const maxParticles=()=>fxQuality==='high'?(mobileDevice?300:420):(mobileDevice?110:170);const ELEMENT_FX={electric:{main:'#ffe16b',accent:'#93f5ff',glow:'#fff7b8'},fire:{main:'#ff9360',accent:'#ffd1a8',glow:'#ffbe7f'},water:{main:'#82d9fb',accent:'#dff9ff',glow:'#a8ecff'},grass:{main:'#9be395',accent:'#e8ffd8',glow:'#b8f4a6'},ghost:{main:'#c48aff',accent:'#f0dcff',glow:'#dcb5ff'},neutral:{main:'#f2f6fb',accent:'#ffffff',glow:'#d9eef8'}};const keys=new Set(),joyVec={x:0,y:0};let mouseAim=null,lastAim={x:1,y:0},skillPointers=new Map(),joyPointer=null,toastTime=0,levelUpText='';
+const map={w:2400,h:1800};let player,enemies=[],projectiles=[],specialEffects=[],particles=[],gems=[],areas=[],kills=0,wave=1,time=0,spawnTimer=0,gameState='menu',last=0,shake=0,idCounter=0;let decals=[],damageTexts=[],shockwaves=[],hitstop=0,flashLevel=0,flashColor='#fff5cf',comboCount=0,comboClock=0,fxQuality='high',cameraKick={x:0,y:0};const ARENA={cx:map.w/2,cy:map.h/2,r:455},CAMERA_ZOOM=1.5;const mobileDevice=/iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);const maxParticles=()=>fxQuality==='high'?(mobileDevice?300:420):(mobileDevice?110:170);const ELEMENT_FX={electric:{main:'#ffe16b',accent:'#93f5ff',glow:'#fff7b8'},fire:{main:'#ff9360',accent:'#ffd1a8',glow:'#ffbe7f'},water:{main:'#82d9fb',accent:'#dff9ff',glow:'#a8ecff'},grass:{main:'#9be395',accent:'#e8ffd8',glow:'#b8f4a6'},ghost:{main:'#c48aff',accent:'#f0dcff',glow:'#dcb5ff'},neutral:{main:'#f2f6fb',accent:'#ffffff',glow:'#d9eef8'}};const keys=new Set(),joyVec={x:0,y:0};let mouseAim=null,lastAim={x:1,y:0},skillPointers=new Map(),joyPointer=null,toastTime=0,levelUpText='';
 const mix=(a,b,t)=>a+(b-a)*t,clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),rand=(a,b)=>a+Math.random()*(b-a),len=(x,y)=>Math.hypot(x,y),norm=(x,y)=>{let z=len(x,y)||1;return{x:x/z,y:y/z}};
 function footDust(x,y,size=1){
  if(Math.random()>.72)return;
@@ -657,7 +667,7 @@ function reset(){
  $('bigSkill').textContent=p.type==='grass'?'◉':p.type==='water'?'≋':p.type==='fire'?'♨':'ϟ';$('fuelHud').hidden=p.type!=='fire';$('fuelButton').hidden=p.type!=='fire';
  $('bigSkill').parentElement.style.setProperty('--c',p.color);
  document.querySelector('[data-n="0"]').style.setProperty('--c',p.color);
- fxPixelSkillIcons();paintBattleArt();spawnEnemy();syncHUD();const arenaNames={electric:'THUNDER TEMPLE',fire:'EMBER FORGE',water:'TIDAL RUINS',grass:'VERDANT SHRINE'};$('roundBadge').textContent=arenaNames[p.type]+'  ·  1 VS 1';announce('READY · FIGHT!');
+ fxPixelSkillIcons();paintBattleArt();spawnEnemy();syncHUD();$('roundBadge').textContent='LAPPET LAB · RIVAL STARTER DUEL';announce('라이벌 '+roster[enemies[0].kind].name+' 등장!');
 }
 function pause(){if(gameState==='playing'){stopPlayerChannel();gameState='paused';$('menu').classList.remove('hidden');$('menu').querySelector('h1').innerHTML='PAUSED <em>Ⅱ</em>';$('menuExplain').innerHTML='잠시 쉬어가세요. 전투 기록은 유지됩니다.';$('start').textContent='계속 플레이';}else if(gameState==='paused'){gameState='playing';$('menu').classList.add('hidden')}}
 function startButton(){try{if(gameState==='paused')pause();else reset()}catch(err){alert('게임 실행 오류: '+err.message);console.error(err)}}$('start').onclick=startButton;$('pause').onclick=pause;
@@ -680,6 +690,9 @@ function drawFallbackCreature(id,x,y,scale=1,t=0,angle=Math.PI/2,renderCtx=ctx){
  const ctx=renderCtx;
  // Original pixel-only placeholders for lost asset connections; all feet remain on y=0.
  const palette={
+  '0001':{a:'#71c75c',b:'#448e4d',c:'#b5ec78',d:'#568d4a'},
+  '0004':{a:'#f29047',b:'#c75c35',c:'#ffdb83',d:'#ce6337'},
+  '0007':{a:'#61b8df',b:'#327da7',c:'#d8c78f',d:'#77d5ed'},
   '0026':{a:'#ecad43',b:'#d47e36',c:'#ffe68b',d:'#a86934'},
   '0006':{a:'#ef863f',b:'#c65f31',c:'#ffe3a8',d:'#3a9da9'},
   '0009':{a:'#478fd1',b:'#2a6099',c:'#c4d9a4',d:'#6b543f'},
@@ -689,7 +702,23 @@ function drawFallbackCreature(id,x,y,scale=1,t=0,angle=Math.PI/2,renderCtx=ctx){
  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
  const b=(color,xx,yy,w,h)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(xx),Math.round(yy),w,h)};
  // Pokémon foot contact is y=0. All sprite art is deliberately above this line.
- if(id==='0026'){
+ if(id==='0001'){
+  // Bulbasaur's squat body, four feet and layered seed bulb/leaves.
+  b(pal.b,-22,-27,44,22);b(pal.a,-19,-29,38,21);b(pal.c,-10,-53,20,24);
+  b('#70bb54',-20,-47,17,10);b('#70bb54',3,-48,18,10);b('#4f9f54',-11,-58,11,9);
+  b(pal.a,-27,-31,13,13);b(pal.a,14,-31,13,13);b(pal.b,-18,-7,12,6);b(pal.b,7,-7,12,6);
+ }else if(id==='0004'){
+  // Charmander's orange body and bright flame-tipped tail.
+  b(pal.b,-17,-31,34,25);b(pal.a,-14,-34,28,27);b(pal.c,-7,-27,15,18);
+  b(pal.a,-14,-53,28,22);b(pal.a,-24,-29,12,12);b(pal.a,13,-29,12,12);
+  b(pal.b,13,-12,24,5);b('#f78b35',34,-24,10,14);b('#ffe577',37,-31,7,10);
+  b(pal.b,-14,-6,11,6);b(pal.b,4,-6,11,6);
+ }else if(id==='0007'){
+  // Squirtle's blue head and limbs, cream belly and rounded shell.
+  b(pal.b,-22,-30,44,23);b(pal.d,-19,-28,38,18);b(pal.c,-12,-24,24,15);
+  b(pal.a,-14,-50,28,24);b('#f0d6a2',-18,-32,12,14);b('#f0d6a2',8,-32,12,14);
+  b(pal.a,-16,-8,13,7);b(pal.a,4,-8,13,7);b(pal.d,18,-14,14,7);b(pal.d,28,-19,8,8);
+ }else if(id==='0026'){
   // Raichu's tall black-tipped ears, cream-colored belly and lightning tail.
   b('#422f2a',-14,-49,8,18);b('#422f2a',7,-50,8,20);
   b(pal.a,-12,-44,5,12);b(pal.a,9,-45,5,13);
@@ -775,7 +804,12 @@ function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0,role='player'){
   ctx.save();ctx.imageSmoothingEnabled=false;
   if(flash>0)ctx.globalAlpha=.65+Math.cos(t*65)*.25;
   ctx.translate(footX,footY-(feet-s.h/2)*scale);
-  ctx.drawImage(s.image,idx*s.w,f*s.h,s.w,s.h,-dw/2,-dh/2,dw,dh);
+  const thunder=typeof specialEffects!=='undefined'&&specialEffects.find(m=>m.type==='thunderbolt'&&m.owner===(role==='player'?'player':'enemy')&&m.age<1.1);
+  if(thunder){
+   const progress=Math.max(0,thunder.age-(thunder.windup||0))/.88;
+   ThunderboltArt.stamp(ctx,ThunderboltArt.corona(Math.floor(progress*16)),0,0,1.4);
+   ThunderboltArt.caster(ctx,s.image,[idx*s.w,f*s.h,s.w,s.h],[-dw/2,-dh/2,dw,dh],progress,thunder.age<(thunder.windup||0));
+  }else ctx.drawImage(s.image,idx*s.w,f*s.h,s.w,s.h,-dw/2,-dh/2,dw,dh);
   ctx.restore();
   return;
  }
@@ -790,9 +824,7 @@ function spriteDraw(id,x,y,angle,action,t,scale=1,flash=0,role='player'){
 function combatantData(idx){const p=roster[idx],level=BATTLE_LEVEL,iv=makeIV(),stats=computeStats(idx,iv,level,'neutral');return {id:p.id,name:p.name,type:p.type,types:p.types,level,iv,stats,maxHp:arenaHP(stats.hp),speed:speedFromStat(stats.spe),color:p.color,icon:p.icon,special:p.special,basic:p.basic}}
 function spawnEnemy(){
  if(enemies.length!==0)return;
- let preferred=Number($('rivalSelect').value);let pool=preferred>=0?[preferred]:roster.map((_,i)=>i).filter(i=>i!==chosen);
- if(!pool.length)pool=[chosen];
- const idx=pool[Math.floor(Math.random()*pool.length)],f=combatantData(idx);
+ const idx=RIVAL_MATCHUP[chosen],f=combatantData(idx);
  const side=Math.random()<.5?-1:1;
  const x=clamp(player.x+side*Math.min(120,W*.24),60,map.w-60);
  const y=clamp(player.y-Math.min(205,Math.max(120,H*.23)),60,map.h-60);
@@ -951,7 +983,7 @@ const MOVE_SPECS={
  electric:{id:'thunderbolt',name:'10만볼트',cooldown:5.2,power:90,range:565},
  fire:{id:'flamethrower',name:'화염방사',cooldown:0,power:90,range:315},
  grass:{id:'energyball',name:'에너지볼',cooldown:5.7,power:90,range:490},
- water:{id:'surf',name:'파도타기',cooldown:6.2,power:90,range:390}
+ water:{id:'surf',name:'파도타기',cooldown:6.2,power:90,range:540}
 };
 function rangedHit(e,x,y,vx,vy,range,halfWidth){
  const dx=e.x-x,dy=(e.y-11)-y,along=dx*vx+dy*vy,cross=Math.abs(dx*vy-dy*vx);
@@ -1075,13 +1107,12 @@ function castSpecial(v,owner='player',opts={}){
  const emission=emissionPoint(actor,spec.id,{angle:actor.face,action:'Shoot',clock:.12});
  const x=emission.x,y=emission.y,packet=damagePacket(actor,owner==='player'?enemies[0]:player,'special');
  const move={type:spec.id,element:profile.type,x,y,vx:v.x,vy:v.y,age:0,
-  life:spec.id==='thunderbolt'?1.25:spec.id==='flamethrower'?(opts.controlled?999:1.4):spec.id==='surf'?1.12:1.65,
+  life:spec.id==='thunderbolt'?1.25:spec.id==='flamethrower'?(opts.controlled?999:1.4):spec.id==='surf'?1.55:1.65,
   range:spec.range,damage:arenaDamage(packet.damage),info:packet,hit:new Set(),tick:0,pulse:0,seed:rand(0,1000),owner,controlled:!!opts.controlled,end:false};
  if(move.type==='thunderbolt'){
   // A visible homing bolt, instead of damage instantly arriving in a fixed direction.
   move.path=[{x,y}];move.origin={x,y};move.distance=0;move.speed=690;
   createRing(x,y,'#fff2b8',24,.2);
-  for(let i=0;i<10;i++)emitParticle({x:x+rand(-9,9),y:y+rand(-9,9),vx:rand(-65,65),vy:rand(-65,65),life:rand(.12,.24),size:rand(2,5),shape:'spark',color:i%2?'#fff4ad':'#a3f7ff'});
   sfx(640,1220,.16);
  }else if(move.type==='flamethrower'){
   actor.flameRecovery=null;move.tick=.08;move.stream=0;move.decalTick=.1;
@@ -1234,12 +1265,24 @@ function activate(n,vec,hold=false){
 }
 let audioCtx;function sfx(a,b,d){try{audioCtx ||=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();let o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type='triangle';o.frequency.setValueAtTime(a,t);o.frequency.exponentialRampToValueAtTime(b,t+d);g.gain.setValueAtTime(.033,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+d)}catch(err){}}
 function hurt(amount,opts={}){if(opts.continuous){if(player.dashTime>0||player.riding)return;player.hp=Math.max(0,player.hp-amount);player.flash=Math.max(player.flash||0,.08);if(player.hp<=0)gameOver();return;}if(player.inv>0)return;player.hp-=amount;flashColor='#ff847c';flashLevel=Math.max(flashLevel,.27);createRing(player.x,player.y,'#ffadad',28,.3);player.inv=.55;player.hurt=.25;shake=8;fx(player.x,player.y,'#ff6d89',12,120);playAction(player,'Hurt',.25);sfx(130,55,.18);if(player.hp<=0){player.hp=0;gameOver()}syncHUD()}
+async function reportRpgArenaResult(result){
+ if(!RPG_ARENA_MODE||rpgArenaResultSent)return;
+ rpgArenaResult=result;
+ try{
+  const response=await fetch('/api/rpg-battle/result',{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({ticket:RPG_ARENA_TICKET,starter:RPG_ARENA_STARTER,result}),cache:'no-store'});
+  if(!response.ok)throw new Error('RPG 결과 전송 실패');
+  rpgArenaResultSent=true;
+  $('menuExplain').innerHTML='<b>대전 결과를 RPG 게임에 전달했습니다.</b><br>RPG Maker XP 창으로 돌아가세요.';
+ }catch(error){setTimeout(()=>reportRpgArenaResult(rpgArenaResult||result),1200)}
+}
 function openResult(won){
  gameState=won?'won':'over';$('menu').classList.remove('hidden');
+ if(RPG_ARENA_EMBEDDED&&window.parent!==window)window.parent.postMessage({type:'arena-rpg-result',won:!!won},location.origin);
  $('menu').querySelector('h1').innerHTML=won?'YOU <em>WIN!</em>':'YOU <em>LOSE</em>';
  const opponent=enemies[0]?roster[enemies[0].kind]:roster[chosen];
  $('menuExplain').innerHTML=`<b>${roster[chosen].name} VS ${opponent.name} · ${won?'승리':'패배'}</b><br>경기 시간 ${Math.floor(time/60)}분 ${Math.floor(time%60)}초 · 다시 도전하세요!`;
- $('start').textContent='다시 대전';
+ $('start').textContent=RPG_ARENA_MODE?'RPG에 결과 전달 중…':'다시 대전';
+ if(RPG_ARENA_MODE){$('start').disabled=true;reportRpgArenaResult(rpgArenaResult||(won?'win':'loss'));}
  $('assetStatus').textContent=`실제 SpriteCollab 스프라이트 ${unique.filter(id=>sprites[id]?.loaded).length}/${unique.length}종 연결`;
 }
 function gameOver(){stopPlayerChannel();player.hp=0;syncHUD();openResult(false)}
@@ -1754,7 +1797,7 @@ function fxBitmapNumber(text,x,y,scale,fill){
 
 function drawThunderbolt(m){
  const actor=m.owner==='player'?player:m.owner==='enemy'?enemies[0]:null;
- const source=actor?emissionPoint(actor,'thunderbolt'):m.source;
+ const source=actor?{x:actor.x,y:actor.y-24}:m.source;
  ArenaFX.thunder(ctx,{...m,source},fxQuality);
 }
 function drawFlamethrower(m){
@@ -1798,8 +1841,9 @@ function drawSpecials(layer){
   if(m.windup&&m.age<m.windup){if(layer==='over')ArenaFX.charge(ctx,m,fxQuality);continue;}
   if(m.type==='extra'){drawExtraSpecial(m,layer);continue;}
   if(layer==='under' && m.type==='surf'){drawSurfRide(m);}
+  if(layer==='under'&&(m.type==='thunderbolt'||m.type==='boltEcho'))drawThunderbolt(m);
   if(layer!=='over')continue;
-  if(m.type==='thunderbolt'||m.type==='boltEcho'){drawThunderbolt(m);}
+
   if(m.type==='flamethrower')drawFlamethrower(m);
   if(m.type==='surf')drawSurfRide(m,true);
   if(m.type==='energyball')drawEnergyball(m);
@@ -1807,7 +1851,7 @@ function drawSpecials(layer){
  }
 }
 function drawGround(ox,oy){paintArenaFloor(ox,oy)}
-function draw(){if(window.ArenaFX)ArenaFX.setPixel(1.43);ctx.clearRect(0,0,W,H);if(!player){ctx.fillStyle='#11323d';ctx.fillRect(0,0,W,H);return}const sh=shake?(Math.random()-.5)*shake:0,ox=Math.round(W/2-player.x+sh+cameraKick.x),oy=Math.round(H/2-player.y+sh+cameraKick.y);drawGround(ox,oy);ctx.save();ctx.translate(ox,oy);renderDecals();fxDrawScenes('ground');renderImpactLights();
+function draw(){if(window.ArenaFX)ArenaFX.setPixel(1.43);ctx.clearRect(0,0,W,H);if(!player){ctx.fillStyle='#11323d';ctx.fillRect(0,0,W,H);return}const sh=shake?(Math.random()-.5)*shake:0;ctx.fillStyle='#102e2e';ctx.fillRect(0,0,W,H);ctx.save();ctx.translate(W/2+sh+cameraKick.x,H/2+sh+cameraKick.y);ctx.scale(CAMERA_ZOOM,CAMERA_ZOOM);ctx.translate(-player.x,-player.y);drawGround(0,0);renderDecals();fxDrawScenes('ground');renderImpactLights();
 drawSpecials('under');
 for(const m of specialEffects){if(m.type==='extra'&&m.move.mode==='charge'&&!m.fired)fxDrawChargeHalo(m.owner==='player'?player:enemies[0]);}
 let render=[];for(const e of enemies)render.push({y:e.y,kind:0,obj:e});render.push({y:player.y,kind:1,obj:player});render.sort((a,b)=>a.y-b.y);for(const it of render){let e=it.obj;if(it.kind===0){const act=combatAnimation(e);spriteDraw(e.id,e.x,e.y-surfRiderLift(e),e.face,act,combatSpriteClock(e,act,e.actionT),1.43,e.flash,'enemy');fxDrawActorMotion(e);drawStatusPixels(e);fxDrawStatus(e);if(e.tell>0){ctx.save();ctx.strokeStyle='#ff9079';ctx.lineWidth=2.8;ctx.globalAlpha=.45+.4*Math.sin(time*23)**2;ctx.beginPath();ctx.arc(e.x,e.y,38+10*Math.sin(time*17)**2,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.attackVec.x*65,e.y+e.attackVec.y*65);ctx.stroke();ctx.restore()}ctx.fillStyle='#102837c7';ctx.fillRect(e.x-17,e.y-56,34,5);ctx.fillStyle='#ff737f';ctx.fillRect(e.x-17,e.y-56,34*clamp(e.hp/e.maxHp,0,1),5)}else{spriteDraw(roster[chosen].id,player.x,player.y-surfRiderLift(player),player.face,combatAnimation(player),combatSpriteClock(player,combatAnimation(player),player.animT),1.43,player.inv>0?.2:0,'player');fxDrawActorMotion(player);drawStatusPixels(player);fxDrawStatus(player)}}
@@ -1858,7 +1902,7 @@ document.querySelectorAll('.skill').forEach(b=>{
  b.addEventListener('pointercancel',e=>release(e,true));
  b.addEventListener('lostpointercapture',e=>release(e,true));
 });
-addEventListener('keydown',e=>{let k=e.key.toLowerCase();keys.add(k);if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(e.repeat)return;if(k==='1')activate(0);if(k==='2'){if(roster[chosen].type==='fire')activate(1,targetAim(),true);else activate(1);}if(EXTRA_SKILLS_ENABLED&&k==='3')activate(3);if(EXTRA_SKILLS_ENABLED&&k==='4')activate(4);if(k==='5'||k===' ')activate(2);if(k==='p'||k==='escape')pause()});addEventListener('keyup',e=>{let k=e.key.toLowerCase();keys.delete(k);if(k==='2')stopPlayerChannel()});CV.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')mouseAim={x:e.clientX,y:e.clientY}});CV.addEventListener('pointerdown',e=>{if(gameState==='playing'&&e.pointerType==='mouse'){mouseAim={x:e.clientX,y:e.clientY};if(e.button===2)activate(1,targetAim(),true);else activate(0)}});CV.addEventListener('pointerup',e=>{if(e.button===2)stopPlayerChannel()});CV.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('visibilitychange',()=>{if(document.hidden&&gameState==='playing')pause()});
+addEventListener('keydown',e=>{let k=e.key.toLowerCase();keys.add(k);if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(e.repeat)return;if(k==='1')activate(0);if(k==='2'){if(roster[chosen].type==='fire')activate(1,targetAim(),true);else activate(1);}if(EXTRA_SKILLS_ENABLED&&k==='3')activate(3);if(EXTRA_SKILLS_ENABLED&&k==='4')activate(4);if(k==='5'||k===' ')activate(2);if(k==='q'&&RPG_ARENA_MODE&&gameState==='playing'){rpgArenaResult='retreat';openResult(false)}if(k==='p'||k==='escape')pause()});addEventListener('keyup',e=>{let k=e.key.toLowerCase();keys.delete(k);if(k==='2')stopPlayerChannel()});CV.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')mouseAim={x:e.clientX,y:e.clientY}});CV.addEventListener('pointerdown',e=>{if(gameState==='playing'&&e.pointerType==='mouse'){mouseAim={x:e.clientX,y:e.clientY};if(e.button===2)activate(1,targetAim(),true);else activate(0)}});CV.addEventListener('pointerup',e=>{if(e.button===2)stopPlayerChannel()});CV.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('visibilitychange',()=>{if(document.hidden&&gameState==='playing')pause()});
 // iOS Safari: block rapid-double-tap zoom while retaining pointer-based attack controls.
 let lastTouchEnd=0,lastTouchAt={x:0,y:0};
 document.addEventListener('touchend',e=>{
@@ -1869,4 +1913,5 @@ document.addEventListener('touchend',e=>{
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});
-</script><script src="./battle-studio.js?v=48"></script></body></html>
+if(RPG_ARENA_MODE){$('menuExplain').innerHTML=`<b>라이벌 ${roster[RIVAL_MATCHUP[chosen]].name}와 대결합니다.</b><br>WASD 이동 · 마우스 조준 · 좌클릭 기본 공격 · 우클릭 고유 기술 · Space 회피`;if(RPG_ARENA_EMBEDDED){$('start').textContent='라이벌과 대결 시작 →';const style=document.createElement('style');style.textContent='body.embedded #menu .studioLink,body.embedded #menu .desc,body.embedded #menu #openMotionStudio,body.embedded #menu #jsWarning,body.embedded #menu #choices,body.embedded #menu .rivalPicker,body.embedded #menu .ivSetup,body.embedded #menu .loadoutSetup,body.embedded #menu #moveDex,body.embedded #menu #fxMode,body.embedded #menu #assetStatus,body.embedded #menu .credit{display:none!important}body.embedded #menu .panel{max-width:520px;padding:24px 20px}';document.head.appendChild(style)}else setTimeout(startButton,120)}
+</script><script src="./battle-studio.js?v=49"></script></body></html>
