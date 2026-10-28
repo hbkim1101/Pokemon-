@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#10212a">
+  <title>포켓몬 RPG · 웹 플레이</title>
+  <style>
+    :root{color-scheme:dark;--ink:#eaf6e8;--muted:#b9c9bb;--gold:#ffe59c;--panel:#12242bf2;--line:#d8e8d645}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0c171b;color:var(--ink);font:14px system-ui,"Apple SD Gothic Neo",sans-serif}button,input{font:inherit}button{color:inherit;cursor:pointer}
+    #screen{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,#223f3c,#0b171b 80%)}
+    #world{width:min(100vw,177.7778vh);height:min(100vh,56.25vw);display:block;image-rendering:pixelated;outline:none;background:#4e6e55}
+    #topbar{position:absolute;z-index:2;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:start;gap:8px;pointer-events:none}
+    .glass{background:#10232be8;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 26px #0005;backdrop-filter:blur(5px)}
+    .brand{padding:9px 12px;font-weight:900;letter-spacing:.02em}.brand small{display:block;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:0}
+    .tools{display:flex;gap:7px;pointer-events:auto}.tools button,.primary,.choice,.dialog button{border:1px solid #d5e9dc44;border-radius:9px;background:#1b3438;padding:8px 12px;font-weight:800}.tools button:hover,.choice:hover,.dialog button:hover{background:#31534d}.primary{background:linear-gradient(#fff0b2,#edbd62);border:0;color:#292b23;padding:11px 18px}.primary:hover{filter:brightness(1.07)}
+    #hud{position:absolute;z-index:2;top:68px;left:12px;padding:9px 12px;min-width:188px;pointer-events:none;font-weight:850}#hud small{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+    #dialog{position:absolute;z-index:3;left:50%;bottom:16px;transform:translateX(-50%);width:min(760px,calc(100vw - 24px));padding:13px 16px;display:flex;align-items:center;gap:14px;min-height:78px}#dialog[hidden]{display:none!important}
+    #speaker{color:var(--gold);font-weight:950;white-space:nowrap}#line{line-height:1.55;flex:1}#next{white-space:nowrap}
+    .shade{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:18px;background:#061115bd;backdrop-filter:blur(5px)}.shade[hidden]{display:none}
+    .card{width:min(560px,100%);padding:24px;border:1px solid #e3f3dc38;border-radius:18px;background:linear-gradient(150deg,#1c3438f7,#102029fa);box-shadow:0 24px 90px #0008;text-align:center}.card h1,.card h2{margin:0 0 8px}.card p{margin:0 auto 18px;max-width:440px;color:var(--muted);line-height:1.6}.card .row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.card input{width:min(260px,100%);padding:10px 12px;border-radius:9px;background:#07161b;border:1px solid #8cbab05c;color:var(--ink)}
+    #starterChoices{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;margin-top:15px}.choice{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 8px}.choice b{font-size:14px}.choice span{font-size:25px}.choice small{color:var(--muted)}
+    #battleView{position:absolute;z-index:4;inset:0;background:#07131a}#battleView[hidden]{display:none}#battleFrame{width:100%;height:100%;border:0;display:block}
+    #battleReturn{position:absolute;z-index:6;inset:0;display:grid;place-items:center;background:#061115ad;padding:20px}#battleReturn[hidden]{display:none}
+    #debug{position:absolute;z-index:8;left:10px;bottom:10px;display:flex;gap:5px;flex-wrap:wrap;max-width:60vw}.debug button{font-size:10px;padding:5px 7px;border:1px solid #c3dbb95c;border-radius:6px;background:#152a2ddf;color:#eaf6e8}
+    #notice{position:absolute;z-index:2;right:12px;top:68px;max-width:300px;padding:8px 10px;color:#e7d9a6;font-size:11px;text-align:right;pointer-events:none}
+    @media(max-width:600px){#topbar{top:7px;left:7px;right:7px}.brand{padding:7px 9px;font-size:12px}.brand small{font-size:9px}.tools button{font-size:11px;padding:7px 8px}#hud{left:7px;top:53px;min-width:140px;font-size:12px;padding:7px 9px}#notice{top:53px;right:7px;max-width:160px;font-size:9px}#dialog{bottom:7px;padding:10px 11px;gap:9px;font-size:12px;min-height:68px}#next{padding:7px 8px}}
+  </style>
+</head>
+<body>
+  <main id="screen" aria-label="웹 RPG 게임">
+    <canvas id="world" width="640" height="360" tabindex="0" aria-label="연구소 맵. 방향키 또는 WASD로 이동하고 E로 대화합니다."></canvas>
+  </main>
+  <header id="topbar">
+    <div class="glass brand">POKÉMON RPG <small id="sceneName">새로운 모험</small></div>
+    <div class="tools"><button id="saveButton" title="현재 진행 저장">저장</button><button id="checkpointButton" title="체크포인트 메뉴">체크포인트</button><button id="exitButton" title="제목으로">나가기</button></div>
+  </header>
+  <div id="hud" class="glass">플레이어 <span id="trainerLabel">트레이너</span><small id="partyLabel">아직 파트너가 없습니다</small></div>
+  <div id="notice"></div>
+  <section id="dialog" class="glass" hidden><strong id="speaker"></strong><span id="line"></span><button id="next">계속 ▸</button></section>
+  <section id="title" class="shade"><div class="card"><h1>새로운 모험</h1><p>연구소를 둘러보고 첫 파트너를 고른 뒤, 라이벌과 직접 조준하는 실시간 전투를 시작합니다. 진행 상황은 이 브라우저에 저장됩니다.</p><div class="row"><button id="newGame" class="primary">새 모험</button><button id="continueGame" class="primary" hidden>이어서 하기</button><button id="quickStart" hidden>스타터 선택부터 시작</button></div></div></section>
+  <section id="namePrompt" class="shade" hidden><div class="card"><h2>트레이너 이름</h2><p>모험에서 사용할 이름을 정해 주세요.</p><div class="row"><input id="trainerName" maxlength="10" value="지우" aria-label="트레이너 이름"><button id="confirmName" class="primary">확인</button></div></div></section>
+  <section id="starterPrompt" class="shade" hidden><div class="card"><h2>첫 파트너 선택</h2><p>함께 모험할 포켓몬을 고르세요. 고르면 라이벌이 결투를 신청합니다.</p><div id="starterChoices"></div></div></section>
+  <section id="battleView" hidden><iframe id="battleFrame" title="라이벌 실시간 전투" allow="autoplay; fullscreen" tabindex="0"></iframe></section>
+  <section id="battleReturn" hidden><div class="card"><h2 id="resultTitle">전투 종료</h2><p id="resultText"></p><div class="row"><button id="continueStory" class="primary">연구소로 돌아가기</button><button id="retryBattle">다시 도전</button></div></div></section>
+  <div id="debug" class="debug" hidden aria-label="개발 체크포인트"><button data-checkpoint="intro">인트로</button><button data-checkpoint="lab">연구소</button><button data-checkpoint="starter">스타터 선택</button><button data-checkpoint="battle">라이벌 배틀</button></div>
+  <script src="rpg-game.js?v=web-rpg-1"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+server*.log
+
+# The standalone RPG Maker projects contain large runtime and game assets.
+# Keep them local to this workspace and out of the Pokémon Arena repository.
+/rpg-maker-xp/projects/*/

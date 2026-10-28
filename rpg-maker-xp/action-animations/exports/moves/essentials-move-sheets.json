@@ -1,0 +1,65 @@
+{
+  "format": "Pokémon Essentials v21.1 animation sheet",
+  "cellSize": {
+    "width": 192,
+    "height": 192
+  },
+  "columns": 5,
+  "rows": 5,
+  "frameOrder": "row-major; use the corresponding pattern number in the Animation Editor",
+  "assets": [
+    {
+      "id": "ember",
+      "graphic": "Arena_Ember.png",
+      "frames": 14,
+      "fps": 16,
+      "patterns": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "source": "assets/pixel-moves/completed/ember.json"
+    },
+    {
+      "id": "watergun",
+      "graphic": "Arena_WaterGun.png",
+      "frames": 8,
+      "fps": 16,
+      "patterns": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "source": "assets/pixel-moves/completed/watergun.json"
+    },
+    {
+      "id": "thundershock",
+      "graphic": "Arena_ThunderShock.png",
+      "frames": 4,
+      "fps": 16,
+      "patterns": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "source": "local pixel-art API#thundershock"
+    }
+  ]
+}
